@@ -35,30 +35,6 @@ from pyrogram import types
 from pyrogram.file_id import FileId, FileType, PHOTO_TYPES, DOCUMENT_TYPES
 
 
-
-ALLOWED_IDS = [1054295664 ,123456789]
-
-def validate():
-    path_to_config = os.path.join(os.getcwd(), "config", "config.py")
-    
-    if not os.path.isfile(path_to_config):
-        print("Repo macam apa ini KONTOL!!")
-        sys.exit(1)
-    
-    spec = importlib.util.spec_from_file_location("user_config", path_to_config)
-    user_config = importlib.util.module_from_spec(spec)
-    sys.modules["user_config"] = user_config
-    spec.loader.exec_module(user_config)
-    owner_id = getattr(user_config, "OWNER_ID", None)
-
-    if not isinstance(owner_id, int):
-        print("LU SIAPA SI ANJING")
-        sys.exit(1)
-    if owner_id not in ALLOWED_IDS:
-        print("LAH LU SIAPA DAH KONTOL ? PAKE PAKE BAE MEMEK, CARI PYROGRAM LAEN BLOK!!")
-        sys.exit(1)
-
-
 async def ainput(prompt: str = "", *, hide: bool = False):
     """Just like the built-in input, but async"""
     with ThreadPoolExecutor(1) as executor:
