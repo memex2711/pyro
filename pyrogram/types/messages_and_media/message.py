@@ -380,7 +380,7 @@ class Message(Object, Update):
         forward_date: datetime = None,
         is_topic_message: bool = None,
         message_thread_id: int = None,
-        effect_id: int = None,
+        effect_id: Optional[int] = None,
         reply_to_message_id: int = None,
         reply_to_story_id: int = None,
         reply_to_story_user_id: int = None,

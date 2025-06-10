@@ -32,6 +32,7 @@ class ForwardStory:
         story_id: int,
         disable_notification: bool = None,
         message_thread_id: int = None,
+        message_effect_id: int = None,
         schedule_date: datetime = None,
     ) -> Optional["types.Message"]:
         """Send story.
@@ -83,6 +84,7 @@ class ForwardStory:
                 random_id=self.rnd_id(),
                 schedule_date=utils.datetime_to_timestamp(schedule_date),
                 message="",
+                effect=message_effect_id,
                 reply_to=utils.get_reply_to(
                     message_thread_id=message_thread_id
                 ),
