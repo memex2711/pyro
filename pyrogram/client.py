@@ -794,6 +794,9 @@ class Client(Methods):
 
             if isinstance(e, asyncio.CancelledError):
                 raise e
+            
+            if isinstance(e, pyrogram.errors.FloodWait):
+                raise e
 
             return None
         else:
