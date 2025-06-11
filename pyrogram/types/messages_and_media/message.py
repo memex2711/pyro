@@ -883,7 +883,7 @@ class Message(Object, Update):
                 elif isinstance(media, raw.types.MessageMediaWebPage):
                     if isinstance(media.webpage, raw.types.WebPage):
                         web_page = types.WebPage._parse(client, media.webpage, media.force_large_media, media.force_small_media, media.manual)
-                        media_type = enums.MessageMediaType.WEB_PAGE
+                        media_type = enums.MessageMediaType.WEB_PAGE_PREVIEW
                     else:
                         media = None
                 elif isinstance(media, raw.types.MessageMediaPoll):
