@@ -16,7 +16,7 @@
 #  You should have received a copy of the GNU Lesser General Public License
 #  along with Pyrogram.  If not, see <http://www.gnu.org/licenses/>.
 
-from typing import Union
+from typing import Union, Optional
 
 import pyrogram
 from pyrogram import raw, types, errors
@@ -24,10 +24,11 @@ from pyrogram import raw, types, errors
 
 class PromoteChatMember:
     async def promote_chat_member(
-        self: "pyrogram.Client",
-        chat_id: Union[int, str],
-        user_id: Union[int, str],
-        privileges: "types.ChatPrivileges" = None,
+            self: "pyrogram.Client",
+            chat_id: Union[int, str],
+            user_id: Union[int, str],
+            privileges: "types.ChatPrivileges" = None,
+            title: Optional[str] = None,
     ) -> bool:
         """Promote or demote a user in a supergroup or a channel.
 
@@ -39,13 +40,20 @@ class PromoteChatMember:
         Parameters:
             chat_id (``int`` | ``str``):
                 Unique identifier (int) or username (str) of the target chat.
+                You can also use chat public link in form of *t.me/<username>* (str).
 
             user_id (``int`` | ``str``):
                 Unique identifier (int) or username (str) of the target user.
                 For a contact that exists in your Telegram address book you can use his phone number (str).
+                You can also use user profile link in form of *t.me/<username>* (str).
 
             privileges (:obj:`~pyrogram.types.ChatPrivileges`, *optional*):
                 New user privileges.
+
+            title: (``str``, *optional*):
+                A custom title that will be shown to all members instead of "Owner" or "Admin".
+                Pass None or "" (empty string) will keep the current title.
+                If you want to delete the custom title, use :meth:`~pyrogram.Client.set_administrator_title()` method.
 
         Returns:
             ``bool``: True on success.
@@ -73,9 +81,10 @@ class PromoteChatMember:
         except errors.RPCError:
             raw_chat_member = None
 
-        rank = None
-        if isinstance(raw_chat_member, raw.types.ChannelParticipantAdmin):
+        if not title and isinstance(raw_chat_member, raw.types.ChannelParticipantAdmin):
             rank = raw_chat_member.rank
+        else:
+            rank = title
 
         await self.invoke(
             raw.functions.channels.EditAdmin(
@@ -93,6 +102,9 @@ class PromoteChatMember:
                     add_admins=privileges.can_promote_members,
                     manage_call=privileges.can_manage_video_chats,
                     manage_topics=privileges.can_manage_topics,
+                    post_stories=privileges.can_post_stories,
+                    edit_stories=privileges.can_edit_stories,
+                    delete_stories=privileges.can_delete_stories,
                     other=privileges.can_manage_chat
                 ),
                 rank=rank or ""
