@@ -20,14 +20,13 @@ from typing import AsyncGenerator, Optional
 
 import pyrogram
 from pyrogram import types, raw, utils
+from pyrogram.errors import ChannelPrivate, PeerIdInvalid
 
 
 class GetDialogs:
     async def get_dialogs(
         self: "pyrogram.Client",
-        limit: int = 0,
-        exclude_pinned: Optional[bool] = None,
-        from_archive: Optional[bool] = None
+        limit: int = 0
     ) -> Optional[AsyncGenerator["types.Dialog", None]]:
         """Get a user's dialogs sequentially.
 
@@ -63,9 +62,7 @@ class GetDialogs:
                     offset_id=offset_id,
                     offset_peer=offset_peer,
                     limit=limit,
-                    hash=0,
-                    exclude_pinned=exclude_pinned,
-                    folder_id=None if from_archive is None else 1 if from_archive else 0
+                    hash=0
                 ),
                 sleep_threshold=60
             )
@@ -80,8 +77,10 @@ class GetDialogs:
                     continue
 
                 chat_id = utils.get_peer_id(message.peer_id)
-                
-                messages[chat_id] = await types.Message._parse(self, message, users, chats)
+                try:
+                    messages[chat_id] = await types.Message._parse(self, message, users, chats)
+                except (ChannelPrivate, PeerIdInvalid):
+                    continue
 
             dialogs = []
 
