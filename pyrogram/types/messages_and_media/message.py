@@ -991,6 +991,12 @@ class Message(Object, Update):
 
             if message.reply_to:
                 if isinstance(message.reply_to, raw.types.MessageReplyHeader):
+                    if message.reply_to.quote:
+                        parsed_message.quote = types.TextQuote._parse(
+                            client,
+                            users,
+                            message.reply_to
+                        )
                     if message.reply_to.forum_topic:
                         if message.reply_to.reply_to_top_id:
                             thread_id = message.reply_to.reply_to_top_id
@@ -1000,41 +1006,25 @@ class Message(Object, Update):
                         parsed_message.message_thread_id = thread_id
                         parsed_message.is_topic_message = True
                         if topics:
-                            parsed_message.topics = types.ForumTopic._parse(topics[thread_id])
+                            parsed_message.topic = types.ForumTopic._parse(topics[thread_id])
                         else:
                             try:
                                 msg = await client.get_messages(parsed_message.chat.id,message.id)
-                                if getattr(msg, "topics"):
-                                    parsed_message.topics = msg.topics
+                                if getattr(msg, "topic"):
+                                    parsed_message.topic = msg.topic
                             except Exception:
                                 pass
                     else:
-                        if message.reply_to.quote:
-                            quote_entities = [types.MessageEntity._parse(client, entity, users) for entity in message.reply_to.quote_entities]
-                            quote_entities = types.List(filter(lambda x: x is not None, quote_entities))
-
-                            parsed_message.quote = message.reply_to.quote
-                            parsed_message.quote_text = (
-                                Str(message.reply_to.quote_text).init(quote_entities) or None
-                                if media is None or web_page is not None
-                                else None
-                            )
-                            parsed_message.quote_entities = (
-                                quote_entities or None
-                                if media is None or web_page is not None
-                                else None
-                            )
                         parsed_message.reply_to_message_id = message.reply_to.reply_to_msg_id
                         parsed_message.reply_to_top_message_id = message.reply_to.reply_to_top_id
-                elif isinstance(message.reply_to, raw.types.MessageReplyStoryHeader):
+                else:
                     parsed_message.reply_to_story_id = message.reply_to.story_id
-                    parsed_message.reply_to_story_user_id = utils.get_peer_id(message.reply_to.peer)
-
-                    if client.fetch_stories and client.me and not client.me.is_bot:
-                        parsed_message.reply_to_story = await client.get_stories(
-                            utils.get_peer_id(message.reply_to.peer),
-                            message.reply_to.story_id
-                        )
+                    if isinstance(message.reply_to.peer, raw.types.PeerUser):
+                        parsed_message.reply_to_story_user_id = message.reply_to.peer.user_id
+                    elif isinstance(message.reply_to.peer, raw.types.PeerChat):
+                        parsed_message.reply_to_story_chat_id = utils.get_channel_id(message.reply_to.peer.chat_id)
+                    else:
+                        parsed_message.reply_to_story_chat_id = utils.get_channel_id(message.reply_to.peer.channel_id)
 
                 if replies:
                     if parsed_message.reply_to_message_id:

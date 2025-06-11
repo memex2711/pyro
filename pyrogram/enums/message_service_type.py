@@ -1,20 +1,21 @@
-#  Pyrogram - Telegram MTProto API Client Library for Python
+#  Pyrofork - Telegram MTProto API Client Library for Python
 #  Copyright (C) 2017-present Dan <https://github.com/delivrance>
+#  Copyright (C) 2022-present Mayuri-Chan <https://github.com/Mayuri-Chan>
 #
-#  This file is part of Pyrogram.
+#  This file is part of Pyrofork.
 #
-#  Pyrogram is free software: you can redistribute it and/or modify
+#  Pyrofork is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU Lesser General Public License as published
 #  by the Free Software Foundation, either version 3 of the License, or
 #  (at your option) any later version.
 #
-#  Pyrogram is distributed in the hope that it will be useful,
+#  Pyrofork is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #  GNU Lesser General Public License for more details.
 #
 #  You should have received a copy of the GNU Lesser General Public License
-#  along with Pyrogram.  If not, see <http://www.gnu.org/licenses/>.
+#  along with Pyrofork.  If not, see <http://www.gnu.org/licenses/>.
 
 from enum import auto
 
@@ -39,24 +40,6 @@ class MessageServiceType(AutoName):
     DELETE_CHAT_PHOTO = auto()
     "Deleted chat photo"
 
-    FORUM_TOPIC_CREATED = auto()
-    "a new forum topic created in the chat"
-
-    FORUM_TOPIC_CLOSED = auto()
-    "a new forum topic closed in the chat"
-
-    FORUM_TOPIC_REOPENED = auto()
-    "a new forum topic reopened in the chat"
-
-    FORUM_TOPIC_EDITED = auto()
-    "a new forum topic renamed in the chat"
-
-    GENERAL_TOPIC_HIDDEN = auto()
-    "a forum general topic hidden in the chat"
-
-    GENERAL_TOPIC_UNHIDDEN = auto()
-    "a forum general topic unhidden in the chat"
-
     GROUP_CHAT_CREATED = auto()
     "Group chat created"
 
@@ -75,8 +58,26 @@ class MessageServiceType(AutoName):
     GAME_HIGH_SCORE = auto()
     "Game high score"
 
-    GIVEAWAY_LAUNCH = auto()
-    "Giveaway launch"
+    CHAT_SHARED = auto()
+    "a shared chat/channel/user"
+
+    FORUM_TOPIC_CREATED = auto()
+    "a new forum topic created in the chat"
+
+    FORUM_TOPIC_CLOSED = auto()
+    "a new forum topic closed in the chat"
+
+    FORUM_TOPIC_REOPENED = auto()
+    "a new forum topic reopened in the chat"
+
+    FORUM_TOPIC_EDITED = auto()
+    "a new forum topic renamed in the chat"
+
+    GENERAL_TOPIC_HIDDEN = auto()
+    "a forum general topic hidden in the chat"
+
+    GENERAL_TOPIC_UNHIDDEN = auto()
+    "a forum general topic unhidden in the chat"
 
     VIDEO_CHAT_STARTED = auto()
     "Video chat started"
@@ -92,3 +93,45 @@ class MessageServiceType(AutoName):
 
     WEB_APP_DATA = auto()
     "Web app data"
+
+    GIFTED_PREMIUM = auto()
+    "Gifted Premium"
+
+    GIVEAWAY_LAUNCHED = auto()
+    "Giveaway Launch"
+
+    GIVEAWAY_RESULT = auto()
+    "Giveaway Result"
+
+    BOOST_APPLY = auto()
+    "Boost apply"
+
+    SUCCESSFUL_PAYMENT = auto()
+    "Successful payment"
+
+    PAYMENT_REFUNDED = auto()
+    "Payment refunded"
+
+    BOT_ALLOWED = auto()
+    "Bot allowed"
+
+    CHAT_THEME_UPDATED = auto()
+    "Chat theme updated"
+
+    CHAT_WALLPAPER_UPDATED = auto()
+    "Chat wallpaper updated"
+
+    CONTACT_REGISTERED = auto()
+    "Contact registered"
+
+    GIFT_CODE = auto()
+    "Gift code"
+
+    GIFT = auto()
+    "Star gift"
+
+    SCREENSHOT_TAKEN = auto()
+    "Screenshot taken"
+
+    PAID_MESSAGE_PRICE_CHANGED = auto()
+    "Paid message price changed"

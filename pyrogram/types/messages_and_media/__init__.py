@@ -23,6 +23,7 @@ from .boosts_status import BoostsStatus
 from .contact import Contact
 from .dice import Dice
 from .document import Document
+from .external_reply_info import ExternalReplyInfo
 from .forum_topic import ForumTopic
 from .forum_topic_created import ForumTopicCreated
 from .forum_topic_closed import ForumTopicClosed
@@ -58,7 +59,7 @@ from .message_story import MessageStory
 from .my_boost import MyBoost
 
 __all__ = [
-    "Animation", "Audio", "AvailableEffect", "BoostsStatus", "Contact", "Document", "ForumTopic", "ForumTopicCreated",
+    "Animation", "Audio", "AvailableEffect", "BoostsStatus", "Contact", "Document", "ExternalReplyInfo", "ForumTopic", "ForumTopicCreated",
     "ForumTopicClosed", "ForumTopicReopened", "ForumTopicEdited", "GeneralTopicHidden",
     "GeneralTopicUnhidden", "Game", "Giveaway", "Location", "Message", "MessageEntity", "Photo", "Thumbnail",
     "StrippedThumbnail", "Story", "StoryDeleted", "StorySkipped", "StoryViews", "TextQuote", "Poll", "PollOption", "Sticker",
