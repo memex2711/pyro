@@ -45,6 +45,7 @@ from .story import Story
 from .story_deleted import StoryDeleted
 from .story_skipped import StorySkipped
 from .story_views import StoryViews
+from .text_quote import TextQuote
 from .thumbnail import Thumbnail
 from .venue import Venue
 from .video import Video
@@ -60,7 +61,7 @@ __all__ = [
     "Animation", "Audio", "AvailableEffect", "BoostsStatus", "Contact", "Document", "ForumTopic", "ForumTopicCreated",
     "ForumTopicClosed", "ForumTopicReopened", "ForumTopicEdited", "GeneralTopicHidden",
     "GeneralTopicUnhidden", "Game", "Giveaway", "Location", "Message", "MessageEntity", "Photo", "Thumbnail",
-    "StrippedThumbnail", "Story", "StoryDeleted", "StorySkipped", "StoryViews", "Poll", "PollOption", "Sticker",
+    "StrippedThumbnail", "Story", "StoryDeleted", "StorySkipped", "StoryViews", "TextQuote", "Poll", "PollOption", "Sticker",
     "Venue", "Video", "VideoNote", "Voice", "WebPage", "Dice", "Reaction", "WebAppData",
     "MessageReactions", "MessageStory", "MyBoost"
 ]
