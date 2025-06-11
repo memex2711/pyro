@@ -29,7 +29,7 @@ from pyrogram.connection import Connection
 from pyrogram.crypto import mtproto
 from pyrogram.errors import (
     RPCError, InternalServerError, AuthKeyDuplicated, FloodWait, FloodPremiumWait, ServiceUnavailable, BadMsgNotification,
-    SecurityCheckMismatch
+    SecurityCheckMismatch, Unauthorized
 )
 from pyrogram.raw.all import layer
 from pyrogram.raw.core import TLObject, MsgContainer, Int, FutureSalts
@@ -184,14 +184,19 @@ class Session:
         await self.start()
 
     async def handle_packet(self, packet):
-        data = await self.loop.run_in_executor(
-            pyrogram.crypto_executor,
-            mtproto.unpack,
-            BytesIO(packet),
-            self.session_id,
-            self.auth_key,
-            self.auth_key_id
-        )
+        try:
+            data = await self.loop.run_in_executor(
+                pyrogram.crypto_executor,
+                mtproto.unpack,
+                BytesIO(packet),
+                self.session_id,
+                self.auth_key,
+                self.auth_key_id
+            )
+        except ValueError:
+            log.debug(e)
+            self.loop.create_task(self.restart())
+            return
 
         messages = (
             data.body.messages
@@ -299,6 +304,12 @@ class Session:
             if packet is None or len(packet) == 4:
                 if packet:
                     error_code = -Int.read(BytesIO(packet))
+
+                    if error_code == 404:
+                        raise Unauthorized(
+                            "Auth key not found in the system. You must delete your session file "
+                            "and log in again with your phone number or bot token."
+                        )
 
                     log.warning(
                         "Server sent transport error: %s (%s)",
