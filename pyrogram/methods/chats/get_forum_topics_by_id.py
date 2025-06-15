@@ -22,7 +22,6 @@ from typing import Union, List, Iterable
 import pyrogram
 from pyrogram import raw
 from pyrogram import types
-from pyrogram import utils
 
 log = logging.getLogger(__name__)
 
@@ -40,6 +39,7 @@ class GetForumTopicsByID:
         Parameters:
             chat_id (``int`` | ``str``):
                 Unique identifier (int) or username (str) of the target chat.
+                You can also use chat public link in form of *t.me/<username>* (str).
 
             topic_ids (``int`` | Iterable of ``int``, *optional*):
                 Pass a single topic identifier or an iterable of topic ids (as integers) to get the information of the
@@ -61,19 +61,30 @@ class GetForumTopicsByID:
         Raises:
             ValueError: In case of invalid arguments.
         """
-        is_iterable = not isinstance(topic_ids, int)
-        ids = list(topic_ids) if is_iterable else [topic_ids]
-
-        r = await self.invoke(
-            raw.functions.channels.GetForumTopicsByID(
-                channel=await self.resolve_peer(chat_id),
-                topics=ids
-            )
+        ids, _ = (
+            (topic_ids, int) if topic_ids
+            else (None, None)
         )
 
-        topics = types.List()
+        if ids is None:
+            raise ValueError("No argument supplied. Either pass topic_ids")
 
-        for i in r:
-            topics.append(types.ForumTopic._parse(i))
+        peer = await self.resolve_peer(chat_id)
 
-        return topics if is_iterable else topics[0]
+        is_iterable = not isinstance(ids, int)
+        ids = list(ids) if is_iterable else [ids]
+        ids = [i for i in ids]
+
+        rpc = raw.functions.channels.GetForumTopicsByID(channel=peer, topics=ids)
+
+        r = await self.invoke(rpc, sleep_threshold=-1)
+
+        if is_iterable:
+            topic_list = []
+            for topic in r.topics:
+                topic_list.append(types.ForumTopic._parse(topic))
+            topics = types.List(topic_list)
+        else:
+            topics = types.ForumTopic._parse(r.topics[0])
+
+        return topics
