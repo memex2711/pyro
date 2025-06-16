@@ -17,6 +17,7 @@
 #  along with Pyrogram.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
+import asyncio
 from datetime import datetime
 from functools import partial
 from typing import List, Match, Union, BinaryIO, Optional, Callable
@@ -25,7 +26,7 @@ import pyrogram
 from pyrogram import raw, enums
 from pyrogram import types
 from pyrogram import utils
-from pyrogram.errors import MessageIdsEmpty, PeerIdInvalid, ChannelPrivate
+from pyrogram.errors import MessageIdsEmpty, PeerIdInvalid, ChannelPrivate, FloodWait, FloodPremiumWait
 from pyrogram.parser import utils as parser_utils, Parser
 from ..object import Object
 from ..update import Update
@@ -1042,6 +1043,12 @@ class Message(Object, Update):
 
                             if not reply_to_message:
                                 try:
+                                    reply_to_message = await client.get_messages(
+                                        replies=replies - 1,
+                                        **reply_to_params
+                                    )
+                                except (FloodWait, FloodPremiumWait) as e:
+                                    await asyncio.sleep(e.value)
                                     reply_to_message = await client.get_messages(
                                         replies=replies - 1,
                                         **reply_to_params
