@@ -30,7 +30,9 @@ from .messages_filter import MessagesFilter
 from .next_code_type import NextCodeType
 from .parse_mode import ParseMode
 from .poll_type import PollType
+from .profile_color import ProfileColor
 from .reaction_type import ReactionType
+from .reply_color import ReplyColor
 from .sent_code_type import SentCodeType
 from .stories_privacy_rules import StoriesPrivacyRules
 from .story_privacy import StoryPrivacy
@@ -50,7 +52,9 @@ __all__ = [
     'MessagesFilter',
     'NextCodeType',
     'ParseMode',
+    'ProfileColor',
     'PollType',
+    'ReplyColor',
     'ReactionType',
     'SentCodeType',
     'StoriesPrivacyRules',
