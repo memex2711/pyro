@@ -177,16 +177,15 @@ class User(Object, Update):
         is_contact: bool = None,
         is_mutual_contact: bool = None,
         is_deleted: bool = None,
+        is_frozen: bool = None,
         is_bot: bool = None,
         is_verified: bool = None,
         is_restricted: bool = None,
         is_scam: bool = None,
         is_fake: bool = None,
         is_support: bool = None,
+        is_contacts_only: bool = None,
         is_premium: bool = None,
-        is_close_friend: bool = None,
-        is_stories_hidden: bool = None,
-        is_stories_unavailable: bool = None,
         first_name: str = None,
         last_name: str = None,
         status: "enums.UserStatus" = None,
@@ -200,8 +199,11 @@ class User(Object, Update):
         phone_number: str = None,
         photo: "types.ChatPhoto" = None,
         restrictions: List["types.Restriction"] = None,
-        color: int = None,
-        background_emoji_id: int = None
+        reply_color: "types.ChatColor" = None,
+        profile_color: "types.ChatColor" = None,
+        active_users: int = None,
+        frozen_icon: int = None
+        
     ):
         super().__init__(client)
 
@@ -210,6 +212,7 @@ class User(Object, Update):
         self.is_contact = is_contact
         self.is_mutual_contact = is_mutual_contact
         self.is_deleted = is_deleted
+        self.is_frozen = is_frozen
         self.is_bot = is_bot
         self.is_verified = is_verified
         self.is_restricted = is_restricted
@@ -217,9 +220,7 @@ class User(Object, Update):
         self.is_fake = is_fake
         self.is_support = is_support
         self.is_premium = is_premium
-        self.is_close_friend = is_close_friend
-        self.is_stories_hidden = is_stories_hidden
-        self.is_stories_unavailable = is_stories_unavailable
+        self.is_contacts_only = is_contacts_only
         self.first_name = first_name
         self.last_name = last_name
         self.status = status
@@ -233,8 +234,10 @@ class User(Object, Update):
         self.phone_number = phone_number
         self.photo = photo
         self.restrictions = restrictions
-        self.color = color
-        self.background_emoji_id = background_emoji_id
+        self.reply_color = reply_color
+        self.profile_color = profile_color
+        self.active_users = active_users
+        self.frozen_icon = frozen_icon
 
     @property
     def full_name(self) -> str:
@@ -252,6 +255,22 @@ class User(Object, Update):
     def _parse(client, user: "raw.base.User") -> Optional["User"]:
         if user is None or isinstance(user, raw.types.UserEmpty):
             return None
+        user_name = user.username
+        active_usernames = getattr(user, "usernames", [])
+        active_users = getattr(user, "bot_active_users", None)
+        usernames = None
+        if len(active_usernames) >= 1:
+            usernames = []
+            for username in active_usernames:
+                if username.editable:
+                    user_name = username.username
+                else:
+                    usernames.append(types.Username._parse(username))
+        if user_name is None and usernames is not None and len(usernames) > 0:
+            user_name = usernames[0].username
+            usernames.pop(0)
+        
+        frozen_icon = getattr(user, "bot_verification_icon", None)
 
         return User(
             id=user.id,
@@ -259,6 +278,7 @@ class User(Object, Update):
             is_contact=user.contact,
             is_mutual_contact=user.mutual_contact,
             is_deleted=user.deleted,
+            is_frozen=True if frozen_icon else False,
             is_bot=user.bot,
             is_verified=user.verified,
             is_restricted=user.restricted,
@@ -266,22 +286,22 @@ class User(Object, Update):
             is_fake=user.fake,
             is_support=user.support,
             is_premium=user.premium,
-            is_close_friend=user.close_friend,
-            is_stories_hidden=user.stories_hidden,
-            is_stories_unavailable=user.stories_unavailable,
+            is_contacts_only=user.contact_require_premium,
             first_name=user.first_name,
             last_name=user.last_name,
             **User._parse_status(user.status, user.bot),
-            username=user.username,
-            usernames=types.List([types.Username._parse(r) for r in user.usernames]) or None,
+            username=user_name,
+            usernames=usernames,
             language_code=user.lang_code,
             emoji_status=types.EmojiStatus._parse(client, user.emoji_status),
             dc_id=getattr(user.photo, "dc_id", None),
             phone_number=user.phone,
             photo=types.ChatPhoto._parse(client, user.photo, user.id, user.access_hash),
             restrictions=types.List([types.Restriction._parse(r) for r in user.restriction_reason]) or None,
-            color=getattr(user, "color", None),
-            background_emoji_id=getattr(user, "background_emoji_id", None),
+            reply_color=types.ChatColor._parse(getattr(user, "color", None)),
+            profile_color=types.ChatColor._parse_profile_color(getattr(user, "profile_color", None)),
+            active_users=active_users,
+            frozen_icon=frozen_icon,
             client=client
         )
 
