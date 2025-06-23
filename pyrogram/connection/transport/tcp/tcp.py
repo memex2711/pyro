@@ -97,6 +97,8 @@ class TCP:
         async with self.lock:
             try:
                 if self.writer is not None:
+                    if self.writer.is_closing():
+                        raise OSError("Writer already closed")
                     self.writer.write(data)
                     await self.writer.drain()
             except Exception as e:
