@@ -154,8 +154,25 @@ class Chat(Object):
             Available reactions in the chat.
             Returned only in :meth:`~pyrogram.Client.get_chat`.
 
-        color (``int``, *optional*)
-            Chat color.
+        level (``int``, *optional*):
+            Channel boosts level.
+            For channel only.
+
+        reply_color (:obj:`~pyrogram.types.ChatColor`, *optional*):
+            Chat reply color.
+
+        profile_color (:obj:`~pyrogram.types.ChatColor`, *optional*):
+            Chat profile color.
+
+        personal_chat (:obj:`~pyrogram.types.Chat`, *optional*):
+            For private chats, the personal channel of the user.
+            Returned only in :meth:`~pyrogram.Client.get_chat`.
+
+        max_reaction_count (``int``):
+            The maximum number of reactions that can be set on a message in the chat
+
+        gifts_count (``int``, *optional*):
+            Number of gifts received by the user.
 
         background_emoji_id (``int``, *optional*)
             Chat background emoji id.
@@ -203,8 +220,9 @@ class Chat(Object):
         linked_chat: "types.Chat" = None,
         send_as_chat: "types.Chat" = None,
         available_reactions: Optional["types.ChatReactions"] = None,
-        color: int = None,
-        background_emoji_id: int = None,
+        reply_color: "types.ChatColor" = None,
+        profile_color: "types.ChatColor" = None,
+        personal_chat: "types.Chat" = None,
         birthday: "types.Birthday" = None
     ):
         super().__init__(client)
@@ -244,8 +262,9 @@ class Chat(Object):
         self.linked_chat = linked_chat
         self.send_as_chat = send_as_chat
         self.available_reactions = available_reactions
-        self.color = color
-        self.background_emoji_id = background_emoji_id
+        self.personal_chat = personal_chat
+        self.reply_color = reply_color
+        self.profile_color = profile_color
         self.birthday = birthday
 
     @staticmethod
@@ -267,8 +286,8 @@ class Chat(Object):
             photo=types.ChatPhoto._parse(client, user.photo, peer_id, user.access_hash),
             restrictions=types.List([types.Restriction._parse(r) for r in user.restriction_reason]) or None,
             dc_id=getattr(getattr(user, "photo", None), "dc_id", None),
-            color=getattr(user, "color", None),
-            background_emoji_id=getattr(user, "background_emoji_id", None),
+            reply_color=types.ChatColor._parse(getattr(user, "color", None)),
+            profile_color=types.ChatColor._parse_profile_color(getattr(user, "profile_color", None)),
             client=client
         )
 
@@ -323,8 +342,7 @@ class Chat(Object):
             members_count=getattr(channel, "participants_count", None),
             dc_id=getattr(getattr(channel, "photo", None), "dc_id", None),
             has_protected_content=getattr(channel, "noforwards", None),
-            color=getattr(channel, "color", None),
-            background_emoji_id=getattr(channel, "background_emoji_id", None),
+            reply_color=types.ChatColor._parse(getattr(channel, "color", None)),
             client=client
         )
 
