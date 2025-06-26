@@ -1,76 +1,75 @@
-#  Pyrogram - Telegram MTProto API Client Library for Python
-#  Copyright (C) 2017-present Dan <https://github.com/delivrance>
+#  PyroFork - Telegram MTProto API Client Library for Python
+#  Copyright (C) 2022-present Mayuri-Chan <https://github.com/Mayuri-Chan>
 #
-#  This file is part of Pyrogram.
+#  This file is part of PyroFork.
 #
-#  Pyrogram is free software: you can redistribute it and/or modify
+#  PyroFork is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU Lesser General Public License as published
 #  by the Free Software Foundation, either version 3 of the License, or
 #  (at your option) any later version.
 #
-#  Pyrogram is distributed in the hope that it will be useful,
+#  PyroFork is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #  GNU Lesser General Public License for more details.
 #
 #  You should have received a copy of the GNU Lesser General Public License
-#  along with Pyrogram.  If not, see <http://www.gnu.org/licenses/>.
+#  along with PyroFork.  If not, see <http://www.gnu.org/licenses/>.
 
 from typing import Union
 
 import pyrogram
 from pyrogram import raw
-from pyrogram import types
+from pyrogram import enums
 
 class UpdateColor:
     async def update_color(
         self: "pyrogram.Client",
         chat_id: Union[int, str],
-        color: int,
+        color: Union["enums.ReplyColor", "enums.ProfileColor"],
         background_emoji_id: int = None
-    ) -> "types.Chat":
+    ) -> bool:
         """Update color
 
-        .. include:: /_includes/usable-by/users-bots.rst
+        .. include:: /_includes/usable-by/users.rst
 
         Parameters:
             chat_id (``int`` | ``str``):
                 Unique identifier (int) or username (str) of the target chat.
+                You can also use chat public link in form of *t.me/<username>* (str).
 
-            color (``int``):
-                Color
+            color (:obj:`~pyrogram.enums.ReplyColor` | :obj:`~pyrogram.enums.ProfileColor`):
+                Color type.
+                Profile color can only be set for the user.
 
             background_emoji_id (``int``, *optional*):
-                Background emoji
+                Unique identifier of the custom emoji.
 
         Returns:
-            ``bool``: True on success.
+            ``bool``: On success, in case the passed-in session is authorized, True is returned.
 
         Example:
             .. code-block:: python
 
-                await app.update_color(chat_id, 1)
+                await app.update_color(chat_id, enums.ReplyColor.RED)
         """
-
         peer = await self.resolve_peer(chat_id)
 
         if isinstance(peer, raw.types.InputPeerSelf):
-            await self.invoke(
+            r = await self.invoke(
                 raw.functions.account.UpdateColor(
-                    color=color,
+                    for_profile=isinstance(color, enums.ProfileColor),
+                    color=color.value,
                     background_emoji_id=background_emoji_id
                 )
             )
-
-            r = await self.invoke(raw.functions.users.GetUsers(id=[raw.types.InputPeerSelf()]))
-            return types.Chat._parse_user_chat(self, r[0])
         else:
             r = await self.invoke(
                 raw.functions.channels.UpdateColor(
                     channel=peer,
-                    color=color,
+                    color=color.value,
                     background_emoji_id=background_emoji_id
                 )
             )
 
-            return types.Chat._parse_channel_chat(self, r.chats[0])
+        return bool(r)
