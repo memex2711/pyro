@@ -535,106 +535,82 @@ class Client(Methods):
     async def handle_updates(self, updates):
         self.last_update_time = datetime.now()
 
-        try:
-            if isinstance(updates, (raw.types.Updates, raw.types.UpdatesCombined)):
-                try:
-                    is_min = any((
-                        await self.fetch_peers(updates.users),
-                        await self.fetch_peers(updates.chats),
-                    ))
-                except Exception as e:
-                    log.warning(f"[handle_updates] Gagal fetch_peers: {e}")
-                    return
+        if isinstance(updates, (raw.types.Updates, raw.types.UpdatesCombined)):
+            is_min = any((
+                await self.fetch_peers(updates.users),
+                await self.fetch_peers(updates.chats),
+            ))
 
-                users = {u.id: u for u in updates.users}
-                chats = {c.id: c for c in updates.chats}
+            users = {u.id: u for u in updates.users}
+            chats = {c.id: c for c in updates.chats}
 
-                for update in updates.updates:
-                    channel_id = getattr(
+            for update in updates.updates:
+                channel_id = getattr(
+                    getattr(
                         getattr(
-                            getattr(update, "message", None), "peer_id", None
-                        ), "channel_id", None
-                    ) or getattr(update, "channel_id", None)
+                            update, "message", None
+                        ), "peer_id", None
+                    ), "channel_id", None
+                ) or getattr(update, "channel_id", None)
 
-                    pts = getattr(update, "pts", None)
-                    pts_count = getattr(update, "pts_count", None)
+                pts = getattr(update, "pts", None)
+                pts_count = getattr(update, "pts_count", None)
 
-                    if isinstance(update, raw.types.UpdateChannelTooLong):
-                        log.info(f"[handle_updates] Channel too long: {update}")
+                if isinstance(update, raw.types.UpdateChannelTooLong):
+                    log.info(update)
 
-                    if isinstance(update, raw.types.UpdateNewChannelMessage) and is_min:
-                        message = update.message
+                if isinstance(update, raw.types.UpdateNewChannelMessage) and is_min:
+                    message = update.message
 
-                        if not isinstance(message, raw.types.MessageEmpty):
-                            try:
-                                diff = await self.invoke(
-                                    raw.functions.updates.GetChannelDifference(
-                                        channel=await self.resolve_peer(utils.get_channel_id(channel_id)),
-                                        filter=raw.types.ChannelMessagesFilter(
-                                            ranges=[
-                                                raw.types.MessageRange(
-                                                    min_id=message.id,
-                                                    max_id=message.id
-                                                )
-                                            ]
-                                        ),
-                                        pts=pts - pts_count,
-                                        limit=pts
-                                    )
+                    if not isinstance(message, raw.types.MessageEmpty):
+                        try:
+                            diff = await self.invoke(
+                                raw.functions.updates.GetChannelDifference(
+                                    channel=await self.resolve_peer(utils.get_channel_id(channel_id)),
+                                    filter=raw.types.ChannelMessagesFilter(
+                                        ranges=[raw.types.MessageRange(
+                                            min_id=update.message.id,
+                                            max_id=update.message.id
+                                        )]
+                                    ),
+                                    pts=pts - pts_count,
+                                    limit=pts
                                 )
+                            )
+                        except ChannelPrivate:
+                            pass
+                        else:
+                            if not isinstance(diff, raw.types.updates.ChannelDifferenceEmpty):
+                                users.update({u.id: u for u in diff.users})
+                                chats.update({c.id: c for c in diff.chats})
 
-                                if not isinstance(diff, raw.types.updates.ChannelDifferenceEmpty):
-                                    users.update({u.id: u for u in diff.users})
-                                    chats.update({c.id: c for c in diff.chats})
-                            except ChannelPrivate:
-                                log.warning(f"[handle_updates] Channel private: {channel_id}")
-                            except TimeoutError:
-                                log.warning(f"[handle_updates] Timeout saat GetChannelDifference")
-                            except Exception as e:
-                                log.exception(f"[handle_updates] Unknown error GetChannelDifference: {e}")
+                self.dispatcher.updates_queue.put_nowait((update, users, chats))
+        elif isinstance(updates, (raw.types.UpdateShortMessage, raw.types.UpdateShortChatMessage)):
+            diff = await self.invoke(
+                raw.functions.updates.GetDifference(
+                    pts=updates.pts - updates.pts_count,
+                    date=updates.date,
+                    qts=-1
+                )
+            )
 
-                    try:
-                        self.dispatcher.updates_queue.put_nowait((update, users, chats))
-                    except Exception as e:
-                        log.warning(f"[handle_updates] Gagal enqueue update: {e}")
-
-            elif isinstance(updates, (raw.types.UpdateShortMessage, raw.types.UpdateShortChatMessage)):
-                try:
-                    diff = await self.invoke(
-                        raw.functions.updates.GetDifference(
-                            pts=updates.pts - updates.pts_count,
-                            date=updates.date,
-                            qts=-1
-                        )
-                    )
-
-                    if diff.new_messages:
-                        self.dispatcher.updates_queue.put_nowait((
-                            raw.types.UpdateNewMessage(
-                                message=diff.new_messages[0],
-                                pts=updates.pts,
-                                pts_count=updates.pts_count
-                            ),
-                            {u.id: u for u in diff.users},
-                            {c.id: c for c in diff.chats}
-                        ))
-                    elif diff.other_updates:
-                        self.dispatcher.updates_queue.put_nowait((diff.other_updates[0], {}, {}))
-
-                except TimeoutError:
-                    log.warning("[handle_updates] Timeout saat GetDifference")
-                except Exception as e:
-                    log.exception(f"[handle_updates] Error GetDifference: {e}")
-
-            elif isinstance(updates, raw.types.UpdateShort):
-                self.dispatcher.updates_queue.put_nowait((updates.update, {}, {}))
-
-            elif isinstance(updates, raw.types.UpdatesTooLong):
-                log.info(f"[handle_updates] UpdatesTooLong: {updates}")
-
-        except Exception as e:
-            log.exception(f"[handle_updates] Fatal unhandled exception: {e}")
-            await asyncio.sleep(2)
+            if diff.new_messages:
+                self.dispatcher.updates_queue.put_nowait((
+                    raw.types.UpdateNewMessage(
+                        message=diff.new_messages[0],
+                        pts=updates.pts,
+                        pts_count=updates.pts_count
+                    ),
+                    {u.id: u for u in diff.users},
+                    {c.id: c for c in diff.chats}
+                ))
+            else:
+                if diff.other_updates:  # The other_updates list can be empty
+                    self.dispatcher.updates_queue.put_nowait((diff.other_updates[0], {}, {}))
+        elif isinstance(updates, raw.types.UpdateShort):
+            self.dispatcher.updates_queue.put_nowait((updates.update, {}, {}))
+        elif isinstance(updates, raw.types.UpdatesTooLong):
+            log.info(updates)
 
     async def load_session(self):
         await self.storage.open()
