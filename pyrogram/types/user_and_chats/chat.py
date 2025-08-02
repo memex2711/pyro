@@ -269,6 +269,8 @@ class Chat(Object):
 
     @staticmethod
     def _parse_user_chat(client, user: raw.types.User) -> "Chat":
+        if user is None or isinstance(user, raw.types.UserEmpty):
+            return None
         peer_id = user.id
 
         return Chat(
@@ -361,10 +363,10 @@ class Chat(Object):
         if isinstance(message.peer_id, raw.types.PeerUser):
             return Chat._parse_user_chat(client, users[chat_id])
 
-        if isinstance(message.peer_id, raw.types.PeerChat):
+        elif isinstance(message.peer_id, raw.types.PeerChat):
             return Chat._parse_chat_chat(client, chats[chat_id])
-
-        return Chat._parse_channel_chat(client, chats[chat_id])
+        else:
+            return Chat._parse_channel_chat(client, chats[chat_id])
 
     @staticmethod
     def _parse_dialog(client, peer, users: dict, chats: dict):
