@@ -194,7 +194,6 @@ class Session:
                 self.auth_key_id
             )
         except ValueError:
-            log.debug(e)
             self.loop.create_task(self.restart())
             return
 
