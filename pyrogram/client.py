@@ -45,7 +45,7 @@ from pyrogram.errors import CDNFileHashMismatch
 from pyrogram.errors import (
     SessionPasswordNeeded,
     VolumeLocNotFound, ChannelPrivate,
-    BadRequest, AuthBytesInvalid
+    BadRequest, AuthBytesInvalid, PersistentTimestampInvalid
 )
 from pyrogram.handlers.handler import Handler
 from pyrogram.methods import Methods
@@ -668,6 +668,12 @@ class Client(Methods):
                             )
                         except ChannelPrivate:
                             pass
+                        except PersistentTimestampInvalid:
+                            log.warning(f"[{self.me.id}] PersistentTimestampInvalid detected. Resetting session...")
+                            await self.stop()
+                            await asyncio.sleep(3)
+                            await self.start()
+                            return
                         else:
                             if not isinstance(diff, raw.types.updates.ChannelDifferenceEmpty):
                                 users.update({u.id: u for u in diff.users})
