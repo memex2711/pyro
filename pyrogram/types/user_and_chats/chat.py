@@ -371,6 +371,52 @@ class Chat(Object):
             return Chat._parse_chat_chat(client, chats.get(chat_id))
         else:
             return Chat._parse_channel_chat(client, chats.get(chat_id))
+        
+    @staticmethod
+    async def _parse_with_fallback(
+        client,
+        message: Union[raw.types.Message, raw.types.MessageService],
+        users: dict,
+        chats: dict,
+        is_chat: bool
+    ) -> "Chat":
+        from_id = utils.get_raw_peer_id(message.from_id)
+        peer_id = utils.get_raw_peer_id(message.peer_id)
+        chat_id = (peer_id or from_id) if is_chat else (from_id or peer_id)
+
+        if isinstance(message.peer_id, raw.types.PeerUser):
+            user_data = users.get(chat_id)
+            if not user_data:
+                try:
+                    chat_obj = await client.get_chat(chat_id)
+                    users[chat_obj.id] = chat_obj
+                    user_data = users.get(chat_id)
+                except Exception:
+                    return None
+            return Chat._parse_user_chat(client, user_data)
+
+        elif isinstance(message.peer_id, raw.types.PeerChat):
+            chat_data = chats.get(chat_id)
+            if not chat_data:
+                try:
+                    chat_obj = await client.get_chat(chat_id)
+                    chats[chat_obj.id] = chat_obj
+                    chat_data = chats.get(chat_id)
+                except Exception:
+                    return None
+            return Chat._parse_chat_chat(client, chat_data)
+
+        else:
+            channel_data = chats.get(chat_id)
+            if not channel_data:
+                try:
+                    chat_obj = await client.get_chat(chat_id)
+                    chats[chat_obj.id] = chat_obj
+                    channel_data = chats.get(chat_id)
+                except Exception:
+                    return None
+            return Chat._parse_channel_chat(client, channel_data)
+
 
     @staticmethod
     def _parse_dialog(client, peer, users: dict, chats: dict):
