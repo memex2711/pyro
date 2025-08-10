@@ -365,12 +365,12 @@ class Chat(Object):
         chat_id = (peer_id or from_id) if is_chat else (from_id or peer_id)
 
         if isinstance(message.peer_id, raw.types.PeerUser):
-            return Chat._parse_user_chat(client, users[chat_id])
+            return Chat._parse_user_chat(client, users.get(chat_id))
 
         elif isinstance(message.peer_id, raw.types.PeerChat):
-            return Chat._parse_chat_chat(client, chats[chat_id])
+            return Chat._parse_chat_chat(client, chats.get(chat_id))
         else:
-            return Chat._parse_channel_chat(client, chats[chat_id])
+            return Chat._parse_channel_chat(client, chats.get(chat_id))
 
     @staticmethod
     def _parse_dialog(client, peer, users: dict, chats: dict):
