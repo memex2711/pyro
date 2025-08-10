@@ -911,7 +911,7 @@ class Message(Object, Update):
                     reply_markup = None
 
             from_user = types.User._parse(client, users.get(user_id, None))
-            sender_chat = await types.Chat._parse_with_fallback(client, message, users, chats, is_chat=False)
+            sender_chat = types.Chat._parse(client, message, users, chats, is_chat=False) if not from_user else None
 
             reactions = types.MessageReactions._parse(client, message.reactions)
 
