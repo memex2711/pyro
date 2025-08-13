@@ -131,7 +131,6 @@ import logging
 import socket
 from concurrent.futures import ThreadPoolExecutor
 import socks
-import weakref
 
 log = logging.getLogger(__name__)
 
@@ -147,10 +146,12 @@ class TCP:
         self.proxy = proxy
         self.last_address = None
         self._closed = False
+        self._ipv6 = ipv6 
 
         self._init_socket(ipv6)
 
     def _init_socket(self, ipv6: bool):
+        self._ipv6 = ipv6
         if self.proxy:
             hostname = self.proxy.get("hostname")
             try:
@@ -166,9 +167,9 @@ class TCP:
             self.socket.set_proxy(
                 proxy_type=getattr(socks, self.proxy.get("scheme").upper()),
                 addr=hostname,
-                port=self.proxy.get("port", None),
-                username=self.proxy.get("username", None),
-                password=self.proxy.get("password", None)
+                port=self.proxy.get("port"),
+                username=self.proxy.get("username"),
+                password=self.proxy.get("password")
             )
             self.socket.settimeout(TCP.TIMEOUT)
             log.info("Using proxy %s", hostname)
@@ -199,7 +200,6 @@ class TCP:
         log.info("Connected to %s:%s", *address)
 
     async def close(self):
-        """Close TCP and release memory"""
         if self._closed:
             return
         self._closed = True
@@ -221,20 +221,23 @@ class TCP:
             self.writer = None
             self.socket = None
 
+    async def _ensure_connected(self):
+        if not self.writer or self.writer.is_closing() or not self.reader:
+            if not self.last_address:
+                raise OSError("No previous connection address stored")
+            log.warning("TCP connection lost, reconnecting...")
+            await self.close()
+            self._init_socket(self._ipv6)
+            await self.connect(self.last_address)
+
     async def send(self, data: bytes):
         async with self.lock:
-            if not self.writer or self.writer.is_closing():
-                if not self.last_address:
-                    raise OSError("No previous connection address stored")
-                log.warning("Writer closed, reconnecting TCP socket...")
-                await self.close()
-                self._init_socket(self.socket.family == socket.AF_INET6)
-                await self.connect(self.last_address)
-
+            await self._ensure_connected()
             self.writer.write(data)
             await self.writer.drain()
 
     async def recv(self, length: int = 0):
+        await self._ensure_connected()
         data = b""
         while len(data) < length:
             try:
@@ -243,8 +246,12 @@ class TCP:
                     TCP.TIMEOUT
                 )
             except (OSError, asyncio.TimeoutError):
+                log.warning("Recv timeout/disconnect, reconnecting...")
+                await self._ensure_connected()
                 return None
             if not chunk:
+                log.warning("Recv got empty chunk, reconnecting...")
+                await self._ensure_connected()
                 return None
             data += chunk
         return data
