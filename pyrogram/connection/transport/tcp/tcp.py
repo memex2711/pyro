@@ -146,7 +146,7 @@ class TCP:
         self.proxy = proxy
         self.last_address = None
         self._closed = False
-        self._ipv6 = ipv6 
+        self._ipv6 = ipv6
 
         self._init_socket(ipv6)
 
@@ -180,6 +180,9 @@ class TCP:
             self.socket.setblocking(False)
 
     async def connect(self, address: tuple):
+        if not isinstance(address, tuple) or len(address) != 2:
+            raise ValueError(f"Invalid address: {address}")
+
         self.last_address = address
         log.info("Connecting to %s:%s", *address)
 
@@ -223,15 +226,18 @@ class TCP:
 
     async def _ensure_connected(self):
         if not self.writer or self.writer.is_closing() or not self.reader:
-            if not self.last_address or len(self.last_address) != 2:
+            if (
+                not self.last_address
+                or not isinstance(self.last_address, tuple)
+                or len(self.last_address) != 2
+            ):
                 raise OSError(f"No valid last_address stored for reconnect: {self.last_address}")
-            
+
             log.warning("TCP connection lost, reconnecting to %s:%s", *self.last_address)
-            
+
             await self.close()
-            
             self._init_socket(self._ipv6)
-            
+
             try:
                 await self.connect(self.last_address)
             except Exception as e:
