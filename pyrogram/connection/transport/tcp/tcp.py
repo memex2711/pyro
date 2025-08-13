@@ -15,7 +15,7 @@
 #
 #  You should have received a copy of the GNU Lesser General Public License
 #  along with Pyrogram.  If not, see <http://www.gnu.org/licenses/>.
-
+"""
 import asyncio
 import ipaddress
 import logging
@@ -122,4 +122,127 @@ class TCP:
                 else:
                     return None
 
+        return data
+"""
+
+
+
+import asyncio
+import ipaddress
+import logging
+import socket
+from concurrent.futures import ThreadPoolExecutor
+
+import socks
+
+log = logging.getLogger(__name__)
+
+
+class TCP:
+    TIMEOUT = 10
+
+    def __init__(self, ipv6: bool, proxy: dict):
+        self.socket = None
+        self.reader = None
+        self.writer = None
+        self.lock = asyncio.Lock()
+        self.loop = asyncio.get_event_loop()
+        self.proxy = proxy
+        self.last_address = None
+
+        self._init_socket(ipv6)
+
+    def _init_socket(self, ipv6: bool):
+        """Inisialisasi socket baru sesuai setting"""
+        if self.proxy:
+            hostname = self.proxy.get("hostname")
+            try:
+                ip_address = ipaddress.ip_address(hostname)
+            except ValueError:
+                self.socket = socks.socksocket(socket.AF_INET)
+            else:
+                if isinstance(ip_address, ipaddress.IPv6Address):
+                    self.socket = socks.socksocket(socket.AF_INET6)
+                else:
+                    self.socket = socks.socksocket(socket.AF_INET)
+
+            self.socket.set_proxy(
+                proxy_type=getattr(socks, self.proxy.get("scheme").upper()),
+                addr=hostname,
+                port=self.proxy.get("port", None),
+                username=self.proxy.get("username", None),
+                password=self.proxy.get("password", None)
+            )
+            self.socket.settimeout(TCP.TIMEOUT)
+            log.info("Using proxy %s", hostname)
+        else:
+            self.socket = socket.socket(
+                socket.AF_INET6 if ipv6 else socket.AF_INET
+            )
+            self.socket.setblocking(False)
+
+    async def connect(self, address: tuple):
+        """Koneksi ke server & simpan address untuk reconnect"""
+        self.last_address = address
+        log.info("Connecting to %s:%s", address[0], address[1])
+
+        if self.proxy:
+            with ThreadPoolExecutor(1) as executor:
+                await self.loop.run_in_executor(executor, self.socket.connect, address)
+        else:
+            try:
+                await asyncio.wait_for(
+                    asyncio.get_event_loop().sock_connect(self.socket, address),
+                    TCP.TIMEOUT
+                )
+            except asyncio.TimeoutError:
+                raise TimeoutError("Connection timed out")
+
+        self.reader, self.writer = await asyncio.open_connection(sock=self.socket)
+        log.info("Connected to %s:%s", address[0], address[1])
+
+    async def close(self):
+        """Tutup koneksi TCP"""
+        try:
+            if self.writer is not None:
+                self.writer.close()
+                await asyncio.wait_for(self.writer.wait_closed(), TCP.TIMEOUT)
+                log.info("TCP connection closed")
+        except Exception as e:
+            log.warning("Close exception: %s %s", type(e).__name__, e)
+
+    async def send(self, data: bytes):
+        """Kirim data ke server, auto reconnect kalau writer mati"""
+        async with self.lock:
+            try:
+                if self.writer is None or self.writer.is_closing():
+                    if not self.last_address:
+                        raise OSError("No previous connection address stored, cannot reconnect")
+                    log.warning("Writer closed, reconnecting TCP socket...")
+                    await self.close()
+                    self._init_socket(self.socket.family == socket.AF_INET6)
+                    await self.connect(self.last_address)
+
+                self.writer.write(data)
+                await self.writer.drain()
+            except Exception as e:
+                log.error("Send exception: %s %s", type(e).__name__, e)
+                raise OSError(e)
+
+    async def recv(self, length: int = 0):
+        """Terima data dari server"""
+        data = b""
+        while len(data) < length:
+            try:
+                chunk = await asyncio.wait_for(
+                    self.reader.read(length - len(data)),
+                    TCP.TIMEOUT
+                )
+            except (OSError, asyncio.TimeoutError):
+                return None
+            else:
+                if chunk:
+                    data += chunk
+                else:
+                    return None
         return data

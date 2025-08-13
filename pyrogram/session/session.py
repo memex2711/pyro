@@ -374,7 +374,7 @@ class Session:
                 return await self.send(data, wait_response, timeout)
 
             return result
-
+    """
     async def invoke(
         self,
         query: TLObject,
@@ -420,3 +420,61 @@ class Session:
                 await asyncio.sleep(0.5)
 
                 return await self.invoke(query, retries - 1, timeout)
+    """
+
+    async def invoke(
+        self,
+        query: TLObject,
+        retries: int = MAX_RETRIES,
+        timeout: float = WAIT_TIMEOUT,
+        sleep_threshold: float = SLEEP_THRESHOLD
+    ):
+        try:
+            await asyncio.wait_for(self.is_started.wait(), self.WAIT_TIMEOUT)
+        except asyncio.TimeoutError:
+            pass
+
+        if isinstance(query, (raw.functions.InvokeWithoutUpdates, raw.functions.InvokeWithTakeout)):
+            inner_query = query.query
+        else:
+            inner_query = query
+
+        query_name = ".".join(inner_query.QUALNAME.split(".")[1:])
+
+        while True:
+            try:
+                return await self.send(query, timeout=timeout)
+
+            except (FloodWait, FloodPremiumWait) as e:
+                amount = e.value
+
+                if amount > sleep_threshold >= 0:
+                    raise
+
+                log.warning('[%s] Waiting for %s seconds before continuing (required by "%s")',
+                            self.client.name, amount, query_name)
+                await asyncio.sleep(amount)
+
+            except (OSError, InternalServerError, ServiceUnavailable) as e:
+                if isinstance(e, OSError) and "Writer already closed" in str(e):
+                    log.warning("[%s] Writer closed, restarting session...", self.client.name)
+                    try:
+                        await self.restart()
+                    except Exception as err:
+                        log.error("[%s] Failed to restart session: %s", self.client.name, err)
+                        raise e
+                    return await self.invoke(query, retries - 1, timeout)
+
+                if retries == 0:
+                    raise e from None
+
+                (log.warning if retries < 2 else log.info)(
+                    '[%s] Retrying "%s" due to: %s',
+                    self.client.name,
+                    query_name,
+                    str(e) or repr(e)
+                )
+
+                await asyncio.sleep(0.5)
+                return await self.invoke(query, retries - 1, timeout)
+
