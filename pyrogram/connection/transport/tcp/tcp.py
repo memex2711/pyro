@@ -191,16 +191,31 @@ class TCP:
                 await self.loop.run_in_executor(executor, self.socket.connect, address)
         else:
             try:
-                await asyncio.wait_for(
-                    self.loop.sock_connect(self.socket, address),
+                log.debug(f"Resolving hostname {address[0]}...")
+                infos = await asyncio.wait_for(
+                    self.loop.getaddrinfo(address[0], address[1], type=socket.SOCK_STREAM),
                     TCP.TIMEOUT
                 )
+                family, socktype, proto, canonname, sockaddr = infos[0]
+
+                self.socket = socket.socket(family, socktype, proto)
+                self.socket.setblocking(False)
+
+                log.debug(f"Connecting to {sockaddr}...")
+                await asyncio.wait_for(
+                    self.loop.sock_connect(self.socket, sockaddr),
+                    TCP.TIMEOUT
+                )
+
             except asyncio.TimeoutError:
-                raise TimeoutError("Connection timed out")
+                raise TimeoutError(f"Connection to {address} timed out")
+            except socket.gaierror as e:
+                raise OSError(f"DNS resolution failed for {address[0]}: {e}")
 
         self.reader, self.writer = await asyncio.open_connection(sock=self.socket)
         self._closed = False
         log.info("Connected to %s:%s", *address)
+
 
     async def close(self):
         if self._closed:
