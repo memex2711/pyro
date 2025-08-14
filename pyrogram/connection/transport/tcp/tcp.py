@@ -192,7 +192,7 @@ class TCP:
         else:
             try:
                 await asyncio.wait_for(
-                    asyncio.get_event_loop().sock_connect(self.socket, address),
+                    self.loop.sock_connect(self.socket, address),
                     TCP.TIMEOUT
                 )
             except asyncio.TimeoutError:
@@ -214,41 +214,47 @@ class TCP:
                 except Exception:
                     pass
             if self.reader:
-                self.reader.feed_eof()
+                try:
+                    self.reader.feed_eof()
+                except Exception:
+                    pass
             if self.socket:
                 try:
                     self.socket.shutdown(socket.SHUT_RDWR)
                 except Exception:
                     pass
-                self.socket.close()
-        except Exception as e:
-            log.warning("Close exception: %s %s", type(e).__name__, e)
+                try:
+                    self.socket.close()
+                except Exception:
+                    pass
+                await asyncio.sleep(0)
         finally:
             self.reader = None
             self.writer = None
-            self.socket = None    
+            self.socket = None
 
     async def _ensure_connected(self):
-        if not self.writer or self.writer.is_closing() or not self.reader:
-            if (
-                not self.last_address
-                or not isinstance(self.last_address, tuple)
-                or len(self.last_address) != 2
-            ):
-                raise OSError(f"No valid last_address stored for reconnect: {self.last_address}")
+        async with self.lock:
+            if not self.writer or self.writer.is_closing() or not self.reader:
+                if (
+                    not self.last_address
+                    or not isinstance(self.last_address, tuple)
+                    or len(self.last_address) != 2
+                ):
+                    raise OSError(f"No valid last_address stored for reconnect: {self.last_address}")
 
-            log.warning("TCP connection lost, reconnecting to %s:%s", *self.last_address)
+                log.warning("TCP connection lost, reconnecting to %s:%s", *self.last_address)
 
-            await self.close()
-            await asyncio.sleep(0.1)
+                await self.close()
+                await asyncio.sleep(0.05)
 
-            self._init_socket(self._ipv6)
+                self._init_socket(self._ipv6)
 
-            try:
-                await self.connect(self.last_address)
-            except Exception as e:
-                log.error("Reconnect failed: %s", e)
-                raise
+                try:
+                    await self.connect(self.last_address)
+                except Exception as e:
+                    log.error("Reconnect failed: %s", e)
+                    raise
 
     async def send(self, data: bytes):
         async with self.lock:
