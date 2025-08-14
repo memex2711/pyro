@@ -150,34 +150,11 @@ class TCP:
 
         self._init_socket(ipv6)
 
-    def _init_socket(self, ipv6: bool):
-        self._ipv6 = ipv6
-        if self.proxy:
-            hostname = self.proxy.get("hostname")
-            try:
-                ip_address = ipaddress.ip_address(hostname)
-            except ValueError:
-                self.socket = socks.socksocket(socket.AF_INET)
-            else:
-                if isinstance(ip_address, ipaddress.IPv6Address):
-                    self.socket = socks.socksocket(socket.AF_INET6)
-                else:
-                    self.socket = socks.socksocket(socket.AF_INET)
-
-            self.socket.set_proxy(
-                proxy_type=getattr(socks, self.proxy.get("scheme").upper()),
-                addr=hostname,
-                port=self.proxy.get("port"),
-                username=self.proxy.get("username"),
-                password=self.proxy.get("password")
-            )
-            self.socket.settimeout(TCP.TIMEOUT)
-            log.info("Using proxy %s", hostname)
-        else:
-            self.socket = socket.socket(
-                socket.AF_INET6 if ipv6 else socket.AF_INET
-            )
-            self.socket.setblocking(False)
+    def _init_socket(self, family=None):
+        if family is None:
+            family = socket.AF_INET6 if self._ipv6 else socket.AF_INET
+        self.socket = socket.socket(family, socket.SOCK_STREAM)
+        self.socket.setblocking(False)
 
     async def connect(self, address: tuple):
         if not isinstance(address, tuple) or len(address) != 2:
@@ -198,8 +175,7 @@ class TCP:
                 )
                 family, socktype, proto, canonname, sockaddr = infos[0]
 
-                self.socket = socket.socket(family, socktype, proto)
-                self.socket.setblocking(False)
+                self._init_socket(family)
 
                 log.debug(f"Connecting to {sockaddr}...")
                 await asyncio.wait_for(
@@ -215,7 +191,6 @@ class TCP:
         self.reader, self.writer = await asyncio.open_connection(sock=self.socket)
         self._closed = False
         log.info("Connected to %s:%s", *address)
-
 
     async def close(self):
         if self._closed:
@@ -263,7 +238,7 @@ class TCP:
                 await self.close()
                 await asyncio.sleep(0.05)
 
-                self._init_socket(self._ipv6)
+                self._init_socket(self.socket.family)
 
                 try:
                     await self.connect(self.last_address)
