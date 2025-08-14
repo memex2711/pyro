@@ -216,13 +216,17 @@ class TCP:
             if self.reader:
                 self.reader.feed_eof()
             if self.socket:
+                try:
+                    self.socket.shutdown(socket.SHUT_RDWR)
+                except Exception:
+                    pass
                 self.socket.close()
         except Exception as e:
             log.warning("Close exception: %s %s", type(e).__name__, e)
         finally:
             self.reader = None
             self.writer = None
-            self.socket = None
+            self.socket = None    
 
     async def _ensure_connected(self):
         if not self.writer or self.writer.is_closing() or not self.reader:
@@ -236,6 +240,8 @@ class TCP:
             log.warning("TCP connection lost, reconnecting to %s:%s", *self.last_address)
 
             await self.close()
+            await asyncio.sleep(0.1)
+
             self._init_socket(self._ipv6)
 
             try:
