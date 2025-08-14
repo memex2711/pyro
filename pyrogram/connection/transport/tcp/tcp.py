@@ -148,13 +148,40 @@ class TCP:
         self._closed = False
         self._ipv6 = ipv6
 
-        self._init_socket(ipv6)
+        self._ipv6_supported = self._check_ipv6_support()
+        if self._ipv6 and not self._ipv6_supported:
+            log.warning("IPv6 requested but not supported, falling back to IPv4")
+            self._ipv6 = False
+
+        self._init_socket()
+
+    def _check_ipv6_support(self):
+        """Check if IPv6 is supported on this system"""
+        try:
+            test_socket = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
+            test_socket.close()
+            return True
+        except OSError:
+            return False
 
     def _init_socket(self, family=None):
         if family is None:
             family = socket.AF_INET6 if self._ipv6 else socket.AF_INET
-        self.socket = socket.socket(family, socket.SOCK_STREAM)
-        self.socket.setblocking(False)
+        
+        if family == socket.AF_INET6 and not self._ipv6_supported:
+            family = socket.AF_INET
+            
+        try:
+            self.socket = socket.socket(family, socket.SOCK_STREAM)
+            self.socket.setblocking(False)
+        except OSError as e:
+            if family == socket.AF_INET6:
+                log.warning(f"IPv6 socket creation failed: {e}, falling back to IPv4")
+                self._ipv6 = False
+                self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                self.socket.setblocking(False)
+            else:
+                raise
 
     async def connect(self, address: tuple):
         if not isinstance(address, tuple) or len(address) != 2:
@@ -169,19 +196,52 @@ class TCP:
         else:
             try:
                 log.debug(f"Resolving hostname {address[0]}...")
+                
+                family_filter = socket.AF_UNSPEC 
+                if not self._ipv6_supported:
+                    family_filter = socket.AF_INET
+                
                 infos = await asyncio.wait_for(
-                    self.loop.getaddrinfo(address[0], address[1], type=socket.SOCK_STREAM),
+                    self.loop.getaddrinfo(
+                        address[0], 
+                        address[1], 
+                        family=family_filter,
+                        type=socket.SOCK_STREAM
+                    ),
                     TCP.TIMEOUT
                 )
-                family, socktype, proto, canonname, sockaddr = infos[0]
-
-                self._init_socket(family)
-
-                log.debug(f"Connecting to {sockaddr}...")
-                await asyncio.wait_for(
-                    self.loop.sock_connect(self.socket, sockaddr),
-                    TCP.TIMEOUT
-                )
+                
+                connected = False
+                last_error = None
+                
+                for family, socktype, proto, canonname, sockaddr in infos:
+                    if family == socket.AF_INET6 and not self._ipv6_supported:
+                        continue
+                        
+                    try:
+                        if self.socket:
+                            try:
+                                self.socket.close()
+                            except:
+                                pass
+                        
+                        self._init_socket(family)
+                        
+                        log.debug(f"Trying to connect to {sockaddr} (family: {family})...")
+                        await asyncio.wait_for(
+                            self.loop.sock_connect(self.socket, sockaddr),
+                            TCP.TIMEOUT
+                        )
+                        connected = True
+                        break
+                        
+                    except Exception as e:
+                        last_error = e
+                        log.debug(f"Connection attempt to {sockaddr} failed: {e}")
+                        continue
+                
+                if not connected:
+                    raise last_error or OSError("All connection attempts failed")
 
             except asyncio.TimeoutError:
                 raise TimeoutError(f"Connection to {address} timed out")
@@ -237,8 +297,6 @@ class TCP:
 
                 await self.close()
                 await asyncio.sleep(0.05)
-
-                self._init_socket(self.socket.family)
 
                 try:
                     await self.connect(self.last_address)
