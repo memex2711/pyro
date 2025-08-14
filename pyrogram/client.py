@@ -620,7 +620,8 @@ class Client(Methods):
         await self.storage.update_peers(parsed_peers)
 
         return is_min
-
+    
+    """
     async def handle_updates(self, updates):
         self.last_update_time = datetime.now()
 
@@ -702,6 +703,129 @@ class Client(Methods):
             else:
                 if diff.other_updates:  # The other_updates list can be empty
                     self.dispatcher.updates_queue.put_nowait((diff.other_updates[0], {}, {}))
+        elif isinstance(updates, raw.types.UpdateShort):
+            self.dispatcher.updates_queue.put_nowait((updates.update, {}, {}))
+        elif isinstance(updates, raw.types.UpdatesTooLong):
+            log.info(updates)
+    """
+
+    async def handle_updates(self, updates):
+        self.last_update_time = datetime.now()
+
+        if isinstance(updates, (raw.types.Updates, raw.types.UpdatesCombined)):
+            is_min = any((
+                await self.fetch_peers(updates.users),
+                await self.fetch_peers(updates.chats),
+            ))
+
+            users = {u.id: u for u in updates.users}
+            chats = {c.id: c for c in updates.chats}
+
+            for update in updates.updates:
+                channel_id = getattr(
+                    getattr(
+                        getattr(
+                            update, "message", None
+                        ), "peer_id", None
+                    ), "channel_id", None
+                ) or getattr(update, "channel_id", None)
+
+                pts = getattr(update, "pts", None)
+                pts_count = getattr(update, "pts_count", None)
+
+                if isinstance(update, raw.types.UpdateChannelTooLong):
+                    log.info(update)
+
+                if isinstance(update, raw.types.UpdateNewChannelMessage) and is_min:
+                    message = update.message
+
+                    if not isinstance(message, raw.types.MessageEmpty):
+                        try:
+                            # Check if client is still connected before invoke
+                            if not self.is_connected:
+                                log.warning(f"[{self.me.id}] Client disconnected, skipping invoke")
+                                continue
+                                
+                            diff = await self.invoke(
+                                raw.functions.updates.GetChannelDifference(
+                                    channel=await self.resolve_peer(utils.get_channel_id(channel_id)),
+                                    filter=raw.types.ChannelMessagesFilter(
+                                        ranges=[raw.types.MessageRange(
+                                            min_id=update.message.id,
+                                            max_id=update.message.id
+                                        )]
+                                    ),
+                                    pts=pts - pts_count,
+                                    limit=pts
+                                )
+                            )
+                        except ChannelPrivate:
+                            pass
+                        except PersistentTimestampInvalid:
+                            log.warning(f"[{self.me.id}] PersistentTimestampInvalid detected. Resetting session...")
+                            await self.stop()
+                            await asyncio.sleep(3)
+                            await self.start()
+                            return
+                        except (OSError, ConnectionError) as e:
+                            # Handle connection errors
+                            if "Writer already closed" in str(e) or "Connection lost" in str(e):
+                                log.warning(f"[{self.me.id}] Connection lost during invoke: {e}")
+                                # Don't restart here, let the main loop handle it
+                                return
+                            else:
+                                log.error(f"[{self.me.id}] OSError in handle_updates: {e}")
+                                raise
+                        except Exception as e:
+                            log.error(f"[{self.me.id}] Unexpected error in handle_updates: {e}")
+                            # Continue processing other updates instead of crashing
+                            continue
+                        else:
+                            if not isinstance(diff, raw.types.updates.ChannelDifferenceEmpty):
+                                users.update({u.id: u for u in diff.users})
+                                chats.update({c.id: c for c in diff.chats})
+
+                self.dispatcher.updates_queue.put_nowait((update, users, chats))
+                
+        elif isinstance(updates, (raw.types.UpdateShortMessage, raw.types.UpdateShortChatMessage)):
+            try:
+                # Check connection before invoke
+                if not self.is_connected:
+                    log.warning(f"[{self.me.id}] Client disconnected, skipping GetDifference")
+                    return
+                    
+                diff = await self.invoke(
+                    raw.functions.updates.GetDifference(
+                        pts=updates.pts - updates.pts_count,
+                        date=updates.date,
+                        qts=-1
+                    )
+                )
+            except (OSError, ConnectionError) as e:
+                if "Writer already closed" in str(e):
+                    log.warning(f"[{self.me.id}] Connection lost during GetDifference: {e}")
+                    return
+                else:
+                    log.error(f"[{self.me.id}] Error in GetDifference: {e}")
+                    raise
+            except Exception as e:
+                log.error(f"[{self.me.id}] Unexpected error in GetDifference: {e}")
+                return
+
+            if diff.new_messages:
+                self.dispatcher.updates_queue.put_nowait((
+                    raw.types.UpdateNewMessage(
+                        message=diff.new_messages[0],
+                        pts=updates.pts,
+                        pts_count=updates.pts_count
+                    ),
+                    {u.id: u for u in diff.users},
+                    {c.id: c for c in diff.chats}
+                ))
+            else:
+                if diff.other_updates:  # The other_updates list can be empty
+                    self.dispatcher.updates_queue.put_nowait((diff.other_updates[0], {}, {}))
+                    
         elif isinstance(updates, raw.types.UpdateShort):
             self.dispatcher.updates_queue.put_nowait((updates.update, {}, {}))
         elif isinstance(updates, raw.types.UpdatesTooLong):
