@@ -137,7 +137,7 @@ class Session:
                 break
 
         self.is_started.set()
-        self._is_restarting = False  # Reset restart flag
+        self._is_restarting = False
 
         log.info("Session started")
 
@@ -166,7 +166,6 @@ class Session:
 
         if self.recv_task:
             try:
-                # Cancel recv task first to prevent race condition
                 if not self.recv_task.done():
                     self.recv_task.cancel()
                     try:
@@ -185,11 +184,9 @@ class Session:
         log.info("Session stopped")
 
     async def restart(self):
-        # Use lock to prevent concurrent restarts
         async with self._restart_lock:
             if self._is_restarting:
                 log.warning("Session restart already in progress, waiting...")
-                # Wait for the current restart to complete
                 while self._is_restarting:
                     await asyncio.sleep(0.1)
                 return
@@ -199,13 +196,13 @@ class Session:
             try:
                 log.info("Restarting session...")
                 await self.stop()
-                await asyncio.sleep(1)  # Give time for cleanup
+                await asyncio.sleep(1)
                 await self.start()
                 log.info("Session restart completed")
             except Exception as e:
                 log.error("Session restart failed: %s", e)
                 self._is_restarting = False
-                raise
+                return
 
     async def handle_packet(self, packet):
         try:
@@ -218,7 +215,7 @@ class Session:
                 self.auth_key_id
             )
         except ValueError:
-            if not self._is_restarting:  # Only restart if not already restarting
+            if not self._is_restarting:
                 self.loop.create_task(self.restart())
             return
 
@@ -418,11 +415,10 @@ class Session:
             await asyncio.wait_for(self.is_started.wait(), self.WAIT_TIMEOUT)
         except asyncio.TimeoutError:
             if self._is_restarting:
-                # If restarting, wait a bit more
                 try:
                     await asyncio.wait_for(self.is_started.wait(), self.WAIT_TIMEOUT * 2)
                 except asyncio.TimeoutError:
-                    raise TimeoutError("Session failed to start after restart")
+                    return
 
         if isinstance(query, (raw.functions.InvokeWithoutUpdates, raw.functions.InvokeWithTakeout)):
             inner_query = query.query
@@ -449,13 +445,10 @@ class Session:
                 if isinstance(e, OSError) and "Writer already closed" in str(e):
                     log.warning("[%s] Writer closed, attempting restart...", self.client.name)
                     try:
-                        # Don't restart if already restarting
                         if not self._is_restarting:
                             await self.restart()
-                            # Wait for session to be ready again
                             await asyncio.wait_for(self.is_started.wait(), self.WAIT_TIMEOUT)
                         else:
-                            # Wait for current restart to complete
                             while self._is_restarting:
                                 await asyncio.sleep(0.1)
                             await asyncio.wait_for(self.is_started.wait(), self.WAIT_TIMEOUT)
@@ -465,7 +458,6 @@ class Session:
                             raise e
                         return await self.invoke(query, retries - 1, timeout)
                     
-                    # After successful restart, retry with one less retry
                     return await self.invoke(query, retries - 1, timeout)
 
                 if retries == 0:
