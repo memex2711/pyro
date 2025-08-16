@@ -751,7 +751,8 @@ class Message(Object, Update):
                     except MessageIdsEmpty:
                         pass
 
-            client.message_cache[(parsed_message.chat.id, parsed_message.id)] = parsed_message
+            if parsed_message.chat is not None:
+                client.message_cache[(parsed_message.chat.id, parsed_message.id)] = parsed_message
 
             if message.reply_to:
                 if message.reply_to.forum_topic:
@@ -1070,7 +1071,7 @@ class Message(Object, Update):
                         else:
                             parsed_message.reply_to_story = reply_to_story
 
-            if not parsed_message.poll:  # Do not cache poll messages
+            if not parsed_message.poll and parsed_message.chat is not None:
                 client.message_cache[(parsed_message.chat.id, parsed_message.id)] = parsed_message
 
             return parsed_message
