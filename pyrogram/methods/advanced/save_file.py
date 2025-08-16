@@ -30,6 +30,7 @@ from typing import Union, BinaryIO, Callable
 import pyrogram
 from pyrogram import StopTransmission
 from pyrogram import raw
+from pyrogram.errors import FloodWait, FloodPremiumWait
 from pyrogram.session import Session
 
 log = logging.getLogger(__name__)
@@ -106,6 +107,8 @@ class SaveFile:
                         return
 
                     try:
+                        await session.invoke(data)
+                    except (FloodWait, FloodPremiumWait) as e:
                         await session.invoke(data)
                     except Exception as e:
                         log.exception(e)
