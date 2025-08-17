@@ -1,3 +1,21 @@
+#  Pyrogram - Telegram MTProto API Client Library for Python
+#  Copyright (C) 2017-present Dan <https://github.com/delivrance>
+#
+#  This file is part of Pyrogram.
+#
+#  Pyrogram is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU Lesser General Public License as published
+#  by the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  Pyrogram is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU Lesser General Public License for more details.
+#
+#  You should have received a copy of the GNU Lesser General Public License
+#  along with Pyrogram.  If not, see <http://www.gnu.org/licenses/>.
+
 import asyncio
 import bisect
 import logging
@@ -78,10 +96,6 @@ class Session:
         self.recv_task = None
 
         self.is_started = asyncio.Event()
-        
-        # Add restart lock to prevent concurrent restarts
-        self._restart_lock = asyncio.Lock()
-        self._is_restarting = False
 
         self.loop = asyncio.get_event_loop()
 
@@ -137,7 +151,6 @@ class Session:
                 break
 
         self.is_started.set()
-        self._is_restarting = False
 
         log.info("Session started")
 
@@ -149,31 +162,14 @@ class Session:
         self.ping_task_event.set()
 
         if self.ping_task is not None:
-            try:
-                await asyncio.wait_for(self.ping_task, timeout=5.0)
-            except asyncio.TimeoutError:
-                log.warning("Ping task didn't stop gracefully, cancelling...")
-                self.ping_task.cancel()
-                try:
-                    await self.ping_task
-                except asyncio.CancelledError:
-                    pass
+            await self.ping_task
 
         self.ping_task_event.clear()
 
-        if self.connection:
-            await self.connection.close()
+        await self.connection.close()
 
         if self.recv_task:
-            try:
-                if not self.recv_task.done():
-                    self.recv_task.cancel()
-                    try:
-                        await asyncio.wait_for(self.recv_task, timeout=3.0)
-                    except (asyncio.CancelledError, asyncio.TimeoutError):
-                        pass
-            except Exception as e:
-                log.warning("Error stopping recv_task: %s", e)
+            await self.recv_task
 
         if not self.is_media and callable(self.client.disconnect_handler):
             try:
@@ -184,25 +180,8 @@ class Session:
         log.info("Session stopped")
 
     async def restart(self):
-        async with self._restart_lock:
-            if self._is_restarting:
-                log.warning("Session restart already in progress, waiting...")
-                while self._is_restarting:
-                    await asyncio.sleep(0.1)
-                return
-                
-            self._is_restarting = True
-            
-            try:
-                log.info("Restarting session...")
-                await self.stop()
-                await asyncio.sleep(1)
-                await self.start()
-                log.info("Session restart completed")
-            except Exception as e:
-                log.error("Session restart failed: %s", e)
-                self._is_restarting = False
-                return
+        await self.stop()
+        await self.start()
 
     async def handle_packet(self, packet):
         try:
@@ -215,8 +194,7 @@ class Session:
                 self.auth_key_id
             )
         except ValueError:
-            if not self._is_restarting:
-                self.loop.create_task(self.restart())
+            self.loop.create_task(self.restart())
             return
 
         messages = (
@@ -320,14 +298,7 @@ class Session:
         log.info("NetworkTask started")
 
         while True:
-            try:
-                packet = await self.connection.recv()
-            except Exception as e:
-                if self._is_restarting:
-                    log.info("NetworkTask stopping due to restart")
-                    break
-                log.error("Error in recv_worker: %s", e)
-                break
+            packet = await self.connection.recv()
 
             if packet is None or len(packet) == 4:
                 if packet:
@@ -344,7 +315,7 @@ class Session:
                         error_code, Session.TRANSPORT_ERRORS.get(error_code, "unknown error")
                     )
 
-                if self.is_started.is_set() and not self._is_restarting:
+                if self.is_started.is_set():
                     self.loop.create_task(self.restart())
 
                 break
@@ -403,6 +374,53 @@ class Session:
                 return await self.send(data, wait_response, timeout)
 
             return result
+    """
+    async def invoke(
+        self,
+        query: TLObject,
+        retries: int = MAX_RETRIES,
+        timeout: float = WAIT_TIMEOUT,
+        sleep_threshold: float = SLEEP_THRESHOLD
+    ):
+        try:
+            await asyncio.wait_for(self.is_started.wait(), self.WAIT_TIMEOUT)
+        except asyncio.TimeoutError:
+            pass
+
+        if isinstance(query, (raw.functions.InvokeWithoutUpdates, raw.functions.InvokeWithTakeout)):
+            inner_query = query.query
+        else:
+            inner_query = query
+
+        query_name = ".".join(inner_query.QUALNAME.split(".")[1:])
+
+        while True:
+            try:
+                return await self.send(query, timeout=timeout)
+            except (FloodWait, FloodPremiumWait) as e:
+                amount = e.value
+
+                if amount > sleep_threshold >= 0:
+                    raise
+
+                log.warning('[%s] Waiting for %s seconds before continuing (required by "%s")',
+                            self.client.name, amount, query_name)
+
+                await asyncio.sleep(amount)
+            except (OSError, InternalServerError, ServiceUnavailable) as e:
+                if retries == 0:
+                    raise e from None
+
+                (log.warning if retries < 2 else log.info)(
+                    '[%s] Retrying "%s" due to: %s',
+                    Session.MAX_RETRIES - retries + 1,
+                    query_name, str(e) or repr(e)
+                )
+
+                await asyncio.sleep(0.5)
+
+                return await self.invoke(query, retries - 1, timeout)
+    """
 
     async def invoke(
         self,
@@ -414,11 +432,7 @@ class Session:
         try:
             await asyncio.wait_for(self.is_started.wait(), self.WAIT_TIMEOUT)
         except asyncio.TimeoutError:
-            if self._is_restarting:
-                try:
-                    await asyncio.wait_for(self.is_started.wait(), self.WAIT_TIMEOUT * 2)
-                except asyncio.TimeoutError:
-                    return
+            pass
 
         if isinstance(query, (raw.functions.InvokeWithoutUpdates, raw.functions.InvokeWithTakeout)):
             inner_query = query.query
@@ -443,21 +457,12 @@ class Session:
 
             except (OSError, InternalServerError, ServiceUnavailable) as e:
                 if isinstance(e, OSError) and "Writer already closed" in str(e):
-                    log.warning("[%s] Writer closed, attempting restart...", self.client.name)
+                    log.warning("[%s] Writer closed, restarting session...", self.client.name)
                     try:
-                        if not self._is_restarting:
-                            await self.restart()
-                            await asyncio.wait_for(self.is_started.wait(), self.WAIT_TIMEOUT)
-                        else:
-                            while self._is_restarting:
-                                await asyncio.sleep(0.1)
-                            await asyncio.wait_for(self.is_started.wait(), self.WAIT_TIMEOUT)
+                        await self.restart()
                     except Exception as err:
                         log.error("[%s] Failed to restart session: %s", self.client.name, err)
-                        if retries == 0:
-                            raise e
-                        return await self.invoke(query, retries - 1, timeout)
-                    
+                        raise e
                     return await self.invoke(query, retries - 1, timeout)
 
                 if retries == 0:
@@ -472,3 +477,4 @@ class Session:
 
                 await asyncio.sleep(0.5)
                 return await self.invoke(query, retries - 1, timeout)
+
