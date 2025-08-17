@@ -710,41 +710,6 @@ class Client(Methods):
             log.info(updates)
     """
 
-    async def _safe_restart(self):
-        if getattr(self, 'is_restarting', False):
-            log.warning(f"[{self.me.id}] Restart already in progress")
-            return False
-            
-        self.is_restarting = True
-        max_retries = 3
-        
-        for attempt in range(max_retries):
-            try:
-                log.info(f"[{self.me.id}] Attempting session restart (attempt {attempt + 1}/{max_retries})")
-                
-                try:
-                    await asyncio.wait_for(self.stop(), timeout=30)
-                except asyncio.TimeoutError:
-                    log.warning(f"[{self.me.id}] Stop timeout, forcing disconnect")
-                    
-                await asyncio.sleep(5 + attempt * 2)                
-                await asyncio.wait_for(self.start(), timeout=60)
-                
-                log.info(f"[{self.me.id}] Session successfully restarted")
-                self.is_restarting = False
-                return True
-                
-            except Exception as e:
-                log.error(f"[{self.me.id}] Restart attempt {attempt + 1} failed: {e}")
-                if attempt == max_retries - 1:
-                    log.error(f"[{self.me.id}] All restart attempts failed")
-                    self.is_restarting = False
-                    return False
-                await asyncio.sleep(10)
-        
-        self.is_restarting = False
-        return False
-
     async def handle_updates(self, updates):
         if getattr(self, 'is_restarting', False):
             log.debug(f"[{self.me.id}] Skipping updates during restart")
@@ -800,10 +765,7 @@ class Client(Methods):
                         except ChannelPrivate:
                             pass
                         except PersistentTimestampInvalid:
-                            if not getattr(self, 'is_restarting', False):
-                                log.warning(f"[{self.me.id}] PersistentTimestampInvalid detected. Resetting session...")
-                                await self._safe_restart()
-                                return
+                            return
                         except (OSError, ConnectionError) as e:
                             log.warning(f"[{self.me.id}] Connection lost during invoke: {e}")
                             return
