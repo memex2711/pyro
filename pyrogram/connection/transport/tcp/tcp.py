@@ -16,8 +16,6 @@
 #  You should have received a copy of the GNU Lesser General Public License
 #  along with Pyrogram.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
 import asyncio
 import ipaddress
 import logging
@@ -82,7 +80,7 @@ class TCP:
         else:
             try:
                 await asyncio.wait_for(asyncio.get_event_loop().sock_connect(self.socket, address), TCP.TIMEOUT)
-            except asyncio.TimeoutError:
+            except asyncio.TimeoutError:  # Re-raise as TimeoutError. asyncio.TimeoutError is deprecated in 3.11
                 raise TimeoutError("Connection timed out")
 
         self.reader, self.writer = await asyncio.open_connection(sock=self.socket)
@@ -99,8 +97,6 @@ class TCP:
         async with self.lock:
             try:
                 if self.writer is not None:
-                    if self.writer.is_closing():
-                        raise OSError("Writer already closed")
                     self.writer.write(data)
                     await self.writer.drain()
             except Exception as e:

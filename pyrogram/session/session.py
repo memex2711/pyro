@@ -28,8 +28,8 @@ from pyrogram import raw
 from pyrogram.connection import Connection
 from pyrogram.crypto import mtproto
 from pyrogram.errors import (
-    RPCError, InternalServerError, AuthKeyDuplicated, FloodWait, FloodPremiumWait, ServiceUnavailable, BadMsgNotification,
-    SecurityCheckMismatch, Unauthorized
+    RPCError, InternalServerError, AuthKeyDuplicated, FloodWait, ServiceUnavailable, BadMsgNotification,
+    SecurityCheckMismatch
 )
 from pyrogram.raw.all import layer
 from pyrogram.raw.core import TLObject, MsgContainer, Int, FutureSalts
@@ -184,18 +184,14 @@ class Session:
         await self.start()
 
     async def handle_packet(self, packet):
-        try:
-            data = await self.loop.run_in_executor(
-                pyrogram.crypto_executor,
-                mtproto.unpack,
-                BytesIO(packet),
-                self.session_id,
-                self.auth_key,
-                self.auth_key_id
-            )
-        except ValueError:
-            self.loop.create_task(self.restart())
-            return
+        data = await self.loop.run_in_executor(
+            pyrogram.crypto_executor,
+            mtproto.unpack,
+            BytesIO(packet),
+            self.session_id,
+            self.auth_key,
+            self.auth_key_id
+        )
 
         messages = (
             data.body.messages
@@ -304,12 +300,6 @@ class Session:
                 if packet:
                     error_code = -Int.read(BytesIO(packet))
 
-                    if error_code == 404:
-                        raise Unauthorized(
-                            "Auth key not found in the system. You must delete your session file "
-                            "and log in again with your phone number or bot token."
-                        )
-
                     log.warning(
                         "Server sent transport error: %s (%s)",
                         error_code, Session.TRANSPORT_ERRORS.get(error_code, "unknown error")
@@ -374,7 +364,7 @@ class Session:
                 return await self.send(data, wait_response, timeout)
 
             return result
-    """
+
     async def invoke(
         self,
         query: TLObject,
@@ -397,7 +387,7 @@ class Session:
         while True:
             try:
                 return await self.send(query, timeout=timeout)
-            except (FloodWait, FloodPremiumWait) as e:
+            except FloodWait as e:
                 amount = e.value
 
                 if amount > sleep_threshold >= 0:
@@ -420,61 +410,3 @@ class Session:
                 await asyncio.sleep(0.5)
 
                 return await self.invoke(query, retries - 1, timeout)
-    """
-
-    async def invoke(
-        self,
-        query: TLObject,
-        retries: int = MAX_RETRIES,
-        timeout: float = WAIT_TIMEOUT,
-        sleep_threshold: float = SLEEP_THRESHOLD
-    ):
-        try:
-            await asyncio.wait_for(self.is_started.wait(), self.WAIT_TIMEOUT)
-        except asyncio.TimeoutError:
-            pass
-
-        if isinstance(query, (raw.functions.InvokeWithoutUpdates, raw.functions.InvokeWithTakeout)):
-            inner_query = query.query
-        else:
-            inner_query = query
-
-        query_name = ".".join(inner_query.QUALNAME.split(".")[1:])
-
-        while True:
-            try:
-                return await self.send(query, timeout=timeout)
-
-            except (FloodWait, FloodPremiumWait) as e:
-                amount = e.value
-
-                if amount > sleep_threshold >= 0:
-                    raise
-
-                log.warning('[%s] Waiting for %s seconds before continuing (required by "%s")',
-                            self.client.name, amount, query_name)
-                await asyncio.sleep(amount)
-
-            except (OSError, InternalServerError, ServiceUnavailable) as e:
-                if isinstance(e, OSError) and "Writer already closed" in str(e):
-                    log.warning("[%s] Writer closed, restarting session...", self.client.name)
-                    try:
-                        await self.restart()
-                    except Exception as err:
-                        log.error("[%s] Failed to restart session: %s", self.client.name, err)
-                        raise e
-                    return await self.invoke(query, retries - 1, timeout)
-
-                if retries == 0:
-                    raise e from None
-
-                (log.warning if retries < 2 else log.info)(
-                    '[%s] Retrying "%s" due to: %s',
-                    self.client.name,
-                    query_name,
-                    str(e) or repr(e)
-                )
-
-                await asyncio.sleep(0.5)
-                return await self.invoke(query, retries - 1, timeout)
-
