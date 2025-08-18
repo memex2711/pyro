@@ -309,7 +309,7 @@ class Client(Methods):
 
         self.listeners = {listener_type: [] for listener_type in ListenerTypes}
 
-        #self.loop = asyncio.get_event_loop()
+        self.loop = asyncio.get_event_loop()
 
     def __enter__(self):
         return self.start()
@@ -320,14 +320,6 @@ class Client(Methods):
         except ConnectionError:
             pass
 
-    @functools.cached_property
-    def loop(self):
-        try:
-            return asyncio.get_running_loop()
-        except RuntimeError:
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            return loop
 
     async def __aenter__(self):
         return await self.start()
