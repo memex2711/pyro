@@ -22,7 +22,7 @@ import asyncio
 import logging
 from typing import TYPE_CHECKING
 
-from pyogram.session.internals import DataCenter
+from pyrogram.session.internals import DataCenter
 
 from .transport import TCP, TCPAbridged
 

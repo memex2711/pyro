@@ -28,10 +28,10 @@ from hashlib import sha1
 from io import BytesIO
 from typing import ClassVar
 
-import pyogram
-from pyogram import raw
-from pyogram.crypto import mtproto
-from pyogram.errors import (
+import pyrogram
+from pyrogram import raw
+from pyrogram.crypto import mtproto
+from pyrogram.errors import (
     AuthKeyDuplicated,
     BadMsgNotification,
     FloodWait,
@@ -40,11 +40,11 @@ from pyogram.errors import (
     SecurityCheckMismatch,
     ServiceUnavailable,
 )
-from pyogram.raw.all import layer
-from pyogram.raw.core import FutureSalts, Int, MsgContainer, TLObject
+from pyrogram.raw.all import layer
+from pyrogram.raw.core import FutureSalts, Int, MsgContainer, TLObject
 
 from .internals import MsgFactory, MsgId
-from pyogram.connection import Connection
+from pyrogram.connection import Connection
 
 log = logging.getLogger(__name__)
 
@@ -73,7 +73,7 @@ class Session:
 
     def __init__(
         self,
-        client: pyogram.Client,
+        client: pyrogram.Client,
         dc_id: int,
         auth_key: bytes,
         test_mode: bool,
@@ -215,7 +215,7 @@ class Session:
 
     async def handle_packet(self, packet):
         data = await self.client.loop.run_in_executor(
-            pyogram.crypto_executor,
+            pyrogram.crypto_executor,
             mtproto.unpack,
             BytesIO(packet),
             self.session_id,
@@ -255,7 +255,7 @@ class Session:
                             "The msg_id belongs to over 30 seconds in the future. "
                             "This usually means your system clock is ahead of the actual time. "
                             "Please synchronize your system time with an NTP server to avoid "
-                            "this error in pyogram."
+                            "this error in pyrogram."
                         )
 
                     if time_diff < -300:
@@ -263,7 +263,7 @@ class Session:
                             "The msg_id belongs to over 300 seconds in the past. "
                             "This usually means your system clock is behind the actual time. "
                             "Please synchronize your system time with an NTP server to avoid "
-                            "this error in pyogram."
+                            "this error in pyrogram."
                         )
             except SecurityCheckMismatch as e:
                 log.info("Discarding packet: %s", e)
@@ -362,7 +362,7 @@ class Session:
         log.debug("Sent: %s", message)
 
         payload = await self.client.loop.run_in_executor(
-            pyogram.crypto_executor,
+            pyrogram.crypto_executor,
             mtproto.pack,
             message,
             self.salt,
