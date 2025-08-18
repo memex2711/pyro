@@ -20,7 +20,7 @@ from datetime import datetime
 from typing import Union, List, Optional, AsyncGenerator, BinaryIO
 
 import pyrogram
-from pyrogram import raw, enums
+from pyrogram import raw, enums, filters
 from pyrogram import types
 from pyrogram import utils
 from ..object import Object
@@ -461,7 +461,7 @@ class Chat(Object):
         
     def listen(
         self,
-        filters: pyrogram.filters | None = None,
+        filters: filters.Filter | None = None,
         listener_type: ListenerTypes = ListenerTypes.MESSAGE,
         timeout: int | None = None,
         unallowed_click_alert: bool = True,
@@ -484,7 +484,7 @@ class Chat(Object):
                 await chat.listen()
 
         Parameters:
-            filters (``Optional[pyrogram.filters]``):
+            filters (``Optional[filters.Filter]``):
                 A filter to check if the listener should be fulfilled.
 
             listener_type (``ListenerTypes``):
@@ -522,7 +522,7 @@ class Chat(Object):
     def ask(
         self,
         text: str,
-        filters: pyrogram.filters | None = None,
+        filters: filters.Filter | None = None,
         listener_type: ListenerTypes = ListenerTypes.MESSAGE,
         timeout: int | None = None,
         unallowed_click_alert: bool = True,
@@ -551,7 +551,7 @@ class Chat(Object):
             text (``str``):
                 The text to send.
 
-            filters (``Optional[pyrogram.filters]``):
+            filters (``Optional[filters.Filter]``):
                 Same as :meth:`pyrogram.Client.listen`.
 
             listener_type (``ListenerTypes``):
