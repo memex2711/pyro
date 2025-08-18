@@ -21,7 +21,8 @@ from datetime import datetime
 from typing import List, Optional
 
 import pyrogram
-from pyrogram import enums, utils, filters, raw, types
+from pyrogram import enums, utils, raw, types
+from pyrogram.filters import Filter
 from ..object import Object
 from ..update import Update
 from pyrogram.types.pyromod import ListenerTypes
@@ -347,7 +348,7 @@ class User(Object, Update):
     
     def listen(
         self,
-        filters: filters.Filter | None = None,
+        filters: Filter | None = None,
         listener_type: ListenerTypes = ListenerTypes.MESSAGE,
         timeout: int | None = None,
         unallowed_click_alert: bool = True,
@@ -408,7 +409,7 @@ class User(Object, Update):
     def ask(
         self,
         text: str,
-        filters: filters.Filter | None = None,
+        filters: Filter | None = None,
         listener_type: ListenerTypes = ListenerTypes.MESSAGE,
         timeout: int | None = None,
         unallowed_click_alert: bool = True,

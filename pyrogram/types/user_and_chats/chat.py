@@ -20,9 +20,8 @@ from datetime import datetime
 from typing import Union, List, Optional, AsyncGenerator, BinaryIO
 
 import pyrogram
-from pyrogram import raw, enums, filters
-from pyrogram import types
-from pyrogram import utils
+from pyrogram import raw, enums, types, utils
+from pyrogram.filters import Filter
 from ..object import Object
 from pyrogram.types import ListenerTypes
 
@@ -461,7 +460,7 @@ class Chat(Object):
         
     def listen(
         self,
-        filters: filters.Filter | None = None,
+        filters: Filter | None = None,
         listener_type: ListenerTypes = ListenerTypes.MESSAGE,
         timeout: int | None = None,
         unallowed_click_alert: bool = True,
@@ -522,7 +521,7 @@ class Chat(Object):
     def ask(
         self,
         text: str,
-        filters: filters.Filter | None = None,
+        filters: Filter | None = None,
         listener_type: ListenerTypes = ListenerTypes.MESSAGE,
         timeout: int | None = None,
         unallowed_click_alert: bool = True,

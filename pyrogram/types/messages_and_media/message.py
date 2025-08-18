@@ -23,10 +23,9 @@ from functools import partial
 from typing import List, Match, Union, BinaryIO, Optional, Callable
 
 import pyrogram
-from pyrogram import raw, enums, filters
-from pyrogram import types
+from pyrogram import raw, enums, types, utils
+from pyrogram.filters import Filter
 from pyrogram.types.pyromod import ListenerTypes
-from pyrogram import utils
 from pyrogram.errors import MessageIdsEmpty, PeerIdInvalid, ChannelPrivate, FloodWait, FloodPremiumWait
 from pyrogram.parser import utils as parser_utils, Parser
 from ..object import Object
@@ -1118,7 +1117,7 @@ class Message(Object, Update):
         
     def listen(
         self,
-        filters: filters.Filter | None = None,
+        filters: Filter | None = None,
         listener_type: ListenerTypes = ListenerTypes.MESSAGE,
         timeout: int | None = None,
         unallowed_click_alert: bool = True,
@@ -1179,7 +1178,7 @@ class Message(Object, Update):
     def ask(
         self,
         text: str,
-        filters: filters.Filter | None = None,
+        filters: Filter | None = None,
         listener_type: ListenerTypes = ListenerTypes.MESSAGE,
         timeout: int | None = None,
         unallowed_click_alert: bool = True,
