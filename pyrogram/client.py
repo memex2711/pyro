@@ -54,6 +54,7 @@ from pyrogram.methods import Methods
 from pyrogram.session import Auth, Session
 from pyrogram.storage import FileStorage, MemoryStorage
 from pyrogram.types import User, TermsOfService, Message, CallbackQuery
+from pyrogram.types.pyromod import ListenerTypes
 from typing import Optional, Union    
 from pyrogram.utils import ainput
 from .dispatcher import Dispatcher
@@ -305,6 +306,8 @@ class Client(Methods):
         self.updates_watchdog_task = None
         self.updates_watchdog_event = asyncio.Event()
         self.last_update_time = datetime.now()
+
+        self.listeners = {listener_type: [] for listener_type in ListenerTypes}
 
     def __enter__(self):
         return self.start()
