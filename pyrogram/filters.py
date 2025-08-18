@@ -16,9 +16,12 @@
 #  You should have received a copy of the GNU Lesser General Public License
 #  along with Pyrogram.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import annotations
+
 import inspect
 import re
 from typing import Callable, Union, List, Pattern
+from collections.abc import Awaitable
 
 import pyrogram
 from pyrogram import enums
@@ -26,16 +29,21 @@ from pyrogram.types import Message, CallbackQuery, InlineQuery, InlineKeyboardMa
 
 
 class Filter:
-    async def __call__(self, client: pyrogram.Client, update: Update):
+    commands: set[str]
+    prefixes: set[str]
+    case_sensitive: bool
+    p: Pattern
+
+    async def __call__(self, client: pyrogram.Client, update: Update) -> Awaitable[bool]:
         raise NotImplementedError
 
-    def __invert__(self):
+    def __invert__(self) -> InvertFilter:
         return InvertFilter(self)
 
-    def __and__(self, other):
+    def __and__(self, other: Filter) -> AndFilter:
         return AndFilter(self, other)
 
-    def __or__(self, other):
+    def __or__(self, other: Filter) -> OrFilter:
         return OrFilter(self, other)
 
 
