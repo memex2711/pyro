@@ -3,7 +3,7 @@ name: PyPi package release
 on:
   push:
     branches:
-      - dev
+      - beta
 
 permissions:
   contents: write
