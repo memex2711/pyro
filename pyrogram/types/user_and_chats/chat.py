@@ -22,7 +22,7 @@ from typing import Union, List, Optional, AsyncGenerator, BinaryIO
 import pyrogram
 from pyrogram import raw, enums, types, utils
 from ..object import Object
-from pyrogram.types import ListenerTypes
+from ..pyromod import ListenerTypes
 
 
 class Chat(Object):

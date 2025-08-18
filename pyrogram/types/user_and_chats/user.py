@@ -24,7 +24,7 @@ import pyrogram
 from pyrogram import enums, utils, raw, types
 from ..object import Object
 from ..update import Update
-from pyrogram.types.pyromod import ListenerTypes
+from ..pyromod import ListenerTypes
 
 
 class Link(str):
