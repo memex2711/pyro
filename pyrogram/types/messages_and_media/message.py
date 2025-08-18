@@ -722,7 +722,7 @@ class Message(Object, Update):
                 service_type = enums.MessageServiceType.WEB_APP_DATA
             elif isinstance(action, raw.types.MessageActionGiveawayLaunch):
                 giveaway_launched = True
-                service_type = enums.MessageServiceType.GIVEAWAY_LAUNCH
+                service_type = enums.MessageServiceType.GIVEAWAY_LAUNCHED
 
             from_user = types.User._parse(client, users.get(user_id, None))
             sender_chat = types.Chat._parse(client, message, users, chats, is_chat=False) if not from_user else None
