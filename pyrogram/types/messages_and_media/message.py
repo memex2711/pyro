@@ -23,7 +23,7 @@ from functools import partial
 from typing import List, Match, Union, BinaryIO, Optional, Callable
 
 import pyrogram
-from pyrogram import raw, enums
+from pyrogram import raw, enums, filters
 from pyrogram import types
 from pyrogram.types.pyromod import ListenerTypes
 from pyrogram import utils
@@ -1118,7 +1118,7 @@ class Message(Object, Update):
         
     def listen(
         self,
-        filters: pyrogram.filters | None = None,
+        filters: filters.Filter | None = None,
         listener_type: ListenerTypes = ListenerTypes.MESSAGE,
         timeout: int | None = None,
         unallowed_click_alert: bool = True,
@@ -1179,7 +1179,7 @@ class Message(Object, Update):
     def ask(
         self,
         text: str,
-        filters: pyrogram.filters | None = None,
+        filters: filters.Filter | None = None,
         listener_type: ListenerTypes = ListenerTypes.MESSAGE,
         timeout: int | None = None,
         unallowed_click_alert: bool = True,
