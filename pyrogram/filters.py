@@ -26,7 +26,7 @@ from pyrogram.types import Message, CallbackQuery, InlineQuery, InlineKeyboardMa
 
 
 class Filter:
-    async def __call__(self, client: "pyrogram.Client", update: Update):
+    async def __call__(self, client: pyrogram.Client, update: Update):
         raise NotImplementedError
 
     def __invert__(self):
