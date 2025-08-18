@@ -23,7 +23,7 @@ from functools import partial
 from typing import List, Match, Union, BinaryIO, Optional, Callable
 
 import pyrogram
-from pyrogram import raw, enums, types, utils, filters
+from pyrogram import raw, enums, types, utils
 from pyrogram.types.pyromod import ListenerTypes
 from pyrogram.errors import MessageIdsEmpty, PeerIdInvalid, ChannelPrivate, FloodWait, FloodPremiumWait
 from pyrogram.parser import utils as parser_utils, Parser
