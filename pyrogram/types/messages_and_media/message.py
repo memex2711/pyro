@@ -16,16 +16,14 @@
 #  You should have received a copy of the GNU Lesser General Public License
 #  along with Pyrogram.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import annotations
-
 import logging
 import asyncio
 from datetime import datetime
 from functools import partial
-from typing import List, Match, Union, BinaryIO, Optional, Callable, TYPE_CHECKING
+from typing import List, Match, Union, BinaryIO, Optional, Callable
 
 import pyrogram
-from pyrogram import raw, enums, types, utils
+from pyrogram import raw, enums, types, utils, filters
 from pyrogram.types.pyromod import ListenerTypes
 from pyrogram.errors import MessageIdsEmpty, PeerIdInvalid, ChannelPrivate, FloodWait, FloodPremiumWait
 from pyrogram.parser import utils as parser_utils, Parser
@@ -33,10 +31,6 @@ from ..object import Object
 from ..update import Update
 
 log = logging.getLogger(__name__)
-
-if TYPE_CHECKING:
-    from pyrogram.filters import Filter
-
 
 
 class Str(str):
@@ -1122,7 +1116,7 @@ class Message(Object, Update):
         
     def listen(
         self,
-        filters: Filter | None = None,
+        filters: None,
         listener_type: ListenerTypes = ListenerTypes.MESSAGE,
         timeout: int | None = None,
         unallowed_click_alert: bool = True,
@@ -1183,7 +1177,7 @@ class Message(Object, Update):
     def ask(
         self,
         text: str,
-        filters: Filter | None = None,
+        filters: None,
         listener_type: ListenerTypes = ListenerTypes.MESSAGE,
         timeout: int | None = None,
         unallowed_click_alert: bool = True,
