@@ -23,8 +23,7 @@ from functools import partial
 from typing import List, Match, Union, BinaryIO, Optional, Callable
 
 import pyrogram
-from pyrogram import raw, enums, types, utils
-from pyrogram.filters import Filter
+from pyrogram import raw, enums, types, utils, filters
 from pyrogram.types.pyromod import ListenerTypes
 from pyrogram.errors import MessageIdsEmpty, PeerIdInvalid, ChannelPrivate, FloodWait, FloodPremiumWait
 from pyrogram.parser import utils as parser_utils, Parser
@@ -571,7 +570,7 @@ class Message(Object, Update):
             timeout (``Optional[int]``):
                 The timeout in seconds. If None, waits forever.
 
-            filters (``Optional[Filter]``):
+            filters (``Optional[pyrogram.filters]``):
                 A filter to check if the callback query should be accepted.
 
             alert (``Union[str, bool]``):
@@ -1117,7 +1116,7 @@ class Message(Object, Update):
         
     def listen(
         self,
-        filters: Filter | None = None,
+        filters: filters | None = None,
         listener_type: ListenerTypes = ListenerTypes.MESSAGE,
         timeout: int | None = None,
         unallowed_click_alert: bool = True,
@@ -1178,7 +1177,7 @@ class Message(Object, Update):
     def ask(
         self,
         text: str,
-        filters: Filter | None = None,
+        filters: filters | None = None,
         listener_type: ListenerTypes = ListenerTypes.MESSAGE,
         timeout: int | None = None,
         unallowed_click_alert: bool = True,
