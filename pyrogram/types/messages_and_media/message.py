@@ -23,7 +23,7 @@ from functools import partial
 from typing import List, Match, Union, BinaryIO, Optional, Callable
 
 import pyrogram
-from pyrogram import raw, enums, filters
+from pyrogram import raw, enums
 from pyrogram import types
 from pyrogram.types.pyromod import ListenerTypes
 from pyrogram import utils
@@ -1118,7 +1118,7 @@ class Message(Object, Update):
         
     def listen(
         self,
-        filters: filters.Filter | None = None,
+        filters: pyrogram.filters | None = None,
         listener_type: ListenerTypes = ListenerTypes.MESSAGE,
         timeout: int | None = None,
         unallowed_click_alert: bool = True,
@@ -1141,7 +1141,7 @@ class Message(Object, Update):
                 await chat.listen()
 
         Parameters:
-            filters (``Optional[filters.Filter]``):
+            filters (``Optional[pyrogram.filters]``):
                 A filter to check if the listener should be fulfilled.
 
             listener_type (``ListenerTypes``):
@@ -1179,7 +1179,7 @@ class Message(Object, Update):
     def ask(
         self,
         text: str,
-        filters: filters.Filter | None = None,
+        filters: pyrogram.filters | None = None,
         listener_type: ListenerTypes = ListenerTypes.MESSAGE,
         timeout: int | None = None,
         unallowed_click_alert: bool = True,
@@ -1208,7 +1208,7 @@ class Message(Object, Update):
             text (``str``):
                 The text to send.
 
-            filters (``Optional[filters.Filter]``):
+            filters (``Optional[pyrogram.filters]``):
                 Same as :meth:`pyrogram.Client.listen`.
 
             listener_type (``ListenerTypes``):
