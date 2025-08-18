@@ -26,7 +26,7 @@ from pyrogram.types import Message, CallbackQuery, InlineQuery, InlineKeyboardMa
 
 
 class Filter:
-    async def __call__(self, client: pyrogram.Client, update: Update):
+    async def __call__(self, client: "pyrogram.Client", update: Update):
         raise NotImplementedError
 
     def __invert__(self):
@@ -43,7 +43,7 @@ class InvertFilter(Filter):
     def __init__(self, base):
         self.base = base
 
-    async def __call__(self, client: pyrogram.Client, update: Update):
+    async def __call__(self, client: "pyrogram.Client", update: Update):
         if inspect.iscoroutinefunction(self.base.__call__):
             x = await self.base(client, update)
         else:
@@ -61,7 +61,7 @@ class AndFilter(Filter):
         self.base = base
         self.other = other
 
-    async def __call__(self, client: pyrogram.Client, update: Update):
+    async def __call__(self, client: "pyrogram.Client", update: Update):
         if inspect.iscoroutinefunction(self.base.__call__):
             x = await self.base(client, update)
         else:
@@ -92,7 +92,7 @@ class OrFilter(Filter):
         self.base = base
         self.other = other
 
-    async def __call__(self, client: pyrogram.Client, update: Update):
+    async def __call__(self, client: "pyrogram.Client", update: Update):
         if inspect.iscoroutinefunction(self.base.__call__):
             x = await self.base(client, update)
         else:
