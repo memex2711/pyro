@@ -21,11 +21,12 @@ from datetime import datetime
 from typing import List, Optional
 
 import pyrogram
-from pyrogram import enums, utils
+from pyrogram import enums, utils, filters
 from pyrogram import raw
 from pyrogram import types
 from ..object import Object
 from ..update import Update
+from pyrogram.types.pyromod import ListenerTypes
 
 
 class Link(str):
@@ -344,6 +345,171 @@ class User(Object, Update):
             id=user_status.user_id,
             **User._parse_status(user_status.status),
             client=client
+        )
+    
+    def listen(
+        self,
+        filters: filters.Filter | None = None,
+        listener_type: ListenerTypes = ListenerTypes.MESSAGE,
+        timeout: int | None = None,
+        unallowed_click_alert: bool = True,
+        chat_id: int | str | list[int | str] | None = None,
+        message_id: int | list[int] | None = None,
+        inline_message_id: str | list[str] | None = None,
+    ):
+        """
+        Bound method *listen* of :obj:`~pyrogram.types.User`.
+
+        Use as a shortcut for:
+
+        .. code-block:: python
+
+            client.listen(user_id=user.id)
+
+        Example:
+            .. code-block:: python
+
+                user.listen()
+
+        Parameters:
+            filters (``Optional[pyrogram.Filter]``):
+                Same as :meth:`pyrogram.Client.listen`.
+
+            listener_type (``ListenerTypes``):
+                Same as :meth:`pyrogram.Client.listen`.
+
+            timeout (``Optional[int]``):
+                Same as :meth:`pyrogram.Client.listen`.
+
+            unallowed_click_alert (``bool``):
+                Same as :meth:`pyrogram.Client.listen`.
+
+            chat_id (``Union[int, str], List[Union[int, str]]``):
+                Same as :meth:`pyrogram.Client.listen`.
+
+            message_id (``Union[int, List[int]]``):
+                Same as :meth:`pyrogram.Client.listen`.
+
+            inline_message_id (``Union[str, List[str]]``):
+                Same as :meth:`pyrogram.Client.listen`.
+
+        Returns:
+            ``Union[Message, CallbackQuery]``: The Message or CallbackQuery that fulfilled the listener.
+        """
+        return self._client.listen(
+            user_id=self.id,
+            filters=filters,
+            listener_type=listener_type,
+            timeout=timeout,
+            unallowed_click_alert=unallowed_click_alert,
+            chat_id=chat_id,
+            message_id=message_id,
+            inline_message_id=inline_message_id,
+        )
+
+    def ask(
+        self,
+        text: str,
+        filters: filters.Filter | None = None,
+        listener_type: ListenerTypes = ListenerTypes.MESSAGE,
+        timeout: int | None = None,
+        unallowed_click_alert: bool = True,
+        message_id: int | list[int] | None = None,
+        inline_message_id: str | list[str] | None = None,
+        *args,
+        **kwargs,
+    ):
+        """
+        Bound method *ask* of :obj:`~pyrogram.types.User`.
+
+        Use as a shortcut for:
+
+        .. code-block:: python
+
+            client.ask(user_id=user.id)
+
+        Example:
+            .. code-block:: python
+
+                user.ask("Hello!")
+
+        Parameters:
+            text (``str``):
+                Same as :meth:`pyrogram.Client.ask`.
+
+            filters (``Optional[pyrogram.Filter]``):
+                Same as :meth:`pyrogram.Client.ask`.
+
+            listener_type (``ListenerTypes``):
+                Same as :meth:`pyrogram.Client.ask`.
+
+            timeout (``Optional[int]``):
+                Same as :meth:`pyrogram.Client.ask`.
+
+            unallowed_click_alert (``bool``):
+                Same as :meth:`pyrogram.Client.ask`.
+
+            message_id (``Union[int, List[int]]``):
+                Same as :meth:`pyrogram.Client.ask`.
+
+            inline_message_id (``Union[str, List[str]]``):
+                Same as :meth:`pyrogram.Client.ask`.
+
+            args (``Any``):
+                Same as :meth:`pyrogram.Client.ask`.
+
+            kwargs (``Any``):
+                Same as :meth:`pyrogram.Client.ask`.
+
+        Returns:
+            ``Union[Message, CallbackQuery]``: The Message or CallbackQuery that fulfilled the listener.
+        """
+        return self._client.ask(
+            chat_id=self.id,
+            text=text,
+            user_id=self.id,
+            filters=filters,
+            listener_type=listener_type,
+            timeout=timeout,
+            unallowed_click_alert=unallowed_click_alert,
+            message_id=message_id,
+            inline_message_id=inline_message_id,
+            *args,
+            **kwargs,
+        )
+
+    def stop_listening(
+        self,
+        listener_type: ListenerTypes = ListenerTypes.MESSAGE,
+        chat_id: int | str | list[int | str] | None = None,
+        message_id: int | list[int] | None = None,
+        inline_message_id: str | list[str] | None = None,
+    ):
+        """
+        Stops listening for messages from the user. Calls Client.stop_listening() with the user_id set to the user's id.
+
+        Parameters:
+            listener_type (``ListenerTypes``):
+                Same as :meth:`pyrogram.Client.stop_listening`.
+
+            chat_id (``Union[int, str], List[Union[int, str]]``):
+                Same as :meth:`pyrogram.Client.stop_listening`.
+
+            message_id (``Union[int, List[int]]``):
+                Same as :meth:`pyrogram.Client.stop_listening`.
+
+            inline_message_id (``Union[str, List[str]]``):
+                Same as :meth:`pyrogram.Client.stop_listening`.
+
+        Returns:
+            ``None``
+        """
+        return self._client.stop_listening(
+            user_id=self.id,
+            listener_type=listener_type,
+            chat_id=chat_id,
+            message_id=message_id,
+            inline_message_id=inline_message_id,
         )
 
     async def archive(self):
