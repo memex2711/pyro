@@ -21,7 +21,6 @@ import functools
 import inspect
 import logging
 import os
-import traceback
 import platform
 import re
 import shutil
@@ -35,6 +34,7 @@ from mimetypes import MimeTypes
 from pathlib import Path
 from typing import Union, List, Optional, Callable, AsyncGenerator
 
+import builtins
 import pyrogram
 from pyrogram import __version__, __license__
 from pyrogram import enums
@@ -45,8 +45,10 @@ from pyrogram.errors import CDNFileHashMismatch
 from pyrogram.errors import (
     SessionPasswordNeeded,
     VolumeLocNotFound, ChannelPrivate,
-    BadRequest, AuthBytesInvalid, PersistentTimestampInvalid
+    BadRequest, AuthBytesInvalid
 )
+from .connection import Connection
+from .connection.transport import TCP, TCPAbridged
 from pyrogram.handlers.handler import Handler
 from pyrogram.methods import Methods
 from pyrogram.session import Auth, Session
@@ -227,7 +229,10 @@ class Client(Methods):
         takeout: bool = None,
         sleep_threshold: int = Session.SLEEP_THRESHOLD,
         hide_password: bool = False,
-        max_concurrent_transmissions: int = MAX_CONCURRENT_TRANSMISSIONS
+        max_concurrent_transmissions: int = MAX_CONCURRENT_TRANSMISSIONS,
+        connection_factory: builtins.type[Connection] = Connection,
+        protocol_factory: builtins.type[TCP] = TCPAbridged,
+        message_cache_size: int = 1000,
     ):
         super().__init__()
 
@@ -256,7 +261,9 @@ class Client(Methods):
         self.sleep_threshold = sleep_threshold
         self.hide_password = hide_password
         self.max_concurrent_transmissions = max_concurrent_transmissions
-        self.is_restarting = False
+        self.connection_factory = connection_factory
+        self.protocol_factory = protocol_factory
+        self.message_cache_size = message_cache_size
 
         self.executor = ThreadPoolExecutor(self.workers, thread_name_prefix="Handler")
 
@@ -290,7 +297,7 @@ class Client(Methods):
 
         self.me: Optional[User] = None
 
-        self.message_cache = Cache(10000)
+        self.message_cache = Cache(message_cache_size)
 
         # Sometimes, for some reason, the server will stop sending updates and will only respond to pings.
         # This watchdog will invoke updates.GetState in order to wake up the server and enable it sending updates again
@@ -298,8 +305,6 @@ class Client(Methods):
         self.updates_watchdog_task = None
         self.updates_watchdog_event = asyncio.Event()
         self.last_update_time = datetime.now()
-
-        self.loop = asyncio.get_event_loop()
 
     def __enter__(self):
         return self.start()
@@ -310,6 +315,7 @@ class Client(Methods):
         except ConnectionError:
             pass
 
+
     async def __aenter__(self):
         return await self.start()
 
@@ -318,6 +324,15 @@ class Client(Methods):
             await self.stop()
         except ConnectionError:
             pass
+
+    @functools.cached_property
+    def loop(self):
+        try:
+            return asyncio.get_running_loop()
+        except RuntimeError:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            return loop
 
     async def updates_watchdog(self):
         while True:
@@ -622,7 +637,6 @@ class Client(Methods):
 
         return is_min
     
-    """
     async def handle_updates(self, updates):
         self.last_update_time = datetime.now()
 
@@ -637,11 +651,9 @@ class Client(Methods):
 
             for update in updates.updates:
                 channel_id = getattr(
-                    getattr(
-                        getattr(
-                            update, "message", None
-                        ), "peer_id", None
-                    ), "channel_id", None
+                    getattr(getattr(update, "message", None), "peer_id", None),
+                    "channel_id",
+                    None,
                 ) or getattr(update, "channel_id", None)
 
                 pts = getattr(update, "pts", None)
@@ -657,25 +669,23 @@ class Client(Methods):
                         try:
                             diff = await self.invoke(
                                 raw.functions.updates.GetChannelDifference(
-                                    channel=await self.resolve_peer(utils.get_channel_id(channel_id)),
+                                    channel=await self.resolve_peer(
+                                        utils.get_channel_id(channel_id)
+                                    ),
                                     filter=raw.types.ChannelMessagesFilter(
-                                        ranges=[raw.types.MessageRange(
-                                            min_id=update.message.id,
-                                            max_id=update.message.id
-                                        )]
+                                        ranges=[
+                                            raw.types.MessageRange(
+                                                min_id=update.message.id,
+                                                max_id=update.message.id,
+                                            )
+                                        ]
                                     ),
                                     pts=pts - pts_count,
-                                    limit=pts
+                                    limit=pts,
                                 )
                             )
                         except ChannelPrivate:
                             pass
-                        except PersistentTimestampInvalid:
-                            log.warning(f"[{self.me.id}] PersistentTimestampInvalid detected. Resetting session...")
-                            await self.stop()
-                            await asyncio.sleep(3)
-                            await self.start()
-                            return
                         else:
                             if not isinstance(diff, raw.types.updates.ChannelDifferenceEmpty):
                                 users.update({u.id: u for u in diff.users})
@@ -685,9 +695,7 @@ class Client(Methods):
         elif isinstance(updates, (raw.types.UpdateShortMessage, raw.types.UpdateShortChatMessage)):
             diff = await self.invoke(
                 raw.functions.updates.GetDifference(
-                    pts=updates.pts - updates.pts_count,
-                    date=updates.date,
-                    qts=-1
+                    pts=updates.pts - updates.pts_count, date=updates.date, qts=-1
                 )
             )
 
@@ -696,127 +704,13 @@ class Client(Methods):
                     raw.types.UpdateNewMessage(
                         message=diff.new_messages[0],
                         pts=updates.pts,
-                        pts_count=updates.pts_count
+                        pts_count=updates.pts_count,
                     ),
                     {u.id: u for u in diff.users},
-                    {c.id: c for c in diff.chats}
+                    {c.id: c for c in diff.chats},
                 ))
-            else:
-                if diff.other_updates:  # The other_updates list can be empty
-                    self.dispatcher.updates_queue.put_nowait((diff.other_updates[0], {}, {}))
-        elif isinstance(updates, raw.types.UpdateShort):
-            self.dispatcher.updates_queue.put_nowait((updates.update, {}, {}))
-        elif isinstance(updates, raw.types.UpdatesTooLong):
-            log.info(updates)
-    """
-
-    async def handle_updates(self, updates):
-        if getattr(self, 'is_restarting', False):
-            log.debug(f"[{self.me.id}] Skipping updates during restart")
-            return
-        self.last_update_time = datetime.now()
-
-        if isinstance(updates, (raw.types.Updates, raw.types.UpdatesCombined)):
-            is_min = any((
-                await self.fetch_peers(updates.users),
-                await self.fetch_peers(updates.chats),
-            ))
-
-            users = {u.id: u for u in updates.users}
-            chats = {c.id: c for c in updates.chats}
-
-            for update in updates.updates:
-                channel_id = getattr(
-                    getattr(
-                        getattr(
-                            update, "message", None
-                        ), "peer_id", None
-                    ), "channel_id", None
-                ) or getattr(update, "channel_id", None)
-
-                pts = getattr(update, "pts", None)
-                pts_count = getattr(update, "pts_count", None)
-
-                if isinstance(update, raw.types.UpdateChannelTooLong):
-                    log.info(update)
-
-                if isinstance(update, raw.types.UpdateNewChannelMessage) and is_min:
-                    message = update.message
-
-                    if not isinstance(message, raw.types.MessageEmpty):
-                        try:
-                            if not self.is_connected or getattr(self, 'is_restarting', False):
-                                 log.warning(f"[{self.me.id}] Client not ready, skipping invoke")
-                                 continue
-                                
-                            diff = await self.invoke(
-                                raw.functions.updates.GetChannelDifference(
-                                    channel=await self.resolve_peer(utils.get_channel_id(channel_id)),
-                                    filter=raw.types.ChannelMessagesFilter(
-                                        ranges=[raw.types.MessageRange(
-                                            min_id=update.message.id,
-                                            max_id=update.message.id
-                                        )]
-                                    ),
-                                    pts=pts - pts_count,
-                                    limit=pts
-                                )
-                            )
-                        except ChannelPrivate:
-                            pass
-                        except PersistentTimestampInvalid:
-                            return
-                        except (OSError, ConnectionError) as e:
-                            log.warning(f"[{self.me.id}] Connection lost during invoke: {e}")
-                            return
-                        except Exception as e:
-                            log.error(f"[{self.me.id}] Unexpected error in handle_updates: {e}")
-                            continue
-                        else:
-                            if not isinstance(diff, raw.types.updates.ChannelDifferenceEmpty):
-                                users.update({u.id: u for u in diff.users})
-                                chats.update({c.id: c for c in diff.chats})
-
-                self.dispatcher.updates_queue.put_nowait((update, users, chats))
-                
-        elif isinstance(updates, (raw.types.UpdateShortMessage, raw.types.UpdateShortChatMessage)):
-            try:
-                if not self.is_connected:
-                    log.warning(f"[{self.me.id}] Client disconnected, skipping GetDifference")
-                    return
-                    
-                diff = await self.invoke(
-                    raw.functions.updates.GetDifference(
-                        pts=updates.pts - updates.pts_count,
-                        date=updates.date,
-                        qts=-1
-                    )
-                )
-            except (OSError, ConnectionError) as e:
-                if "Writer already closed" in str(e):
-                    log.warning(f"[{self.me.id}] Connection lost during GetDifference: {e}")
-                    return
-                else:
-                    log.error(f"[{self.me.id}] Error in GetDifference: {e}")
-                    raise
-            except Exception as e:
-                log.error(f"[{self.me.id}] Unexpected error in GetDifference: {e}")
-                return
-
-            if diff.new_messages:
-                self.dispatcher.updates_queue.put_nowait((
-                    raw.types.UpdateNewMessage(
-                        message=diff.new_messages[0],
-                        pts=updates.pts,
-                        pts_count=updates.pts_count
-                    ),
-                    {u.id: u for u in diff.users},
-                    {c.id: c for c in diff.chats}
-                ))
-            else:
-                if diff.other_updates:
-                    self.dispatcher.updates_queue.put_nowait((diff.other_updates[0], {}, {}))
-                    
+            elif diff.other_updates:  # The other_updates list can be empty
+                self.dispatcher.updates_queue.put_nowait((diff.other_updates[0], {}, {}))
         elif isinstance(updates, raw.types.UpdateShort):
             self.dispatcher.updates_queue.put_nowait((updates.update, {}, {}))
         elif isinstance(updates, raw.types.UpdatesTooLong):
