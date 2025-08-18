@@ -23,7 +23,7 @@ __copyright__ = "Copyright (C) 2017-present Dan <https://github.com/delivrance>"
 from concurrent.futures.thread import ThreadPoolExecutor
 
 
-class StopTransmission(Exception):  # noqa: N818
+class StopTransmission(Exception):
     pass
 
 
@@ -35,26 +35,8 @@ class ContinuePropagation(StopAsyncIteration):
     pass
 
 
-crypto_executor = ThreadPoolExecutor(1, thread_name_prefix="CryptoWorker")
-
-
-from . import enums, errors, filters, handlers, raw, types
+from . import raw, types, filters, handlers, emoji, enums
 from .client import Client
-from .methods.utilities.compose import compose
-from .methods.utilities.idle import idle
+from .sync import idle, compose
 
-__all__ = [
-    "Client",
-    "ContinuePropagation",
-    "StopPropagation",
-    "StopTransmission",
-    "compose",
-    "crypto_executor",
-    "enums",
-    "errors",
-    "filters",
-    "handlers",
-    "idle",
-    "raw",
-    "types",
-]
+crypto_executor = ThreadPoolExecutor(1, thread_name_prefix="CryptoWorker")
