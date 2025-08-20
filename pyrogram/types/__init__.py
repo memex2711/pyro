@@ -50,7 +50,6 @@ __all__ = [
     "CallbackQuery",
     "Chat",
     "ChatAdminWithInviteLinks",
-    "ChatBackground",
     "ChatEvent",
     "ChatEventFilter",
     "ChatInviteLink",
