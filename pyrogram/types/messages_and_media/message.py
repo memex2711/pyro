@@ -78,7 +78,7 @@ class Message(Object, Update):
         chat (:obj:`~pyrogram.types.Chat`, *optional*):
             Conversation the message belongs to.
 
-        topics (:obj:`~pyrogram.types.ForumTopic`, *optional*):
+        topic (:obj:`~pyrogram.types.ForumTopic`, *optional*):
             Topic the message belongs to.
 
         forward_from (:obj:`~pyrogram.types.User`, *optional*):
@@ -371,7 +371,7 @@ class Message(Object, Update):
         sender_chat: "types.Chat" = None,
         date: datetime = None,
         chat: "types.Chat" = None,
-        topics: "types.ForumTopic" = None,
+        topic: "types.ForumTopic" = None,
         forward_from: "types.User" = None,
         forward_sender_name: str = None,
         forward_from_chat: "types.Chat" = None,
@@ -468,7 +468,7 @@ class Message(Object, Update):
         self.sender_chat = sender_chat
         self.date = date
         self.chat = chat
-        self.topics = topics
+        self.topic = topic
         self.forward_from = forward_from
         self.forward_sender_name = forward_sender_name
         self.forward_from_chat = forward_from_chat
