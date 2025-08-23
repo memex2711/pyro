@@ -18,5 +18,6 @@
 
 from .sent_code import SentCode
 from .terms_of_service import TermsOfService
+from .session import Session
 
-__all__ = ["TermsOfService", "SentCode"]
+__all__ = ["TermsOfService", "SentCode", "Session"]
