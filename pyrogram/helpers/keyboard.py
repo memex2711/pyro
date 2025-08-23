@@ -1,6 +1,6 @@
 
 
-from pyrogram.emoji import *
+from pyrogram.emoji import FLAG_UKRAINE,FLAG_UZBEKISTAN,FLAG_SPAIN,FLAG_TURKEY,FLAG_BELARUS,FLAG_GERMANY,FLAG_CHINA,FLAG_UNITED_KINGDOM, FLAG_FRANCE, FLAG_INDONESIA, FLAG_ITALY,FLAG_SOUTH_KOREA,FLAG_RUSSIA
 from pyrogram.types import (InlineKeyboardMarkup, InlineKeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove, KeyboardButton, ForceReply)
 from typing import List, Union
 
