@@ -138,7 +138,6 @@ __all__ = [
     "Restriction",
     "SentCode",
     "SentWebAppMessage",
-    "Session",
     "Sticker",
     "StrippedThumbnail",
     "TermsOfService",
