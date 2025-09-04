@@ -378,7 +378,6 @@ class Chat(Object):
             title=chat.title,
             is_creator=getattr(chat, "creator", None),
             is_admin=True if admin_rights else None,
-            usernames=types.List([types.Username._parse(r) for r in usernames]) or None,
             photo=types.ChatPhoto._parse(client, getattr(chat, "photo", None), peer_id, 0),
             permissions=types.ChatPermissions._parse(getattr(chat, "default_banned_rights", None)),
             members_count=getattr(chat, "participants_count", None),
