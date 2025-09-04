@@ -370,14 +370,12 @@ class Chat(Object):
             usernames = []
             for username in active_usernames:
                 usernames.append(types.Username._parse(username))
-        admin_rights = getattr(chat, "admin_rights", None)
 
         return Chat(
             id=peer_id,
             type=enums.ChatType.GROUP,
             title=chat.title,
             is_creator=getattr(chat, "creator", None),
-            is_admin=True if admin_rights else None,
             photo=types.ChatPhoto._parse(client, getattr(chat, "photo", None), peer_id, 0),
             permissions=types.ChatPermissions._parse(getattr(chat, "default_banned_rights", None)),
             members_count=getattr(chat, "participants_count", None),
@@ -395,7 +393,6 @@ class Chat(Object):
         peer_id = utils.get_channel_id(channel.id)
         restriction_reason = getattr(channel, "restriction_reason", [])
         user_name = getattr(channel, "username", None)
-        admin_rights = getattr(channel, "admin_rights", None)
         active_usernames = getattr(channel, "usernames", [])
         if getattr(channel, "monoforum", None):
             chat_type = enums.ChatType.MONOFORUM
@@ -427,7 +424,6 @@ class Chat(Object):
             is_verified=getattr(channel, "verified", None),
             is_restricted=getattr(channel, "restricted", None),
             is_creator=getattr(channel, "creator", None),
-            is_admin=True if admin_rights else None,
             is_scam=getattr(channel, "scam", None),
             is_fake=getattr(channel, "fake", None),
             is_join_request=getattr(channel, "join_request", None),
