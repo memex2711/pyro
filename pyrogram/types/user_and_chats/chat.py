@@ -364,7 +364,12 @@ class Chat(Object):
         if chat is None or isinstance(chat, raw.types.ChatEmpty):
             return None
         peer_id = -chat.id
-        usernames = getattr(chat, "usernames", [])
+        active_usernames = getattr(chat, "usernames", [])
+        usernames = None
+        if len(active_usernames) >= 1:
+            usernames = []
+            for username in active_usernames:
+                usernames.append(types.Username._parse(username))
         admin_rights = getattr(chat, "admin_rights", None)
 
         return Chat(
@@ -373,13 +378,14 @@ class Chat(Object):
             title=chat.title,
             is_creator=getattr(chat, "creator", None),
             is_admin=True if admin_rights else None,
-            is_deactivated=getattr(chat, "deactivated", None),
             usernames=types.List([types.Username._parse(r) for r in usernames]) or None,
             photo=types.ChatPhoto._parse(client, getattr(chat, "photo", None), peer_id, 0),
             permissions=types.ChatPermissions._parse(getattr(chat, "default_banned_rights", None)),
             members_count=getattr(chat, "participants_count", None),
+            join_requests_count=getattr(chat, "requests_pending", None),
             dc_id=getattr(getattr(chat, "photo", None), "dc_id", None),
             has_protected_content=getattr(chat, "noforwards", None),
+            usernames=usernames,
             client=client
         )
 
@@ -389,6 +395,7 @@ class Chat(Object):
             return None
         peer_id = utils.get_channel_id(channel.id)
         restriction_reason = getattr(channel, "restriction_reason", [])
+        user_name = getattr(channel, "username", None)
         admin_rights = getattr(channel, "admin_rights", None)
         active_usernames = getattr(channel, "usernames", [])
         if getattr(channel, "monoforum", None):
@@ -551,7 +558,7 @@ class Chat(Object):
 
                 if linked_chat_raw:
                     parsed_chat.linked_chat = Chat._parse_channel_chat(client, linked_chat_raw)
-                    
+
                 if linked_forum_raw:
                     parsed_chat.linked_forum = Chat._parse_channel_chat(client, linked_forum_raw)
 
