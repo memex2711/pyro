@@ -16,6 +16,8 @@
 #  You should have received a copy of the GNU Lesser General Public License
 #  along with Pyrogram.  If not, see <http://www.gnu.org/licenses/>.
 
+
+from .bot_verification import BotVerification
 from .chat import Chat
 from .chat_admin_with_invite_links import ChatAdminWithInviteLinks
 from .chat_color import ChatColor
@@ -56,6 +58,7 @@ from .birthday import Birthday
 
 
 __all__ = [
+    "BotVerification",
     "Chat",
     "ChatColor",
     "ChatMember",
