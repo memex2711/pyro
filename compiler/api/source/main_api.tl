@@ -1480,9 +1480,7 @@ premiumGiftOption#74c34319 flags:# months:int currency:string amount:long bot_ur
 paymentFormMethod#88f8f21b url:string title:string = PaymentFormMethod;
 
 emojiStatusEmpty#2de11aae = EmojiStatus;
-emojiStatus#929b619d flags:# document_id:long until:flags.0?int = EmojiStatus;
-emojiStatusCollectible#7184603b flags:# collectible_id:long document_id:long title:string slug:string pattern_document_id:long center_color:int edge_color:int pattern_color:int text_color:int until:flags.0?int = EmojiStatus;
-inputEmojiStatusCollectible#7141dbf flags:# collectible_id:long until:flags.0?int = EmojiStatus;
+emojiStatus#929b619d document_id:long = EmojiStatus;
 emojiStatusUntil#fa30a8c7 document_id:long until:int = EmojiStatus;
 
 account.emojiStatusesNotModified#d08ce645 = account.EmojiStatuses;
