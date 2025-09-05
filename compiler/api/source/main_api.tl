@@ -1480,9 +1480,10 @@ premiumGiftOption#74c34319 flags:# months:int currency:string amount:long bot_ur
 paymentFormMethod#88f8f21b url:string title:string = PaymentFormMethod;
 
 emojiStatusEmpty#2de11aae = EmojiStatus;
-emojiStatus#e7ff068a flags:# document_id:long until:flags.0?int = EmojiStatus;
+emojiStatus#929b619d flags:# document_id:long until:flags.0?int = EmojiStatus;
 emojiStatusCollectible#7184603b flags:# collectible_id:long document_id:long title:string slug:string pattern_document_id:long center_color:int edge_color:int pattern_color:int text_color:int until:flags.0?int = EmojiStatus;
 inputEmojiStatusCollectible#7141dbf flags:# collectible_id:long until:flags.0?int = EmojiStatus;
+emojiStatusUntil#fa30a8c7 document_id:long until:int = EmojiStatus;
 
 account.emojiStatusesNotModified#d08ce645 = account.EmojiStatuses;
 account.emojiStatuses#90c467d1 hash:long statuses:Vector<EmojiStatus> = account.EmojiStatuses;
@@ -2502,4 +2503,4 @@ smsjobs.finishJob#4f1ebf24 flags:# job_id:string error:flags.0?string = Bool;
 
 fragment.getCollectibleInfo#be1e85ba collectible:InputCollectible = fragment.CollectibleInfo;
 
-// LAYER 196
+// LAYER 182
