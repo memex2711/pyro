@@ -1475,8 +1475,6 @@ inputStorePaymentPremiumGiftCode#a3805f3f flags:# users:Vector<InputUser> boost_
 inputStorePaymentPremiumGiveaway#160544ca flags:# only_new_subscribers:flags.0?true winners_are_visible:flags.3?true boost_peer:InputPeer additional_peers:flags.1?Vector<InputPeer> countries_iso2:flags.2?Vector<string> prize_description:flags.4?string random_id:long until_date:int currency:string amount:long = InputStorePaymentPurpose;
 inputStorePaymentStars#4f0ee8df flags:# stars:long currency:string amount:long = InputStorePaymentPurpose;
 
-premiumGiftOption#74c34319 flags:# months:int currency:string amount:long bot_url:string store_product:flags.0?string = PremiumGiftOption;
-
 paymentFormMethod#88f8f21b url:string title:string = PaymentFormMethod;
 
 emojiStatusEmpty#2de11aae = EmojiStatus;
