@@ -75,7 +75,7 @@ from .unpin_chat_message import UnpinChatMessage
 from .update_chat_notifications import UpdateChatNotifications
 from .update_color import UpdateColor
 from .update_folder import UpdateFolder
-
+from .transfer_chat_ownership import TransferChatOwnership
 
 class Chats(
     GetChat,
@@ -136,6 +136,7 @@ class Chats(
     GetChatOnlineCount,
     GetSendAsChats,
     SetSendAsChat,
-    SetChatProtectedContent
+    SetChatProtectedContent,
+    TransferChatOwnership
 ):
     pass
