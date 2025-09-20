@@ -897,8 +897,6 @@ class Client(Methods):
             
             if isinstance(e, pyrogram.errors.FloodWait):
                 raise e
-            if isinstance(e, pyrogram.errors.FloodPremiumWait):
-                raise e
 
             return None
         else:
