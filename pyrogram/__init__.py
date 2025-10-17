@@ -16,7 +16,7 @@
 #  You should have received a copy of the GNU Lesser General Public License
 #  along with Pyrogram.  If not, see <http://www.gnu.org/licenses/>.
 
-__version__ = "2.0.184"
+__version__ = "2.0.185"
 __license__ = "GNU Lesser General Public License v3.0 (LGPL-3.0)"
 __copyright__ = "Copyright (C) 2017-present Dan <https://github.com/delivrance>"
 
@@ -38,19 +38,11 @@ class ContinuePropagation(StopAsyncIteration):
 crypto_executor = ThreadPoolExecutor(1, thread_name_prefix="CryptoWorker")
 
 # ruff: noqa: E402
-import asyncio as _asyncio
-from contextlib import suppress
 
 from . import enums, errors, filters, handlers, raw, types
 from .client import Client
 from .methods.utilities.compose import compose
 from .methods.utilities.idle import idle
-
-with suppress(ImportError):
-    import uvloop as _uvloop
-
-    _asyncio.set_event_loop_policy(_uvloop.EventLoopPolicy())
-
 
 __all__ = [
     "Client",
