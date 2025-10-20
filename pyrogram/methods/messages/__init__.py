@@ -68,6 +68,7 @@ from .start_bot import StartBot
 from .stop_poll import StopPoll
 from .stream_media import StreamMedia
 from .vote_poll import VotePoll
+from .send_screenshot_notification import SendScreenshotNotification
 
 
 class Messages(
@@ -122,6 +123,7 @@ class Messages(
     GetDiscussionReplies,
     GetDiscussionRepliesCount,
     StreamMedia,
-    GetCustomEmojiStickers
+    GetCustomEmojiStickers,
+    SendScreenshotNotification
 ):
     pass
