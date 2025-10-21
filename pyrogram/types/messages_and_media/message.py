@@ -438,7 +438,7 @@ class Message(Object, Update):
         forwards: int = None,
         via_bot: "types.User" = None,
         outgoing: bool = None,
-        quote: bool = None,
+        quote: "types.TextQuote" = None,
         matches: List[Match] = None,
         command: List[str] = None,
         forum_topic_created: "types.ForumTopicCreated" = None,
@@ -1025,9 +1025,6 @@ class Message(Object, Update):
                 reactions=reactions,
                 client=client
             )
-
-            if any((isinstance(entity, raw.types.MessageEntityBlockquote) for entity in message.entities)):
-                parsed_message.quote = True
 
             if message.reply_to:
                 if isinstance(message.reply_to, raw.types.MessageReplyHeader):
