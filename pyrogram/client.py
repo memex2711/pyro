@@ -37,7 +37,7 @@ from typing import Union, List, Optional, Callable, AsyncGenerator
 import builtins
 import pyrogram
 from pyrogram import __version__, __license__
-from .formatter import TextFormatter as fmt
+from .formatter import Formatter as fmt
 from pyrogram import enums
 from pyrogram import raw
 from pyrogram import utils
