@@ -37,6 +37,7 @@ from typing import Union, List, Optional, Callable, AsyncGenerator
 import builtins
 import pyrogram
 from pyrogram import __version__, __license__
+from .formatter import TextFormatter as fmt
 from pyrogram import enums
 from pyrogram import raw
 from pyrogram import utils
@@ -459,6 +460,54 @@ class Client(Methods):
             await self.accept_terms_of_service(signed_in.id)
 
         return signed_up
+    
+    def bold(self, text_content: str):
+        """Bold text"""
+        return fmt.bold(text_content, self.parse_mode)
+
+    def italic(self, text_content: str):
+        """Italic text"""
+        return fmt.italic(text_content, self.parse_mode)
+
+    def underline(self, text_content: str):
+        """Underlined text"""
+        return fmt.underline(text_content, self.parse_mode)
+
+    def strike(self, text_content: str):
+        """Strikethrough text"""
+        return fmt.strike(text_content, self.parse_mode)
+
+    def spoiler(self, text_content: str):
+        """Spoiler text"""
+        return fmt.spoiler(text_content, self.parse_mode)
+
+    def mono(self, text_content: str):
+        """Monospace/code text"""
+        return fmt.mono(text_content, self.parse_mode)
+
+    def pre(self, text_content: str, language: str = ""):
+        """Preformatted code block"""
+        return fmt.pre(text_content, language, self.parse_mode)
+
+    def blockquote(self, text_content: str):
+        """Blockquote"""
+        return fmt.blockquote(text_content, self.parse_mode)
+
+    def escaped_blockquote(self, text_content: str):
+        """Escaped blockquote"""
+        return fmt.escaped_blockquote(text_content, self.parse_mode)
+
+    def expandable_blockquote(self, text_content: str):
+        """Expandable blockquote"""
+        return fmt.expandable_blockquote(text_content, self.parse_mode)
+
+    def link(self, text_content: str, url: str):
+        """Hyperlink"""
+        return fmt.link(text_content, url, self.parse_mode)
+
+    def new_line(self, count: int = 1):
+        """New line(s)"""
+        return fmt.new_line(count, self.parse_mode)
 
     def set_parse_mode(self, parse_mode: Optional["enums.ParseMode"]):
         """Set the parse mode to be used globally by the client.
