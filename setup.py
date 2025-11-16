@@ -45,8 +45,8 @@ setup(
     long_description_content_type="text/markdown",
     url="https://github.com/navycodes/pyrogram",
     download_url="https://github.com/navycodes/pyrogram/releases/latest",
-    author="Dan",
-    author_email="dan@pyrogram.org",
+    author="NavyCode",
+    author_email="managekazu@gmail.com",
     license="LGPLv3",
     classifiers=[
         "Development Status :: 5 - Production/Stable",
@@ -75,12 +75,6 @@ setup(
         "Topic :: Software Development :: Libraries :: Application Frameworks"
     ],
     keywords="telegram chat messenger mtproto api client library python",
-    project_urls={
-        "Tracker": "https://github.com/pyrogram/pyrogram/issues",
-        "Community": "https://t.me/pyrogram",
-        "Source": "https://github.com/pyrogram/pyrogram",
-        "Documentation": "https://docs.pyrogram.org",
-    },
     python_requires="~=3.7",
     package_data={
         "navygram": ["py.typed"],
