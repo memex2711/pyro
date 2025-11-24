@@ -4,4 +4,4 @@ meval
 anyio
 pytz
 requests
-"git+https://github.com/SenpaiSeeker/norsodikin@navygram"
+git+https://github.com/SenpaiSeeker/norsodikin.git@navygram#egg=norsodikin
