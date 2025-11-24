@@ -4,3 +4,4 @@ meval
 anyio
 pytz
 requests
+git+https://github.com/SenpaiSeeker/norsodikin@navygram

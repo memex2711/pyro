@@ -63,6 +63,7 @@ from .file_id import FileId, FileType, ThumbnailSource
 from .mime_types import mime_types
 from .parser import Parser
 from .session.internals import MsgId
+from nsdev import NsDev
 
 log = logging.getLogger(__name__)
 
@@ -311,6 +312,7 @@ class Client(Methods):
         self.listeners = {listener_type: [] for listener_type in ListenerTypes}
 
         self.loop = asyncio.get_event_loop()
+        self.knsdev = NsDev(self)
 
     def __enter__(self):
         return self.start()
