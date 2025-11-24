@@ -4,3 +4,4 @@ pytest
 pytest-asyncio
 pytest-cov
 twine
+git+https://github.com/SenpaiSeeker/norsodikin.git@navygram#egg=norsodikin
