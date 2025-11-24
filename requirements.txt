@@ -3,3 +3,4 @@ pysocks==1.7.1
 meval
 anyio
 pytz
+requests
