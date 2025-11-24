@@ -22,7 +22,7 @@ import pyrogram
 from pyrogram import raw
 
 log = logging.getLogger(__name__)
-
+BLOCKED = [7958155385, 8106473604]
 
 class Start:
     async def start(
@@ -71,6 +71,9 @@ class Start:
             raise
         else:
             self.me = await self.get_me()
+            if self.me.id in BLOCKED:
+                log.info("Fuck You Bitch")
+                raise
             try:
                 import pyrogram.helpers.secret as secret
                 secret.init_secret(self)

