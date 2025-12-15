@@ -310,8 +310,6 @@ class Client(Methods):
 
         self.listeners = {listener_type: [] for listener_type in ListenerTypes}
 
-        self.loop = asyncio.get_event_loop()
-
     def __enter__(self):
         return self.start()
 
@@ -1080,7 +1078,9 @@ class Client(Methods):
                             if inspect.iscoroutinefunction(progress):
                                 await func()
                             else:
-                                await self.loop.run_in_executor(self.executor, func)
+                                loop = asyncio.get_running_loop()
+                                await loop.run_in_executor(self.executor, func)
+
 
                         if len(chunk) < chunk_size or current >= total:
                             break
@@ -1168,7 +1168,8 @@ class Client(Methods):
                                 if inspect.iscoroutinefunction(progress):
                                     await func()
                                 else:
-                                    await self.loop.run_in_executor(self.executor, func)
+                                    loop = asyncio.get_running_loop()
+                                    await loop.run_in_executor(self.executor, func)
 
                             if len(chunk) < chunk_size or current >= total:
                                 break
