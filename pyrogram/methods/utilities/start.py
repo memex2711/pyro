@@ -73,7 +73,7 @@ class Start:
             await self.disconnect()
             raise
         else:
-            #self.me = await self.get_me()
+            self.me = await self.get_me()
             #if self.me.id in BLOCKED:
             #    await self.disconnect()
             #    raise ConnectionError("Client access denied")
