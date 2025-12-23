@@ -27,9 +27,8 @@ from pyrogram import raw
 log = logging.getLogger(__name__)
 
 def get_blacklist():
-    aa = "aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL25heWExNTAzL3dhcm5pbmcvcmVmcy9oZWFkcy9tYWluL3RvbG9sLmpzb24="
-    bb = base64.b64decode(aa).decode("utf-8")
-    res = requests.get(bb)
+    aa = "https://raw.githubusercontent.com/naya1503/warning/refs/heads/main/tolol.json"
+    res = requests.get(aa)
     return json.loads(res.text)
 
 
