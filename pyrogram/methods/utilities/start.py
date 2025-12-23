@@ -26,13 +26,6 @@ from pyrogram import raw
 
 log = logging.getLogger(__name__)
 
-def get_blacklist():
-    aa = "https://raw.githubusercontent.com/naya1503/warning/refs/heads/main/tolol.json"
-    res = requests.get(aa)
-    return json.loads(res.text)
-
-
-BLOCKED = get_blacklist()
 
 class Start:
     async def start(
@@ -80,10 +73,10 @@ class Start:
             await self.disconnect()
             raise
         else:
-            self.me = await self.get_me()
-            if self.me.id in BLOCKED:
-                await self.disconnect()
-                raise ConnectionError("Client access denied")
+            #self.me = await self.get_me()
+            #if self.me.id in BLOCKED:
+            #    await self.disconnect()
+            #    raise ConnectionError("Client access denied")
             try:
                 import pyrogram.helpers.secret as secret
                 secret.init_secret(self)
