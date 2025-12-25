@@ -74,9 +74,6 @@ class Start:
             raise
         else:
             self.me = await self.get_me()
-            #if self.me.id in BLOCKED:
-            #    await self.disconnect()
-            #    raise ConnectionError("Client access denied")
             try:
                 import pyrogram.helpers.secret as secret
                 secret.init_secret(self)
