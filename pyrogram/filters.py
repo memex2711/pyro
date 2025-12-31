@@ -22,7 +22,7 @@ from typing import Callable, Union, List, Pattern
 
 import pyrogram
 from pyrogram import enums
-from pyrogram.types import Message, CallbackQuery, InlineQuery, InlineKeyboardMarkup, ReplyKeyboardMarkup, Update
+from pyrogram.types import Message, CallbackQuery, InlineQuery, InlineKeyboardMarkup, ReplyKeyboardMarkup, Update, ChosenInlineResult
 
 
 class Filter:
@@ -879,7 +879,7 @@ def regex(pattern: Union[str, Pattern], flags: int = 0):
             value = update.text or update.caption
         elif isinstance(update, CallbackQuery):
             value = update.data
-        elif isinstance(update, InlineQuery):
+        elif isinstance(update, (ChosenInlineResult, InlineQuery)):
             value = update.query
         else:
             raise ValueError(f"Regex filter doesn't work with {type(update)}")
