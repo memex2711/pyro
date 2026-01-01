@@ -19,7 +19,7 @@
 from typing import Union, List, Match, Optional
 
 import pyrogram
-from pyrogram import raw, enums
+from pyrogram import raw, enums, errors
 from pyrogram import types
 from ..object import Object
 from ..update import Update
@@ -87,27 +87,63 @@ class CallbackQuery(Object, Update):
         self.matches = matches
 
     @staticmethod
-    async def _parse(client: "pyrogram.Client", callback_query, users) -> "CallbackQuery":
+    async def _parse(
+        client: "pyrogram.Client",
+        callback_query: Union[
+            "raw.types.UpdateBotCallbackQuery",
+            "raw.types.UpdateInlineBotCallbackQuery",
+            "raw.types.UpdateBusinessBotCallbackQuery",
+        ],
+        users: dict,
+        chats: dict,
+    ) -> "CallbackQuery":
         message = None
         inline_message_id = None
 
         if isinstance(callback_query, raw.types.UpdateBotCallbackQuery):
             chat_id = utils.get_peer_id(callback_query.peer)
+            peer_id = utils.get_raw_peer_id(callback_query.peer)
             message_id = callback_query.msg_id
 
             message = client.message_cache[(chat_id, message_id)]
-
             if not message:
-                message = await client.get_messages(chat_id, message_id)
+                try:
+                    message = await client.get_messages(
+                        chat_id=chat_id,
+                        message_ids=message_id
+                    )
+                except errors.ChannelPrivate:
+                    message = None
+                if not message:
+                    channel = chats.get(peer_id, None)
+                    if channel:
+                        message = types.Message(
+                            id=message_id,
+                            date=utils.timestamp_to_datetime(0),
+                            chat=types.Chat._parse_channel_chat(
+                                client,
+                                channel
+                            )
+                        )
         elif isinstance(callback_query, raw.types.UpdateInlineBotCallbackQuery):
             inline_message_id = utils.pack_inline_message_id(callback_query.msg_id)
-
+        elif isinstance(callback_query, raw.types.UpdateBusinessBotCallbackQuery):
+            message = await types.Message._parse(
+                client,
+                callback_query.message,
+                users,
+                chats,
+                is_scheduled=False,
+                replies=0,
+            )
         # Try to decode callback query data into string. If that fails, fallback to bytes instead of decoding by
         # ignoring/replacing errors, this way, button clicks will still work.
-        try:
-            data = callback_query.data.decode()
-        except (UnicodeDecodeError, AttributeError):
-            data = callback_query.data
+        data = getattr(callback_query, "data", None)
+        if data:
+            try:
+                data = data.decode()
+            except (UnicodeDecodeError, AttributeError):
+                data = data
 
         return CallbackQuery(
             id=str(callback_query.query_id),
@@ -116,7 +152,7 @@ class CallbackQuery(Object, Update):
             inline_message_id=inline_message_id,
             chat_instance=str(callback_query.chat_instance),
             data=data,
-            game_short_name=callback_query.game_short_name,
+            game_short_name=getattr(callback_query, "game_short_name", None),
             client=client
         )
 

@@ -23,37 +23,28 @@ from collections import OrderedDict
 from typing import Any
 
 import pyrogram
-from pyrogram import utils, types
+from pyrogram import utils, types, raw
 from pyrogram.handlers import (
     CallbackQueryHandler, MessageHandler, EditedMessageHandler, ErrorHandler, DeletedMessagesHandler,
     UserStatusHandler, RawUpdateHandler, InlineQueryHandler, PollHandler,
     ChosenInlineResultHandler, ChatMemberUpdatedHandler, ChatJoinRequestHandler, StoryHandler
-)
-from pyrogram.raw.types import (
-    UpdateNewMessage, UpdateNewChannelMessage, UpdateNewScheduledMessage,
-    UpdateEditMessage, UpdateEditChannelMessage,
-    UpdateDeleteMessages, UpdateDeleteChannelMessages,
-    UpdateBotCallbackQuery, UpdateInlineBotCallbackQuery,
-    UpdateUserStatus, UpdateBotInlineQuery, UpdateMessagePoll,
-    UpdateBotInlineSend, UpdateChatParticipant, UpdateChannelParticipant,
-    UpdateBotChatInviteRequester, UpdateStory
 )
 
 log = logging.getLogger(__name__)
 
 
 class Dispatcher:
-    NEW_MESSAGE_UPDATES = (UpdateNewMessage, UpdateNewChannelMessage, UpdateNewScheduledMessage)
-    EDIT_MESSAGE_UPDATES = (UpdateEditMessage, UpdateEditChannelMessage)
-    DELETE_MESSAGES_UPDATES = (UpdateDeleteMessages, UpdateDeleteChannelMessages)
-    CALLBACK_QUERY_UPDATES = (UpdateBotCallbackQuery, UpdateInlineBotCallbackQuery)
-    CHAT_MEMBER_UPDATES = (UpdateChatParticipant, UpdateChannelParticipant)
-    USER_STATUS_UPDATES = (UpdateUserStatus,)
-    BOT_INLINE_QUERY_UPDATES = (UpdateBotInlineQuery,)
-    POLL_UPDATES = (UpdateMessagePoll,)
-    CHOSEN_INLINE_RESULT_UPDATES = (UpdateBotInlineSend,)
-    CHAT_JOIN_REQUEST_UPDATES = (UpdateBotChatInviteRequester,)
-    NEW_STORY_UPDATES = (UpdateStory,)
+    NEW_MESSAGE_UPDATES = (raw.types.UpdateNewMessage, raw.types.UpdateNewChannelMessage, raw.types.UpdateNewScheduledMessage)
+    EDIT_MESSAGE_UPDATES = (raw.types.UpdateEditMessage, raw.types.UpdateEditChannelMessage)
+    DELETE_MESSAGES_UPDATES = (raw.types.UpdateDeleteMessages, raw.types.UpdateDeleteChannelMessages)
+    CALLBACK_QUERY_UPDATES = (raw.types.UpdateBotCallbackQuery, raw.types.UpdateInlineBotCallbackQuery)
+    CHAT_MEMBER_UPDATES = (raw.types.UpdateChatParticipant, raw.types.UpdateChannelParticipant)
+    USER_STATUS_UPDATES = (raw.types.UpdateUserStatus,)
+    BOT_INLINE_QUERY_UPDATES = (raw.types.UpdateBotInlineQuery,)
+    POLL_UPDATES = (raw.types.UpdateMessagePoll,)
+    CHOSEN_INLINE_RESULT_UPDATES = (raw.types.UpdateBotInlineSend,)
+    CHAT_JOIN_REQUEST_UPDATES = (raw.types.UpdateBotChatInviteRequester,)
+    NEW_STORY_UPDATES = (raw.types.UpdateStory,)
 
     def __init__(self, client: "pyrogram.Client"):
         self.client = client
@@ -69,7 +60,7 @@ class Dispatcher:
         async def message_parser(update, users, chats):
             return (
                 await pyrogram.types.Message._parse(self.client, update.message, users, chats, None,
-                                                    isinstance(update, UpdateNewScheduledMessage)),
+                                                    isinstance(update, raw.types.UpdateNewScheduledMessage)),
                 MessageHandler
             )
 
@@ -90,7 +81,7 @@ class Dispatcher:
 
         async def callback_query_parser(update, users, chats):
             return (
-                await pyrogram.types.CallbackQuery._parse(self.client, update, users),
+                await pyrogram.types.CallbackQuery._parse(self.client, update, users, chats),
                 CallbackQueryHandler
             )
 
