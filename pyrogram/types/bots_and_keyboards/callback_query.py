@@ -92,7 +92,6 @@ class CallbackQuery(Object, Update):
         callback_query: Union[
             "raw.types.UpdateBotCallbackQuery",
             "raw.types.UpdateInlineBotCallbackQuery",
-            "raw.types.UpdateBusinessBotCallbackQuery",
         ],
         users: dict,
         chats: dict,
