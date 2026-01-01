@@ -96,7 +96,6 @@ class ChosenInlineResult(Object, Update):
         text: str,
         parse_mode: Optional["enums.ParseMode"] = None,
         entities: list["types.MessageEntity"] = None,
-        link_preview_options: "types.LinkPreviewOptions" = None,
         reply_markup: "types.InlineKeyboardMarkup" = None
     ) -> bool:
         """Edit the text of messages attached to sent :obj:`~pyrogram.types.InlineQueryResult` messages.
@@ -113,9 +112,6 @@ class ChosenInlineResult(Object, Update):
 
             entities (List of :obj:`~pyrogram.types.MessageEntity`):
                 List of special entities that appear in message text, which can be specified instead of *parse_mode*.
-
-            link_preview_options (:obj:`~pyrogram.types.LinkPreviewOptions`, *optional*):
-                Link preview generation options for the message
 
             reply_markup (:obj:`~pyrogram.types.InlineKeyboardMarkup`, *optional*):
                 An InlineKeyboardMarkup object.
@@ -134,7 +130,6 @@ class ChosenInlineResult(Object, Update):
                 text=text,
                 parse_mode=parse_mode,
                 entities=entities,
-                link_preview_options=link_preview_options,
                 reply_markup=reply_markup
             )
 
