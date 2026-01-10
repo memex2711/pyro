@@ -38,15 +38,15 @@ if len(argv) > 1 and argv[1] in ["bdist_wheel", "install", "develop"]:
     errors_compiler.start()
 
 setup(
-    name="Navygram",
+    name="pyrogram-navy",
     version=version,
-    description="Elegant, modern and asynchronous Telegram MTProto API framework in Python for users and bots",
+    description="Elegant, modern and asynchronous Telegram MTProto API framework in Python for users and bots (Navy Fork)",
     long_description=readme,
     long_description_content_type="text/markdown",
-    url="https://github.com/navycodes/pyrogram",
-    download_url="https://github.com/navycodes/pyrogram/releases/latest",
-    author="NavyCode",
-    author_email="managekazu@gmail.com",
+    url="https://github.com/navycodes/pyrogram-navy",
+    download_url="https://github.com/navycodes/pyrogram-navy/releases/latest",
+    author="deylin",
+    author_email="deylinarea@gmail.com",
     license="LGPLv3",
     classifiers=[
         "Development Status :: 5 - Production/Stable",
@@ -64,7 +64,6 @@ setup(
         "Programming Language :: Python :: 3.12",
         "Programming Language :: Python :: 3.13",
         "Programming Language :: Python :: 3.14",
-        "Programming Language :: Python :: 3.15",
         "Programming Language :: Python :: Implementation",
         "Programming Language :: Python :: Implementation :: CPython",
         "Programming Language :: Python :: Implementation :: PyPy",
@@ -78,7 +77,7 @@ setup(
     keywords="telegram chat messenger mtproto api client library python",
     python_requires=">=3.8",
     package_data={
-        "navygram": ["py.typed"],
+        "pyrogram-navy": ["py.typed"],
     },
     packages=find_packages(exclude=["compiler*", "tests*"]),
     zip_safe=False,
