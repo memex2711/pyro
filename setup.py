@@ -64,6 +64,8 @@ setup(
         "Programming Language :: Python :: 3.12",
         "Programming Language :: Python :: 3.13",
         "Programming Language :: Python :: 3.14",
+        "Programming Language :: Python :: 3.15",
+        "Programming Language :: Python :: 3.16",
         "Programming Language :: Python :: Implementation",
         "Programming Language :: Python :: Implementation :: CPython",
         "Programming Language :: Python :: Implementation :: PyPy",
@@ -75,7 +77,7 @@ setup(
         "Topic :: Software Development :: Libraries :: Application Frameworks"
     ],
     keywords="telegram chat messenger mtproto api client library python",
-    python_requires="~=3.7",
+    python_requires=">=3.8",
     package_data={
         "navygram": ["py.typed"],
     },
