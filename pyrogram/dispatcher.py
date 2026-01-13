@@ -226,6 +226,7 @@ class Dispatcher:
                 self.updates_queue.task_done()
     
     async def _handle_packet(self, packet, lock: asyncio.Lock):
+        print(self.client)
         update, users, chats = packet
         parser = self.update_parsers.get(type(update))
 
