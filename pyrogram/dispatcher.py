@@ -228,16 +228,10 @@ class Dispatcher:
         update, users, chats = packet
         parser = self.update_parsers.get(type(update))
 
-        try:
-            parsed_update, handler_type = (
-                await parser(update, users, chats)
-                if parser is not None else (None, type(None))
-            )
-        except (KeyError, IndexError):
-            pass
-        except Exception as e:
-            log.exception(e)
-            pass
+        parsed_update, handler_type = (
+            await parser(update, users, chats)
+            if parser is not None else (None, type(None))
+        )
         async with lock:
             await self._dispatch_to_handlers(update, users, chats, parsed_update, handler_type)
 
