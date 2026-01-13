@@ -234,10 +234,10 @@ class Dispatcher:
                 if parser is not None else (None, type(None))
             )
         except (KeyError, IndexError):
-            return 
+            pass
         except Exception as e:
             log.exception(e)
-            return
+            pass
         async with lock:
             await self._dispatch_to_handlers(update, users, chats, parsed_update, handler_type)
 
