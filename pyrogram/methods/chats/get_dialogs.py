@@ -19,6 +19,7 @@
 from typing import AsyncGenerator, Optional, List
 
 import pyrogram
+from asyncio import sleep
 from pyrogram import types, raw, utils, enums
 from pyrogram.errors import ChannelPrivate, PeerIdInvalid
 
@@ -87,23 +88,28 @@ class GetDialogs:
                 if not isinstance(dialog, raw.types.Dialog):
                     continue
 
-                dialogs.append(types.Dialog._parse(self, dialog, messages, users, chats))
+                parsed = types.Dialog._parse(self, dialog, messages, users, chats)
+                if parsed is None:
+                    continue
+
+                if parsed.chat is None:
+                    continue
+                dialogs.append(parsed)
 
             if not dialogs:
                 return
 
             last = dialogs[-1]
 
-            if last.top_message:
-                offset_id = last.top_message.id
-                offset_date = utils.datetime_to_timestamp(last.top_message.date)
-            
-            else:
-                offset_id = 0
-                offset_date = 0
+            if last.top_message is None:
+                return
+                
+            offset_id = last.top_message.id
+            offset_date = utils.datetime_to_timestamp(last.top_message.date)
             offset_peer = await self.resolve_peer(last.chat.id)
 
             for dialog in dialogs:
+                await sleep(0)
                 yield dialog
 
                 current += 1
