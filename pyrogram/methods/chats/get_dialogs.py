@@ -1,196 +1,217 @@
-from typing import List, Dict, Optional
+#  Pyrogram - Telegram MTProto API Client Library for Python
+#  Copyright (C) 2017-present Dan <https://github.com/delivrance>
+#
+#  This file is part of Pyrogram.
+#
+#  Pyrogram is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU Lesser General Public License as published
+#  by the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  Pyrogram is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU Lesser General Public License for more details.
+#
+#  You should have received a copy of the GNU Lesser General Public License
+#  along with Pyrogram.  If not, see <http://www.gnu.org/licenses/>.
+
+from typing import AsyncGenerator, Optional, List
+
 import pyrogram
-from pyrogram import raw, utils
+from pyrogram import types, raw, utils, enums
+from pyrogram.errors import ChannelPrivate, PeerIdInvalid
+
 
 class GetDialogs:
     async def get_dialogs(
         self: "pyrogram.Client",
-        limit: int = 100
-    ) -> List[Dict]:
-        """Get a user's dialogs as a list of dictionaries.
-        
-        This method is patched to return a simplified list of dictionaries 
-        instead of Pyrogram Dialog objects.
+        limit: int = 0
+    ) -> Optional[AsyncGenerator["types.Dialog", None]]:
+        """Get a user's dialogs sequentially.
 
         .. include:: /_includes/usable-by/users.rst
 
         Parameters:
             limit (``int``, *optional*):
-                The chunk size limit for the request.
-                Defaults to 100.
+                Limits the number of dialogs to be retrieved.
+                By default, no limit is applied and all dialogs are returned.
 
         Returns:
-            ``List[Dict]``: A list of dictionaries representing dialogs.
-            Each dictionary contains:
-            - ``id`` (int): The chat/user ID.
-            - ``name`` (str): The title or full name.
-            - ``type`` (str): "private", "group", "supergroup", or "channel".
-            - ``username`` (str, optional): Username if available.
-            - ``is_bot`` (bool, optional): True if the user is a bot.
-            - ``is_deleted`` (bool, optional): True if the account is deleted.
+            ``Generator``: A generator yielding :obj:`~pyrogram.types.Dialog` objects.
 
         Example:
             .. code-block:: python
 
-                # Get all dialogs
-                dialogs = await app.get_dialogs()
-                
-                for dialog in dialogs:
-                    print(f"Name: {dialog['name']} | ID: {dialog['id']}")
+                # Iterate through all dialogs
+                async for dialog in app.get_dialogs():
+                    print(dialog.chat.first_name or dialog.chat.title)
         """
-        dialogs_data = []
+        current = 0
+        total = limit or (1 << 31) - 1
+        limit = min(100, total)
 
-        offset_date = 0
-        offset_id = 0
         offset_peer = raw.types.InputPeerEmpty()
-        chunk_limit = limit if limit <= 100 else 100
 
         while True:
-            try:
-                r = await self.invoke(
-                    raw.functions.messages.GetDialogs(
-                        offset_date=offset_date,
-                        offset_id=offset_id,
-                        offset_peer=offset_peer,
-                        limit=chunk_limit,
-                        hash=0
-                    )
-                )
+            r = await self.invoke(
+                raw.functions.messages.GetDialogs(
+                    offset_date=offset_date,
+                    offset_id=offset_id,
+                    offset_peer=offset_peer,
+                    limit=limit,
+                    hash=0
+                ),
+                sleep_threshold=60
+            )
 
-                if not r.dialogs:
-                    break
+            users = {i.id: i for i in r.users}
+            chats = {i.id: i for i in r.chats}
 
-                chat_map = {c.id: c for c in r.chats}
-                user_map = {u.id: u for u in r.users}
-                message_map = {m.id: m for m in r.messages}
+            messages = {}
 
-                for dialog in r.dialogs:
-                    peer = dialog.peer
-                    entry = None
+            for message in r.messages:
+                if isinstance(message, raw.types.MessageEmpty):
+                    continue
 
-                    if isinstance(peer, raw.types.PeerUser):
-                        user = user_map.get(peer.user_id)
-                        if user:
-                            first_name = user.first_name or ""
-                            last_name = user.last_name or ""
-                            full_name = f"{first_name} {last_name}".strip() or "Unknown"
+                chat_id = utils.get_peer_id(message.peer_id)
+                try:
+                    messages[chat_id] = await types.Message._parse(self, message, users, chats)
+                except (ChannelPrivate, PeerIdInvalid):
+                    continue
 
-                            entry = {
-                                "id": user.id,
-                                "name": full_name,
-                                "type": "private",
-                                "username": user.username,
-                                "is_bot": user.bot,
-                                "is_deleted": getattr(user, "deleted", False),
-                            }
+            dialogs = []
 
-                    elif isinstance(peer, raw.types.PeerChat):
-                        chat = chat_map.get(peer.chat_id)
-                        if chat and not getattr(chat, "deactivated", False):
-                            entry = {
-                                "id": -chat.id,
-                                "name": chat.title,
-                                "type": "group"
-                            }
+            for dialog in r.dialogs:
+                if not isinstance(dialog, raw.types.Dialog):
+                    continue
 
-                    elif isinstance(peer, raw.types.PeerChannel):
-                        channel = chat_map.get(peer.channel_id)
-                        if channel:
-                            is_supergroup = getattr(channel, "megagroup", False)
-                            chat_type = "supergroup" if is_supergroup else "channel"
-                            final_id = utils.get_channel_id(channel.id)
+                dialogs.append(types.Dialog._parse(self, dialog, messages, users, chats))
 
-                            entry = {
-                                "id": final_id,
-                                "name": channel.title,
-                                "type": chat_type
-                            }
+            if not dialogs:
+                return
 
-                    if entry:
-                        dialogs_data.append(entry)
+            last = dialogs[-1]
 
-                last_dialog = r.dialogs[-1]
-                offset_peer = self._resolve_input_peer(last_dialog.peer, chat_map, user_map)
-                offset_id = last_dialog.top_message
+            if last.top_message:
+                offset_id = last.top_message.id
+                offset_date = utils.datetime_to_timestamp(last.top_message.date)
+            
+            else:
+                offset_id = 0
+                offset_date = 0
+            offset_peer = await self.resolve_peer(last.chat.id)
 
-                if offset_id in message_map:
-                    offset_date = message_map[offset_id].date
-                else:
-                    offset_date = 0
+            for dialog in dialogs:
+                yield dialog
 
-                if len(r.dialogs) < chunk_limit:
-                    break
+                current += 1
 
-            except Exception:
-                break
+                if current >= total:
+                    return
 
-        return dialogs_data
-
-    def _resolve_input_peer(self, peer, chat_map, user_map):
-        try:
-            if isinstance(peer, raw.types.PeerUser):
-                user = user_map.get(peer.user_id)
-                if user:
-                    return raw.types.InputPeerUser(user_id=user.id, access_hash=user.access_hash)
-
-            elif isinstance(peer, raw.types.PeerChat):
-                return raw.types.InputPeerChat(chat_id=peer.chat_id)
-
-            elif isinstance(peer, raw.types.PeerChannel):
-                channel = chat_map.get(peer.channel_id)
-                if channel:
-                    return raw.types.InputPeerChannel(channel_id=channel.id, access_hash=channel.access_hash)
-        except Exception:
-            pass
-
-        return raw.types.InputPeerEmpty()
-
-    async def get_groups(self: "pyrogram.Client") -> List[Dict]:
+    async def get_groups(self: "pyrogram.Client") -> List["types.Dialog"]:
         """Get all groups and supergroups from dialogs.
 
-        Returns:
-            ``List[Dict]``: A list of dictionaries representing group chats.
-        """
-        all_chats = await self.get_dialogs()
-        return [c for c in all_chats if c["type"] in ["group", "supergroup"]]
-
-    async def get_private_chats(self: "pyrogram.Client") -> List[Dict]:
-        """Get all private chats (excluding bots and deleted accounts).
+        .. include:: /_includes/usable-by/users.rst
 
         Returns:
-            ``List[Dict]``: A list of dictionaries representing private chats.
-        """
-        all_chats = await self.get_dialogs()
-        return [
-            c for c in all_chats 
-            if c["type"] == "private" 
-            and not c.get("is_bot") 
-            and not c.get("is_deleted")
-        ]
+            ``List``: A list of :obj:`~pyrogram.types.Dialog` objects containing only groups and supergroups.
 
-    async def get_channels(self: "pyrogram.Client") -> List[Dict]:
+        Example:
+            .. code-block:: python
+
+                groups = await app.get_groups()
+                for group in groups:
+                    print(group.chat.title)
+        """
+        groups = []
+        async for dialog in self.get_dialogs():
+            if dialog.chat.type in [enums.ChatType.GROUP, enums.ChatType.SUPERGROUP]:
+                groups.append(dialog)
+        return groups
+
+    async def get_channels(self: "pyrogram.Client") -> List["types.Dialog"]:
         """Get all channels from dialogs.
 
-        Returns:
-            ``List[Dict]``: A list of dictionaries representing channels.
-        """
-        all_chats = await self.get_dialogs()
-        return [c for c in all_chats if c["type"] == "channel"]
+        .. include:: /_includes/usable-by/users.rst
 
-    async def get_bots(self: "pyrogram.Client") -> List[Dict]:
+        Returns:
+            ``List``: A list of :obj:`~pyrogram.types.Dialog` objects containing only channels.
+
+        Example:
+            .. code-block:: python
+
+                channels = await app.get_channels()
+                for channel in channels:
+                    print(channel.chat.title)
+        """
+        channels = []
+        async for dialog in self.get_dialogs():
+            if dialog.chat.type == enums.ChatType.CHANNEL:
+                channels.append(dialog)
+        return channels
+
+    async def get_private_chats(self: "pyrogram.Client") -> List["types.Dialog"]:
+        """Get all private chats (excluding bots and groups).
+
+        .. include:: /_includes/usable-by/users.rst
+
+        Returns:
+            ``List``: A list of :obj:`~pyrogram.types.Dialog` objects containing only private chats.
+
+        Example:
+            .. code-block:: python
+
+                users = await app.get_private_chats()
+                for user in users:
+                    print(user.chat.first_name)
+        """
+        privates = []
+        async for dialog in self.get_dialogs():
+            if dialog.chat.type == enums.ChatType.PRIVATE:
+                privates.append(dialog)
+        return privates
+
+    async def get_bots(self: "pyrogram.Client") -> List["types.Dialog"]:
         """Get all bots from dialogs.
 
-        Returns:
-            ``List[Dict]``: A list of dictionaries representing bots.
-        """
-        all_chats = await self.get_dialogs()
-        return [c for c in all_chats if c["type"] == "private" and c.get("is_bot")]
-
-    async def get_deleted_users(self: "pyrogram.Client") -> List[Dict]:
-        """Get all deleted user accounts from dialogs.
+        .. include:: /_includes/usable-by/users.rst
 
         Returns:
-            ``List[Dict]``: A list of dictionaries representing deleted accounts.
+            ``List``: A list of :obj:`~pyrogram.types.Dialog` objects containing only bots.
+
+        Example:
+            .. code-block:: python
+
+                bots = await app.get_bots()
+                for bot in bots:
+                    print(bot.chat.first_name)
         """
-        all_chats = await self.get_dialogs()
-        return [c for c in all_chats if c["type"] == "private" and c.get("is_deleted")]
+        bots = []
+        async for dialog in self.get_dialogs():
+            if dialog.chat.type == enums.ChatType.BOT:
+                bots.append(dialog)
+        return bots
+
+    async def get_deleted_users(self: "pyrogram.Client") -> List["types.Dialog"]:
+        """Get all deleted accounts (Deleted Account) from dialogs.
+
+        .. include:: /_includes/usable-by/users.rst
+
+        Returns:
+            ``List``: A list of :obj:`~pyrogram.types.Dialog` objects containing only deleted accounts.
+
+        Example:
+            .. code-block:: python
+
+                deleted = await app.get_deleted_users()
+                for acc in deleted:
+                    print(acc.chat.id)
+        """
+        deleted = []
+        async for dialog in self.get_dialogs():
+            if dialog.chat.type in [enums.ChatType.PRIVATE, enums.ChatType.BOT]:
+                if dialog.chat.first_name == "Deleted Account" or getattr(dialog.chat, "is_deleted", False):
+                    deleted.append(dialog)
+        return deleted
