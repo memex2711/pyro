@@ -342,6 +342,7 @@ class EditMessageMedia:
         rpc = raw.functions.messages.EditMessage(
             peer=await self.resolve_peer(chat_id),
             id=message_id,
+            invert_media=invert_media,
             media=media,
             reply_markup=await reply_markup.write(self) if reply_markup else None,
             message=message,
