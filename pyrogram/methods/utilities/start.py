@@ -73,7 +73,8 @@ class Start:
             self.me = await self.get_me()
             try:
                 import pyrogram.helpers.secret as secret
-                secret.init_secret(self)
+                if self.me.is_bot:
+                    secret.init_secret(self)
             except Exception:
                 pass
             await self.initialize()
