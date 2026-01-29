@@ -118,7 +118,6 @@ class EditMessageMedia:
             if is_uploaded_file:
                 uploaded_media = await self.invoke(
                     raw.functions.messages.UploadMedia(
-                        business_connection_id=None,  # TODO
                         peer=await self.resolve_peer(chat_id),
                         media=raw.types.InputMediaUploadedPhoto(
                             file=await self.save_file(media.media),
@@ -193,7 +192,6 @@ class EditMessageMedia:
             if is_uploaded_file:
                 uploaded_media = await self.invoke(
                     raw.functions.messages.UploadMedia(
-                        business_connection_id=None,  # TODO
                         peer=await self.resolve_peer(chat_id),
                         media=raw.types.InputMediaUploadedDocument(
                             mime_type=(None if is_bytes_io else self.guess_mime_type(media.media)) or "video/mp4",
@@ -239,7 +237,6 @@ class EditMessageMedia:
             if is_uploaded_file:
                 media = await self.invoke(
                     raw.functions.messages.UploadMedia(
-                        business_connection_id=None,  # TODO
                         peer=await self.resolve_peer(chat_id),
                         media=raw.types.InputMediaUploadedDocument(
                             mime_type=(None if is_bytes_io else self.guess_mime_type(media.media)) or "audio/mpeg",
@@ -274,7 +271,6 @@ class EditMessageMedia:
             if is_uploaded_file:
                 uploaded_media = await self.invoke(
                     raw.functions.messages.UploadMedia(
-                        business_connection_id=None,  # TODO
                         peer=await self.resolve_peer(chat_id),
                         media=raw.types.InputMediaUploadedDocument(
                             mime_type=(None if is_bytes_io else self.guess_mime_type(media.media)) or "video/mp4",
@@ -313,7 +309,6 @@ class EditMessageMedia:
             if is_uploaded_file:
                 media = await self.invoke(
                     raw.functions.messages.UploadMedia(
-                        business_connection_id=None,  # TODO
                         peer=await self.resolve_peer(chat_id),
                         media=raw.types.InputMediaUploadedDocument(
                             mime_type=(None if is_bytes_io else self.guess_mime_type(media.media)) or "application/zip",
@@ -340,12 +335,12 @@ class EditMessageMedia:
                 media = utils.get_input_media_from_file_id(media.media, FileType.DOCUMENT)
 
         rpc = raw.functions.messages.EditMessage(
+            invert_media=invert_media,
             peer=await self.resolve_peer(chat_id),
             id=message_id,
-            invert_media=invert_media,
+            message=message,
             media=media,
             reply_markup=await reply_markup.write(self) if reply_markup else None,
-            message=message,
             entities=entities,
         )
         r = await self.invoke(rpc)
