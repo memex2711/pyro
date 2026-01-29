@@ -1,42 +1,11 @@
-///////////////////////////////
-/////////////////// Layer cons
-///////////////////////////////
-
-//invokeAfterMsg#cb9f372d msg_id:long query:!X = X;
-//invokeAfterMsgs#3dc4b4f0 msg_ids:Vector<long> query:!X = X;
-//invokeWithLayer1#53835315 query:!X = X;
-//invokeWithLayer2#289dd1f6 query:!X = X;
-//invokeWithLayer3#b7475268 query:!X = X;
-//invokeWithLayer4#dea0d430 query:!X = X;
-//invokeWithLayer5#417a57ae query:!X = X;
-//invokeWithLayer6#3a64d54d query:!X = X;
-//invokeWithLayer7#a5be56d3 query:!X = X;
-//invokeWithLayer8#e9abd9fd query:!X = X;
-//invokeWithLayer9#76715a63 query:!X = X;
-//invokeWithLayer10#39620c41 query:!X = X;
-//invokeWithLayer11#a6b88fdf query:!X = X;
-//invokeWithLayer12#dda60d3c query:!X = X;
-//invokeWithLayer13#427c8ea2 query:!X = X;
-//invokeWithLayer14#2b9b08fa query:!X = X;
-//invokeWithLayer15#b4418b64 query:!X = X;
-//invokeWithLayer16#cf5f0987 query:!X = X;
-//invokeWithLayer17#50858a19 query:!X = X;
-//invokeWithLayer18#1c900537 query:!X = X;
-//invokeWithLayer#da9b0d0d layer:int query:!X = X; // after 18 layer
+// https://github.com/telegramdesktop/tdesktop/blob/dev/Telegram/SourceFiles/mtproto/scheme/api.tl
+// https://github.com/telegramdesktop/tdesktop/blob/dev/Telegram/SourceFiles/mtproto/scheme/layer.tl
 
 ///////////////////////////////
 ///////// Main application API
 ///////////////////////////////
 
 ---types---
-
-int ? = Int;
-long ? = Long;
-double ? = Double;
-string ? = String;
-
-bytes = Bytes;
-int256 = Int256;
 
 // boolFalse#bc799737 = Bool;  // Parsed manually
 // boolTrue#997275b5 = Bool;  // Parsed manually
@@ -48,14 +17,6 @@ int256 = Int256;
 // error#c4b9f9bb code:int text:string = Error;  // Not used
 
 // null#56730bcc = Null;  // Parsed manually
-
-ipPort#d433ad73 ipv4:int port:int = IpPort;
-ipPortSecret#37982646 ipv4:int port:int secret:bytes = IpPort;
-accessPointRule#4679b65f phone_prefix_rules:string dc_id:int ips:vector<IpPort> = AccessPointRule;
-help.configSimple#5a592a6c date:int expires:int rules:vector<AccessPointRule> = help.ConfigSimple;
-
-inputPeerPhotoFileLocationLegacy#27d69997 flags:# big:flags.0?true peer:InputPeer volume_id:long local_id:int = InputFileLocation;
-inputStickerSetThumbLegacy#dbaeae9 stickerset:InputStickerSet volume_id:long local_id:int = InputFileLocation;
 
 inputPeerEmpty#7f3b18ea = InputPeer;
 inputPeerSelf#7da07ec9 = InputPeer;
@@ -95,7 +56,6 @@ inputMediaStory#89fdd778 peer:InputPeer id:int = InputMedia;
 inputMediaWebPage#c21b8849 flags:# force_large_media:flags.0?true force_small_media:flags.1?true optional:flags.2?true url:string = InputMedia;
 inputMediaPaidMedia#c4103386 flags:# stars_amount:long extended_media:Vector<InputMedia> payload:flags.0?string = InputMedia;
 inputMediaTodo#9fc55fde todo:TodoList = InputMedia;
-inputMediaStakeDice#f3a9244a game_hash:string ton_amount:long client_seed:bytes = InputMedia;
 
 inputChatPhotoEmpty#1ca48f57 = InputChatPhoto;
 inputChatUploadedPhoto#bdcdaec0 flags:# file:flags.0?InputFile video:flags.1?InputFile video_start_ts:flags.2?double video_emoji_markup:flags.3?VideoSize = InputChatPhoto;
@@ -166,7 +126,7 @@ chatPhotoEmpty#37c1011c = ChatPhoto;
 chatPhoto#1c6e1c11 flags:# has_video:flags.0?true photo_id:long stripped_thumb:flags.1?bytes dc_id:int = ChatPhoto;
 
 messageEmpty#90a6ca84 flags:# id:int peer_id:flags.0?Peer = Message;
-message#9cb490e9 flags:# out:flags.1?true mentioned:flags.4?true media_unread:flags.5?true silent:flags.13?true post:flags.14?true from_scheduled:flags.18?true legacy:flags.19?true edit_hide:flags.21?true pinned:flags.24?true noforwards:flags.26?true invert_media:flags.27?true flags2:# offline:flags2.1?true video_processing_pending:flags2.4?true paid_suggested_post_stars:flags2.8?true paid_suggested_post_ton:flags2.9?true id:int from_id:flags.8?Peer from_boosts_applied:flags.29?int peer_id:Peer saved_peer_id:flags.28?Peer fwd_from:flags.2?MessageFwdHeader via_bot_id:flags.11?long via_business_bot_id:flags2.0?long reply_to:flags.3?MessageReplyHeader date:int message:string media:flags.9?MessageMedia reply_markup:flags.6?ReplyMarkup entities:flags.7?Vector<MessageEntity> views:flags.10?int forwards:flags.10?int replies:flags.23?MessageReplies edit_date:flags.15?int post_author:flags.16?string grouped_id:flags.17?long reactions:flags.20?MessageReactions restriction_reason:flags.22?Vector<RestrictionReason> ttl_period:flags.25?int quick_reply_shortcut_id:flags.30?int effect:flags2.2?long factcheck:flags2.3?FactCheck report_delivery_until_date:flags2.5?int paid_message_stars:flags2.6?long suggested_post:flags2.7?SuggestedPost schedule_repeat_period:flags2.10?int summary_from_language:flags2.11?string = Message;
+message#b92f76cf flags:# out:flags.1?true mentioned:flags.4?true media_unread:flags.5?true silent:flags.13?true post:flags.14?true from_scheduled:flags.18?true legacy:flags.19?true edit_hide:flags.21?true pinned:flags.24?true noforwards:flags.26?true invert_media:flags.27?true flags2:# offline:flags2.1?true video_processing_pending:flags2.4?true paid_suggested_post_stars:flags2.8?true paid_suggested_post_ton:flags2.9?true id:int from_id:flags.8?Peer from_boosts_applied:flags.29?int peer_id:Peer saved_peer_id:flags.28?Peer fwd_from:flags.2?MessageFwdHeader via_bot_id:flags.11?long via_business_bot_id:flags2.0?long reply_to:flags.3?MessageReplyHeader date:int message:string media:flags.9?MessageMedia reply_markup:flags.6?ReplyMarkup entities:flags.7?Vector<MessageEntity> views:flags.10?int forwards:flags.10?int replies:flags.23?MessageReplies edit_date:flags.15?int post_author:flags.16?string grouped_id:flags.17?long reactions:flags.20?MessageReactions restriction_reason:flags.22?Vector<RestrictionReason> ttl_period:flags.25?int quick_reply_shortcut_id:flags.30?int effect:flags2.2?long factcheck:flags2.3?FactCheck report_delivery_until_date:flags2.5?int paid_message_stars:flags2.6?long suggested_post:flags2.7?SuggestedPost schedule_repeat_period:flags2.10?int = Message;
 messageService#7a800e0a flags:# out:flags.1?true mentioned:flags.4?true media_unread:flags.5?true reactions_are_possible:flags.9?true silent:flags.13?true post:flags.14?true legacy:flags.19?true id:int from_id:flags.8?Peer peer_id:Peer saved_peer_id:flags.28?Peer reply_to:flags.3?MessageReplyHeader date:int action:MessageAction reactions:flags.20?MessageReactions ttl_period:flags.25?int = Message;
 
 messageMediaEmpty#3ded6320 = MessageMedia;
@@ -181,7 +141,7 @@ messageMediaGame#fdb19008 game:Game = MessageMedia;
 messageMediaInvoice#f6a548d3 flags:# shipping_address_requested:flags.1?true test:flags.3?true title:string description:string photo:flags.0?WebDocument receipt_msg_id:flags.2?int currency:string total_amount:long start_param:string extended_media:flags.4?MessageExtendedMedia = MessageMedia;
 messageMediaGeoLive#b940c666 flags:# geo:GeoPoint heading:flags.0?int period:int proximity_notification_radius:flags.1?int = MessageMedia;
 messageMediaPoll#4bd6e798 poll:Poll results:PollResults = MessageMedia;
-messageMediaDice#8cbec07 flags:# value:int emoticon:string game_outcome:flags.0?messages.EmojiGameOutcome = MessageMedia;
+messageMediaDice#3f7ee58b value:int emoticon:string = MessageMedia;
 messageMediaStory#68cb6283 flags:# via_mention:flags.1?true peer:Peer id:int story:flags.0?StoryItem = MessageMedia;
 messageMediaGiveaway#aa073beb flags:# only_new_subscribers:flags.0?true winners_are_visible:flags.2?true channels:Vector<long> countries_iso2:flags.1?Vector<string> prize_description:flags.3?string quantity:int months:flags.4?int stars:flags.5?long until_date:int = MessageMedia;
 messageMediaGiveawayResults#ceaa3ea1 flags:# only_new_subscribers:flags.0?true refunded:flags.2?true channel_id:long additional_peers_count:flags.3?int launch_msg_id:int winners_count:int unclaimed_count:int winners:Vector<long> months:flags.4?int stars:flags.5?long prize_description:flags.1?string until_date:int = MessageMedia;
@@ -501,7 +461,6 @@ updatePinnedForumTopics#def143d0 flags:# peer:Peer order:flags.0?Vector<int> = U
 updateDeleteGroupCallMessages#3e85e92c call:InputGroupCall messages:Vector<int> = Update;
 updateStarGiftAuctionState#48e246c2 gift_id:long state:StarGiftAuctionState = Update;
 updateStarGiftAuctionUserState#dc58f31e gift_id:long user_state:StarGiftAuctionUserState = Update;
-updateEmojiGameInfo#fb9c547a info:messages.EmojiGameInfo = Update;
 
 updates.state#a56c2a3e pts:int qts:int date:int seq:int unread_count:int = updates.State;
 
@@ -2066,9 +2025,7 @@ todoCompletion#221bb5e4 id:int completed_by:Peer date:int = TodoCompletion;
 suggestedPost#e8e37e5 flags:# accepted:flags.1?true rejected:flags.2?true price:flags.3?StarsAmount schedule_date:flags.0?int = SuggestedPost;
 
 starsRating#1b0e4f07 flags:# level:int current_level_stars:long stars:long next_level_stars:flags.0?long = StarsRating;
-
 starGiftCollection#9d6b13b0 flags:# collection_id:int title:string icon:flags.0?Document gifts_count:int hash:long = StarGiftCollection;
-
 payments.starGiftCollectionsNotModified#a0ba4f17 = payments.StarGiftCollections;
 payments.starGiftCollections#8a2932f3 collections:Vector<StarGiftCollection> = payments.StarGiftCollections;
 
@@ -2147,7 +2104,6 @@ inputPasskeyResponseRegister#3e63935c client_data:DataJSON attestation_data:byte
 inputPasskeyResponseLogin#c31fc14a client_data:DataJSON authenticator_data:bytes signature:bytes user_handle:string = InputPasskeyResponse;
 
 inputPasskeyCredentialPublicKey#3c27b78f id:string raw_id:string response:InputPasskeyResponse = InputPasskeyCredential;
-inputPasskeyCredentialFirebasePNV#5b1ccb28 pnv_token:string = InputPasskeyCredential;
 
 starGiftBackground#aff56398 center_color:int edge_color:int text_color:int = StarGiftBackground;
 
@@ -2155,11 +2111,6 @@ starGiftAuctionRound#3aae0528 num:int duration:int = StarGiftAuctionRound;
 starGiftAuctionRoundExtendable#aa021e5 num:int duration:int extend_top:int extend_window:int = StarGiftAuctionRound;
 
 payments.starGiftUpgradeAttributes#46c6e36f attributes:Vector<StarGiftAttribute> = payments.StarGiftUpgradeAttributes;
-
-messages.emojiGameOutcome#da2ad647 seed:bytes stake_ton_amount:long ton_amount:long = messages.EmojiGameOutcome;
-
-messages.emojiGameUnavailable#59e65335 = messages.EmojiGameInfo;
-messages.emojiGameDiceInfo#44e56023 flags:# game_hash:string prev_stake:long current_streak:int params:Vector<int> plays_left:flags.0?int = messages.EmojiGameInfo;
 
 ---functions---
 
@@ -2600,8 +2551,6 @@ messages.updatePinnedForumTopic#175df251 peer:InputPeer topic_id:int pinned:Bool
 messages.reorderPinnedForumTopics#e7841f0 flags:# force:flags.0?true peer:InputPeer order:Vector<int> = Updates;
 messages.createForumTopic#2f98c3d5 flags:# title_missing:flags.4?true peer:InputPeer title:string icon_color:flags.0?int icon_emoji_id:flags.3?long random_id:long send_as:flags.2?InputPeer = Updates;
 messages.deleteTopicHistory#d2816f10 peer:InputPeer top_msg_id:int = messages.AffectedHistory;
-messages.getEmojiGameInfo#fb7e8ca7 = messages.EmojiGameInfo;
-messages.summarizeText#9d4104e2 flags:# peer:InputPeer id:int to_lang:flags.0?string = TextWithEntities;
 
 updates.getState#edd4882a = updates.State;
 updates.getDifference#19c2f763 flags:# pts:int pts_limit:flags.1?int pts_total_limit:flags.0?int date:int qts:int qts_limit:flags.2?int = updates.Difference;
@@ -2918,7 +2867,6 @@ stories.updateAlbum#5e5259b6 flags:# peer:InputPeer album_id:int title:flags.0?s
 stories.reorderAlbums#8535fbd9 peer:InputPeer order:Vector<int> = Bool;
 stories.deleteAlbum#8d3456d0 peer:InputPeer album_id:int = Bool;
 stories.getAlbums#25b3eac7 peer:InputPeer hash:long = stories.Albums;
-stories.getAlbumStories#ac806d61 peer:InputPeer album_id:int offset:int limit:int = stories.Stories;
 stories.startLive#d069ccde flags:# pinned:flags.2?true noforwards:flags.4?true rtmp_stream:flags.5?true peer:InputPeer caption:flags.0?string entities:flags.1?Vector<MessageEntity> privacy_rules:Vector<InputPrivacyRule> random_id:long messages_enabled:flags.6?Bool send_paid_messages_stars:flags.7?long = Updates;
 
 premium.getBoostsList#60f67660 flags:# gifts:flags.0?true peer:InputPeer offset:string limit:int = premium.BoostsList;
@@ -2937,13 +2885,4 @@ smsjobs.finishJob#4f1ebf24 flags:# job_id:string error:flags.0?string = Bool;
 
 fragment.getCollectibleInfo#be1e85ba collectible:InputCollectible = fragment.CollectibleInfo;
 
-// test.useError = Error;
-// test.useConfigSimple = help.ConfigSimple;
-// test.parseInputAppEvent = InputAppEvent;
-
-// invokeWithBusinessConnectionPrefix#dd289f8e connection_id:string = Error;
-// invokeWithGooglePlayIntegrityPrefix#1df92984 nonce:string token:string = Error;
-// invokeWithApnsSecretPrefix#0dae54f8 nonce:string secret:string = Error;
-// invokeWithReCaptchaPrefix#adbb0f94 token:string = Error;
-
-// LAYER 186
+// LAYER 182
