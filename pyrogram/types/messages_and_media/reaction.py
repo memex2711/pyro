@@ -79,8 +79,16 @@ class Reaction(Object):
         client: "pyrogram.Client",
         reaction_count: "raw.base.ReactionCount"
     ) -> "Reaction":
+        if reaction_count is None:
+            return None
+        
+        if reaction_count.count is None:
+            return None
+        
         reaction = Reaction._parse(client, reaction_count.reaction)
-        reaction.count = reaction_count.count
-        reaction.chosen_order = reaction_count.chosen_order
+        
+        if reaction is not None:
+            reaction.count = reaction_count.count
+            reaction.chosen_order = getattr(reaction_count, 'chosen_order', None)
 
         return reaction
