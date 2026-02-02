@@ -213,6 +213,7 @@ class EditInlineMedia:
                     media=media
                 )
             )
+            print(uploaded_media)
 
             actual_media = raw.types.InputMediaPhoto(
                 id=raw.types.InputPhoto(
@@ -221,6 +222,7 @@ class EditInlineMedia:
                     file_reference=uploaded_media.photo.file_reference
                 ),
                 spoiler=getattr(media, "has_spoiler", None)
+            
             ) if isinstance(uploaded_media, raw.types.MessageMediaPhoto) else raw.types.InputMediaDocument(
                 id=raw.types.InputDocument(
                     id=uploaded_media.document.id,
