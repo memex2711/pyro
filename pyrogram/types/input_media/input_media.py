@@ -16,10 +16,12 @@
 #  You should have received a copy of the GNU Lesser General Public License
 #  along with Pyrogram.  If not, see <http://www.gnu.org/licenses/>.
 
-from typing import List, Union, BinaryIO
+import io
+from typing import Optional, Union
 
 from ..messages_and_media import MessageEntity
 from ..object import Object
+from ... import enums
 
 
 class InputMedia(Object):
@@ -36,10 +38,10 @@ class InputMedia(Object):
 
     def __init__(
         self,
-        media: Union[str, BinaryIO],
+        media: Union[str, "io.BytesIO"],
         caption: str = "",
-        parse_mode: str = None,
-        caption_entities: List[MessageEntity] = None
+        parse_mode: Optional["enums.ParseMode"] = None,
+        caption_entities: list[MessageEntity] = None
     ):
         super().__init__()
 

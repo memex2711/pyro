@@ -16,7 +16,8 @@
 #  You should have received a copy of the GNU Lesser General Public License
 #  along with Pyrogram.  If not, see <http://www.gnu.org/licenses/>.
 
-from typing import Optional, List, Union, BinaryIO
+import io
+from typing import Optional, Union
 
 from .input_media import InputMedia
 from ..messages_and_media import MessageEntity
@@ -28,7 +29,7 @@ class InputMediaPhoto(InputMedia):
     It is intended to be used with :obj:`~pyrogram.Client.send_media_group`.
 
     Parameters:
-        media (``str`` | ``BinaryIO``):
+        media (``str`` | :obj:`io.BytesIO`):
             Photo to send.
             Pass a file_id as string to send a photo that exists on the Telegram servers or
             pass a file path as string to upload a new photo that exists on your local machine or
@@ -46,18 +47,23 @@ class InputMediaPhoto(InputMedia):
         caption_entities (List of :obj:`~pyrogram.types.MessageEntity`):
             List of special entities that appear in the caption, which can be specified instead of *parse_mode*.
 
+        show_caption_above_media (``bool``, *optional*):
+            Pass True, if the caption must be shown above the message media.
+
         has_spoiler (``bool``, *optional*):
             Pass True if the photo needs to be covered with a spoiler animation.
     """
 
     def __init__(
         self,
-        media: Union[str, BinaryIO],
+        media: Union[str, "io.BytesIO"],
         caption: str = "",
         parse_mode: Optional["enums.ParseMode"] = None,
-        caption_entities: List[MessageEntity] = None,
+        caption_entities: list[MessageEntity] = None,
+        show_caption_above_media: bool = None,
         has_spoiler: bool = None
     ):
         super().__init__(media, caption, parse_mode, caption_entities)
 
+        self.show_caption_above_media = show_caption_above_media
         self.has_spoiler = has_spoiler
