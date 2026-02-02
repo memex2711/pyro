@@ -46,7 +46,7 @@ from pyrogram.errors import CDNFileHashMismatch
 from pyrogram.errors import (
     SessionPasswordNeeded,
     VolumeLocNotFound, ChannelPrivate,
-    BadRequest, AuthBytesInvalid
+    BadRequest, AuthBytesInvalid, PersistentTimestampOutdated
 )
 from .connection import Connection
 from .connection.transport import TCP, TCPAbridged
@@ -729,7 +729,7 @@ class Client(Methods):
                                     limit=pts,
                                 )
                             )
-                        except ChannelPrivate:
+                        except (ChannelPrivate, PersistentTimestampOutdated):
                             pass
                         else:
                             if not isinstance(diff, raw.types.updates.ChannelDifferenceEmpty):
