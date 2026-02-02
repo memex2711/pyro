@@ -213,8 +213,6 @@ class EditInlineMedia:
                     media=media
                 )
             )
-            print(uploaded_media)
-
             actual_media = raw.types.InputMediaPhoto(
                 id=raw.types.InputPhoto(
                     id=uploaded_media.photo.id,
