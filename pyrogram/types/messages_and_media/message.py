@@ -358,6 +358,10 @@ class Message(Object, Update):
 
         link (``str``, *property*):
             Generate a link to this message, only for groups and channels.
+
+        edit_hide (``bool``, *optional*):
+            The message shown as not modified.
+            A message can be not modified in case it has received a reaction.
     """
 
     # TODO: Add game missing field. Also invoice, successful_payment, connected_website
@@ -392,6 +396,7 @@ class Message(Object, Update):
         service: "enums.MessageServiceType" = None,
         scheduled: bool = None,
         from_scheduled: bool = None,
+        edit_hide: bool = None,
         media: "enums.MessageMediaType" = None,
         invert_media: bool = None,
         edit_date: datetime = None,
@@ -492,6 +497,7 @@ class Message(Object, Update):
         self.media = media
         self.invert_media = invert_media
         self.edit_date = edit_date
+        self.edit_hide = edit_hide
         self.media_group_id = media_group_id
         self.author_signature = author_signature
         self.has_protected_content = has_protected_content
@@ -997,6 +1003,7 @@ class Message(Object, Update):
                 scheduled=is_scheduled,
                 from_scheduled=message.from_scheduled,
                 media=media_type,
+                edit_hide=message.edit_hide,
                 invert_media=getattr(message, "invert_media", None),
                 edit_date=utils.timestamp_to_datetime(message.edit_date),
                 media_group_id=message.grouped_id,

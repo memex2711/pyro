@@ -239,6 +239,16 @@ forwarded = create(forwarded_filter)
 
 # endregion
 
+# region reaction_filter
+async def reaction_filter(_, __, m: Message):
+    return bool(m.edit_hide)
+
+
+react = create(reaction_filter)
+"""Filter reactions."""
+
+# endregion
+
 # region caption_filter
 async def caption_filter(_, __, m: Message):
     return bool(m.caption)
