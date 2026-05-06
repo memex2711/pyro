@@ -231,8 +231,10 @@ class EditMessageMedia:
                 )
             else:
                 media = utils.get_input_media_from_file_id(media.media, FileType.VIDEO, has_spoiler=media.has_spoiler)
-                media.video_cover = coverfile
-                media.video_timestamp = start_timestamp
+                if hasattr(media, 'video_cover'):
+                    media.video_cover = coverfile
+                if hasattr(media, 'video_timestamp'):
+                    media.video_timestamp = start_timestamp
         elif isinstance(media, types.InputMediaAudio):
             if is_uploaded_file:
                 media = await self.invoke(
