@@ -27,6 +27,7 @@ from .bot_command_scope_chat_member import BotCommandScopeChatMember
 from .bot_command_scope_default import BotCommandScopeDefault
 from .callback_game import CallbackGame
 from .callback_query import CallbackQuery
+from .copy_text_button import CopyTextButton
 from .force_reply import ForceReply
 from .game_high_score import GameHighScore
 from .inline_keyboard_button import InlineKeyboardButton
@@ -40,11 +41,14 @@ from .menu_button_web_app import MenuButtonWebApp
 from .reply_keyboard_markup import ReplyKeyboardMarkup
 from .reply_keyboard_remove import ReplyKeyboardRemove
 from .sent_web_app_message import SentWebAppMessage
+from .switch_inline_query_chosen_chat import SwitchInlineQueryChosenChat
 from .web_app_info import WebAppInfo
+
 
 __all__ = [
     "CallbackGame",
     "CallbackQuery",
+    "CopyTextButton",
     "ForceReply",
     "GameHighScore",
     "InlineKeyboardButton",
@@ -67,5 +71,6 @@ __all__ = [
     "MenuButtonCommands",
     "MenuButtonWebApp",
     "MenuButtonDefault",
-    "SentWebAppMessage"
+    "SentWebAppMessage",
+    "SwitchInlineQueryChosenChat",
 ]
