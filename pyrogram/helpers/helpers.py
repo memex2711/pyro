@@ -6,32 +6,6 @@ from pyrogram.types import (
     ForceReply,
 )
 
-
-def ikb(rows=None):
-    if rows is None:
-        rows = []
-    lines = []
-    for row in rows:
-        line = []
-        for button in row:
-            if isinstance(button, str):
-                button = btn(button, button)
-            elif len(button) == 4:  # (text, value, type, style)
-                text, value, typ, style = button
-                button = btn(text, value, typ, style)
-            else:
-                button = btn(*button)
-            line.append(button)
-        lines.append(line)
-    return InlineKeyboardMarkup(inline_keyboard=lines)
-
-
-def btn(text, value, type="callback_data", style=None):
-    kwargs = {type: value}
-    if style is not None:
-        kwargs["style"] = style
-    return InlineKeyboardButton(text, **kwargs)
-
 # The inverse of above
 def bki(keyboard):
     """
@@ -75,8 +49,40 @@ def ntb(button):
     # return {'text': text, type: value}
 
 
+def ikb(rows=None):
+    if rows is None:
+        rows = []
+    lines = []
+    for row in rows:
+        line = []
+        for button in row:
+            if isinstance(button, str):
+                button = btn(button, button)
+            elif len(button) == 4:          
+                text, value, typ, style = button
+                button = btn(text, value, typ, style)
+            elif len(button) == 3:
+                text, value, style = button
+                button = btn(text, value, "callback_data", style)
+            else:                           
+                button = btn(*button)
+            line.append(button)
+        lines.append(line)
+    return InlineKeyboardMarkup(inline_keyboard=lines)
+
+def btn(text, value, type="callback_data", style=None):
+    if not isinstance(type, str):
+        raise TypeError(f"Parameter 'type' harus string, got {type(type)}")    
+    if type == "callback_data" and not isinstance(value, bytes):
+        value = str(value).encode()
+    
+    kwargs = {type: value}
+    if style is not None:
+        kwargs["style"] = style
+    return InlineKeyboardButton(text, **kwargs)
 
 def kb(rows=None, **kwargs):
+
     if rows is None:
         rows = []
 

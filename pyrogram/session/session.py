@@ -431,7 +431,7 @@ class Session:
             inner_query = query
 
         query_name = ".".join(inner_query.QUALNAME.split(".")[1:])
-        log.info("[%s] Invoking: %s", self.client.name, query_name)
+        
         while retries > 0:
             try:
                 if (
