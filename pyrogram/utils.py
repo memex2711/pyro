@@ -331,11 +331,15 @@ def unpack_inline_message_id(inline_message_id: str) -> "raw.base.InputBotInline
         )
 
 
-MIN_CHANNEL_ID = -100999999999999
+MIN_CHANNEL_ID_OLD = -1002147483647
+MIN_CHANNEL_ID = -1997852516352
 MAX_CHANNEL_ID = -1000000000000
+MIN_CHAT_ID_OLD = -2147483647
 MIN_CHAT_ID = -999999999999
 MAX_USER_ID_OLD = 2147483647
 MAX_USER_ID = 999999999999
+MIN_MONOFORUM_CHANNEL_ID = 1002147483649
+MAX_MONOFORUM_CHANNEL_ID = 3000000000000
 
 
 def get_raw_peer_id(peer: raw.base.Peer) -> Optional[int]:
@@ -365,15 +369,18 @@ def get_input_peer_id(peer: raw.base.InputPeer) -> Optional[int]:
     return None
 
 
-def get_peer_id(peer: Union[raw.base.Peer, raw.base.InputPeer, raw.base.RequestedPeer]) -> int:
+def get_peer_id(peer: raw.base.Peer) -> int:
     """Get the non-raw peer id from a Peer object"""
-    if isinstance(peer, (raw.types.PeerUser, raw.types.InputPeerUser, raw.types.RequestedPeerUser)):
+    if isinstance(peer, raw.types.PeerUser):
         return peer.user_id
 
-    if isinstance(peer, (raw.types.PeerChat, raw.types.InputPeerChat, raw.types.RequestedPeerChat)):
+    if isinstance(peer, raw.types.PeerChat):
         return -peer.chat_id
 
-    if isinstance(peer, (raw.types.PeerChannel, raw.types.InputPeerChannel, raw.types.RequestedPeerChannel)):
+    if isinstance(peer, raw.types.PeerChannel):
+        if MIN_MONOFORUM_CHANNEL_ID <= peer.channel_id < MAX_MONOFORUM_CHANNEL_ID:
+            return peer.channel_id
+
         return MAX_CHANNEL_ID - peer.channel_id
 
     raise ValueError(f"Peer type invalid: {peer}")
@@ -386,8 +393,12 @@ def get_peer_type(peer_id: int) -> str:
 
         if MIN_CHANNEL_ID <= peer_id < MAX_CHANNEL_ID:
             return "channel"
+
     elif 0 < peer_id <= MAX_USER_ID:
         return "user"
+
+    elif MIN_MONOFORUM_CHANNEL_ID <= peer_id < MAX_MONOFORUM_CHANNEL_ID:
+        return "monoforum"
 
     raise ValueError(f"Peer id invalid: {peer_id}")
 
@@ -415,6 +426,8 @@ def get_reply_to(
     return None
 
 def get_channel_id(peer_id: int) -> int:
+    if MIN_MONOFORUM_CHANNEL_ID <= peer_id < MAX_MONOFORUM_CHANNEL_ID:
+        return MAX_CHANNEL_ID - peer_id
     return MAX_CHANNEL_ID - peer_id
 
 
@@ -541,3 +554,22 @@ def timestamp_to_datetime(ts: Optional[int]) -> Optional[datetime]:
 
 def datetime_to_timestamp(dt: Optional[datetime]) -> Optional[int]:
     return int(dt.timestamp()) if dt else None
+
+def is_list_like(obj):
+    """
+    Returns `True` if the given object looks like a list.
+
+    Ported from https://github.com/LonamiWebs/Telethon/blob/1cb5ff1dd54ecfad41711fc5a4ecf36d2ad8eaf6/telethon/utils.py#L902
+    """
+    return isinstance(obj, (list, tuple, set, dict, range))
+
+
+def get_premium_duration_month_count(day_count: int) -> int:
+    return max(1, day_count // 30)
+
+
+def get_premium_duration_day_count(month_count: int) -> int:
+    if month_count <= 0 or month_count > 10000000:
+        return 7
+
+    return month_count * 30 + month_count // 3 + month_count // 12
