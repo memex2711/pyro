@@ -8,39 +8,29 @@ from pyrogram.types import (
 
 
 def ikb(rows=None):
-    """
-    Create an InlineKeyboardMarkup from a list of lists of buttons.
-    :param rows: List of lists of buttons. Defaults to empty list.
-    :return: InlineKeyboardMarkup
-    """
     if rows is None:
         rows = []
-
     lines = []
     for row in rows:
         line = []
         for button in row:
-            button = (
-                btn(button, button) if isinstance(button, str) else btn(*button)
-            )  # InlineKeyboardButton
+            if isinstance(button, str):
+                button = btn(button, button)
+            elif len(button) == 4:  # (text, value, type, style)
+                text, value, typ, style = button
+                button = btn(text, value, typ, style)
+            else:
+                button = btn(*button)
             line.append(button)
         lines.append(line)
     return InlineKeyboardMarkup(inline_keyboard=lines)
-    # return {'inline_keyboard': lines}
 
 
-def btn(text, value, type="callback_data"):
-    """
-    Create an InlineKeyboardButton.
-
-    :param text: Text of the button.
-    :param value: Value of the button.
-    :param type: Type of the button. Defaults to "callback_data".
-    :return: InlineKeyboardButton
-    """
-    return InlineKeyboardButton(text, **{type: value})
-    # return {'text': text, type: value}
-
+def btn(text, value, type="callback_data", style=None):
+    kwargs = {type: value}
+    if style is not None:
+        kwargs["style"] = style
+    return InlineKeyboardButton(text, **kwargs)
 
 # The inverse of above
 def bki(keyboard):
@@ -85,14 +75,8 @@ def ntb(button):
     # return {'text': text, type: value}
 
 
-def kb(rows=None, **kwargs):
-    """
-    Create a ReplyKeyboardMarkup from a list of lists of buttons.
 
-    :param rows: List of lists of buttons. Defaults to empty list.
-    :param kwargs: Other arguments to pass to ReplyKeyboardMarkup.
-    :return: ReplyKeyboardMarkup
-    """
+def kb(rows=None, **kwargs):
     if rows is None:
         rows = []
 
@@ -100,16 +84,18 @@ def kb(rows=None, **kwargs):
     for row in rows:
         line = []
         for button in row:
-            button_type = type(button)
-            if button_type == str:
+            if isinstance(button, str):
                 button = KeyboardButton(button)
-            elif button_type == dict:
+            elif isinstance(button, dict):
                 button = KeyboardButton(**button)
-
+            elif isinstance(button, tuple) and len(button) == 2:
+                text, style = button
+                button = KeyboardButton(text, style=style)
+            else:
+                button = KeyboardButton(str(button))
             line.append(button)
         lines.append(line)
     return ReplyKeyboardMarkup(keyboard=lines, **kwargs)
-
 
 kbtn = KeyboardButton
 """
