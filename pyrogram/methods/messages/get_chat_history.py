@@ -93,8 +93,9 @@ class GetChatHistory:
         total = limit or (1 << 31) - 1
         limit = min(100, total)
 
-        if reverse and offset_id == 0:
-            offset_id = 1
+        if reverse:
+            offset_id = offset_id or 1
+            offset = -limit
 
         while True:
             messages = await get_chunk(
@@ -112,7 +113,7 @@ class GetChatHistory:
             if reverse:
                 messages = list(reversed(messages))
                 offset_id = messages[-1].id + 1
-                offset = 0
+                offset = -limit
             else:
                 offset_id = messages[-1].id
 
