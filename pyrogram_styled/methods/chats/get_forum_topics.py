@@ -51,7 +51,7 @@ class GetForumTopics:
                     print(topic)
         """
         r = await self.invoke(
-            raw.functions.channels.GetForumTopics(
+            raw.functions.messages.GetForumTopics(
                 channel=await self.resolve_peer(chat_id),
                 offset_date=0,
                 offset_id=0,
