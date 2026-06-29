@@ -32,7 +32,7 @@ from .set_bot_commands import SetBotCommands
 from .set_bot_default_privileges import SetBotDefaultPrivileges
 from .set_chat_menu_button import SetChatMenuButton
 from .set_game_score import SetGameScore
-
+from .get_owned_bots import GetOwnedBots
 
 class Bots(
     AnswerCallbackQuery,
@@ -50,6 +50,7 @@ class Bots(
     GetBotDefaultPrivileges,
     SetChatMenuButton,
     GetChatMenuButton,
-    AnswerWebAppQuery
+    AnswerWebAppQuery,
+    GetOwnedBots
 ):
     pass
