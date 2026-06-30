@@ -69,6 +69,8 @@ from .stop_poll import StopPoll
 from .stream_media import StreamMedia
 from .vote_poll import VotePoll
 from .send_screenshot_notification import SendScreenshotNotification
+from .add_poll_option import AddPollOption
+from .delete_poll_option import DeletePollOption
 
 
 class Messages(
@@ -124,6 +126,8 @@ class Messages(
     GetDiscussionRepliesCount,
     StreamMedia,
     GetCustomEmojiStickers,
-    SendScreenshotNotification
+    SendScreenshotNotification,
+    DeletePollOption,
+    AddPollOption
 ):
     pass
