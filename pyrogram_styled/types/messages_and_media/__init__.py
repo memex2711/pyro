@@ -61,6 +61,7 @@ from .my_boost import MyBoost
 from .poll_answer import PollAnswer
 from .poll_option_added import PollOptionAdded
 from .poll_option_deleted import PollOptionDeleted
+from .formatted_text import FormattedText
 
 __all__ = [
     "Animation", "Audio", "AvailableEffect", "BoostsStatus", "Contact", "Document", "ExternalReplyInfo", "ForumTopic", "ForumTopicCreated",
@@ -68,5 +69,5 @@ __all__ = [
     "GeneralTopicUnhidden", "Game", "Giveaway", "Location", "Message", "MessageEntity", "Photo", "Thumbnail",
     "StrippedThumbnail", "Story", "StoryDeleted", "StorySkipped", "StoryViews", "TextQuote", "Poll", "PollOption", "Sticker",
     "StickerSet", "Venue", "Video", "VideoNote", "Voice", "WebPage", "Dice", "Reaction", "WebAppData",
-    "MessageReactions", "MessageStory", "MyBoost", "PollAnswer", "PollOptionAdded", "PollOptionDeleted"
+    "MessageReactions", "MessageStory", "MyBoost", "PollAnswer", "PollOptionAdded", "PollOptionDeleted", "FormattedText"
 ]

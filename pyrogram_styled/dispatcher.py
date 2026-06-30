@@ -42,6 +42,7 @@ class Dispatcher:
     USER_STATUS_UPDATES = (raw.types.UpdateUserStatus,)
     BOT_INLINE_QUERY_UPDATES = (raw.types.UpdateBotInlineQuery,)
     POLL_UPDATES = (raw.types.UpdateMessagePoll,)
+    POLL_ANSWER_UPDATES = (raw.types.UpdateMessagePollVote,)
     CHOSEN_INLINE_RESULT_UPDATES = (raw.types.UpdateBotInlineSend,)
     CHAT_JOIN_REQUEST_UPDATES = (raw.types.UpdateBotChatInviteRequester,)
     NEW_STORY_UPDATES = (raw.types.UpdateStory,)
@@ -99,7 +100,15 @@ class Dispatcher:
 
         async def poll_parser(update, users, chats):
             return (
-                pyrogram_styled.types.Poll._parse_update(self.client, update),
+                pyrogram_styled.types.Poll._parse_update(self.client, update, users, chats),
+                PollHandler
+            )
+        
+        async def poll_answer_parser(update, users, chats):
+            return (
+                pyrogram_styled.types.PollAnswer._parse_update(
+                    self.client, update, users, chats
+                ),
                 PollHandler
             )
 
@@ -135,6 +144,7 @@ class Dispatcher:
             Dispatcher.USER_STATUS_UPDATES: user_status_parser,
             Dispatcher.BOT_INLINE_QUERY_UPDATES: inline_query_parser,
             Dispatcher.POLL_UPDATES: poll_parser,
+            Dispatcher.POLL_ANSWER_UPDATES: poll_answer_parser,
             Dispatcher.CHOSEN_INLINE_RESULT_UPDATES: chosen_inline_result_parser,
             Dispatcher.CHAT_MEMBER_UPDATES: chat_member_updated_parser,
             Dispatcher.CHAT_JOIN_REQUEST_UPDATES: chat_join_request_parser,
