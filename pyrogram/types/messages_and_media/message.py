@@ -359,6 +359,9 @@ class Message(Object, Update):
         link (``str``, *property*):
             Generate a link to this message, only for groups and channels.
 
+        screenshot_taken (:obj:`~pyrogram.types.ScreenshotTaken`, *optional*):
+            A service message that a screenshot of a message in the chat has been taken.
+
         edit_hide (``bool``, *optional*):
             The message shown as not modified.
             A message can be not modified in case it has received a reaction.
@@ -464,7 +467,8 @@ class Message(Object, Update):
             "types.ReplyKeyboardRemove",
             "types.ForceReply"
         ] = None,
-        reactions: List["types.Reaction"] = None
+        reactions: List["types.Reaction"] = None,
+        screenshot_taken: "types.ScreenshotTaken" = None,
     ):
         super().__init__(client)
 
@@ -557,7 +561,8 @@ class Message(Object, Update):
         self.video_chat_members_invited = video_chat_members_invited
         self.web_app_data = web_app_data
         self.giveaway_launched = giveaway_launched
-        self.reactions = reactions
+        self.reactions = reactions,
+        self.screenshot_taken = screenshot_taken
 
     async def wait_for_click(
         self,
@@ -657,6 +662,7 @@ class Message(Object, Update):
             video_chat_members_invited = None
             web_app_data = None
             giveaway_launched = None
+            screenshot_taken = None
 
             service_type = None
 
@@ -693,6 +699,9 @@ class Message(Object, Update):
             elif isinstance(action, raw.types.MessageActionTopicCreate):
                 forum_topic_created = types.ForumTopicCreated._parse(message)
                 service_type = enums.MessageServiceType.FORUM_TOPIC_CREATED
+            elif isinstance(action, raw.types.MessageActionScreenshotTaken):
+                service_type = enums.MessageServiceType.SCREENSHOT_TAKEN
+                screenshot_taken = types.ScreenshotTaken()
             elif isinstance(action, raw.types.MessageActionTopicEdit):
                 if action.title:
                     forum_topic_edited = types.ForumTopicEdited._parse(action)
@@ -764,6 +773,7 @@ class Message(Object, Update):
                 video_chat_members_invited=video_chat_members_invited,
                 web_app_data=web_app_data,
                 giveaway_launched=giveaway_launched,
+                screenshot_taken=screenshot_taken,
                 client=client
                 # TODO: supergroup_chat_created
             )
