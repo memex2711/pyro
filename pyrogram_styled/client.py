@@ -239,6 +239,7 @@ class Client(Methods):
         connection_factory: builtins.type[Connection] = Connection,
         protocol_factory: builtins.type[TCP] = TCPAbridged,
         message_cache_size: int = 1000,
+        fetch_replies: int = 1,
     ):
         super().__init__()
 
@@ -323,6 +324,7 @@ class Client(Methods):
         self.listeners = {listener_type: [] for listener_type in ListenerTypes}
 
         self.loop = asyncio.get_event_loop()
+        self.fetch_replies = fetch_replies
 
     def __enter__(self):
         return self.start()

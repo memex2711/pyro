@@ -1,6 +1,5 @@
 #  Pyrogram - Telegram MTProto API Client Library for Python
-#  Copyright (C) 2017-present Dan <https://github.com/delivrance>
-#  Copyright (C) 2022-present Mayuri-Chan <https://github.com/Mayuri-Chan>
+#  Copyright (C) 2017-present <https://github.com/KurimuzonAkuma>
 #
 #  This file is part of Pyrogram.
 #
@@ -23,7 +22,7 @@ from .auto_name import AutoName
 
 
 class MessageOriginType(AutoName):
-    """Message origin type enumeration used in :obj:`~pyrogram_styled.types.MessageOrigin`."""
+    """Message origin type enumeration used in :obj:`~pyrogram.types.MessageOrigin`."""
 
     CHANNEL = auto()
     "The message was originally a post in a channel"
@@ -34,9 +33,8 @@ class MessageOriginType(AutoName):
     HIDDEN_USER = auto()
     "The message was originally sent by a user, which is hidden by their privacy settings"
 
-    IMPORT = auto()
-    "The message was imported from a foreign chat service"
-
+    IMPORT_INFO = auto()
+    "The message was imported with `importMessages <https://t.me/telegram/142>`_"
 
     USER = auto()
     "The message was originally sent by a known user"

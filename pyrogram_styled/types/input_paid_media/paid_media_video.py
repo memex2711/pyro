@@ -16,17 +16,27 @@
 #  You should have received a copy of the GNU Lesser General Public License
 #  along with Pyrogram.  If not, see <http://www.gnu.org/licenses/>.
 
-from .input_media import InputMedia
-from .input_media_animation import InputMediaAnimation
-from .input_media_audio import InputMediaAudio
-from .input_media_document import InputMediaDocument
-from .input_media_photo import InputMediaPhoto
-from .input_media_video import InputMediaVideo
-from .input_phone_contact import InputPhoneContact
-from .link_preview_options import LinkPreviewOptions
-from .input_media_sticker import InputMediaSticker
 
-__all__ = [
-    "InputMedia", "InputMediaAnimation", "InputMediaAudio", "InputMediaDocument", "InputMediaPhoto", "InputMediaVideo",
-    "InputPhoneContact", "LinkPreviewOptions", "InputMediaSticker"
-]
+import pyrogram_styled
+from pyrogram_styled import types
+
+from .paid_media import PaidMedia
+
+
+class PaidMediaVideo(PaidMedia):
+    """The paid media is a video.
+
+    Parameters:
+        video (:obj:`~pyrogram_styled.types.Video`):
+            The video.
+
+    """
+
+    def __init__(
+        self,
+        *,
+        video: "types.Video" = None
+    ):
+        super().__init__()
+
+        self.video = video

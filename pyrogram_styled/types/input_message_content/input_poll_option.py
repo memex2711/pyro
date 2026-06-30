@@ -1,53 +1,86 @@
-#  pyrogram_styled - Telegram MTProto API Client Library for Python
-#  Copyright (C) 2023-present pyrogram_styled <https://pyrogram_styled.org>
+#  Pyrogram - Telegram MTProto API Client Library for Python
+#  Copyright (C) 2017-present Dan <https://github.com/delivrance>
 #
-#  This file is part of pyrogram_styled.
+#  This file is part of Pyrogram.
 #
-#  pyrogram_styled is free software: you can redistribute it and/or modify
+#  Pyrogram is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU Lesser General Public License as published
 #  by the Free Software Foundation, either version 3 of the License, or
 #  (at your option) any later version.
 #
-#  pyrogram_styled is distributed in the hope that it will be useful,
+#  Pyrogram is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #  GNU Lesser General Public License for more details.
 #
 #  You should have received a copy of the GNU Lesser General Public License
-#  along with pyrogram_styled.  If not, see <http://www.gnu.org/licenses/>.
+#  along with Pyrogram.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import annotations
-
+from typing import Optional, Union
 
 import pyrogram_styled
-from pyrogram_styled.types.object import Object
+from pyrogram_styled import raw, utils, types
+from pyrogram_styled.file_id import FileType
+
+from ..object import Object
+
 
 class InputPollOption(Object):
     """This object contains information about one answer option in a poll to send.
 
     Parameters:
-        text (``str``):
-            Option text, 1-100 characters
+        text (:obj:`~pyrogram_styled.types.FormattedText`):
+            Option text, 1-100 characters after entity parsing.
+            Only custom emoji entities are allowed to be added and only by Premium users.
 
-        text_parse_mode (:obj:`~pyrogram_styled.enums.ParseMode`, *optional*):
-            By default, texts are parsed using both Markdown and HTML styles.
-            You can combine both syntaxes together.
-            Currently, only custom emoji entities are allowed.
-
-        text_entities (List of :obj:`~pyrogram_styled.types.MessageEntity`, *optional*):
-            List of special entities that appear in the poll option text, which can be specified instead of *text_parse_mode*.
+        media (:obj:`~pyrogram_styled.types.InputMediaPhoto` | :obj:`~pyrogram_styled.types.InputMediaVideo` | :obj:`~pyrogram_styled.types.InputMediaSticker` | :obj:`~pyrogram_styled.types.Location`, *optional*):
+            Media associated with the option.
+            Currently supports only photo, video, sticker or location.
 
     """
 
     def __init__(
         self,
         *,
-        text: str,
-        text_parse_mode: pyrogram_styled.enums.ParseMode = None,
-        text_entities: list[pyrogram_styled.types.MessageEntity] | None = None,
+        text: "types.FormattedText",
+        media: Optional[
+            Union[
+                "types.InputMediaPhoto",
+                "types.InputMediaVideo",
+                "types.InputMediaSticker",
+                "types.Location",
+            ]
+        ] = None,
     ):
         super().__init__()
 
         self.text = text
-        self.text_parse_mode = text_parse_mode
-        self.text_entities = text_entities
+        self.media = media
+
+    async def write(
+        self,
+        client: "pyrogram_styled.Client",
+    ) -> "raw.types.PollAnswer":
+        if isinstance(self.text, str):
+            self.text = types.FormattedText(text=self.text)
+
+        if self.media is not None and not isinstance(
+            self.media,
+            (
+                types.InputMediaPhoto,
+                types.InputMediaVideo,
+                types.InputMediaSticker,
+                types.Location,
+            ),
+        ):
+            raise ValueError(f"Unsupported media type: {type(self.media)}")
+        media = None
+        if self.media:
+            if isinstance(self.media, types.Location):
+                media = await self.media.write()
+            else:
+                media, _ = await self.media.write(client=client)
+        return raw.types.InputPollAnswer(
+            text=await self.text.write(client),
+            media=media,
+        )

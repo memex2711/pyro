@@ -1,5 +1,5 @@
 #  Pyrogram - Telegram MTProto API Client Library for Python
-#  Copyright (C) 2017-present Dan <https://github.com/delivrance>
+#  Copyright (C) 2017-present <https://github.com/TelegramPlayGround>
 #
 #  This file is part of Pyrogram.
 #
@@ -16,17 +16,25 @@
 #  You should have received a copy of the GNU Lesser General Public License
 #  along with Pyrogram.  If not, see <http://www.gnu.org/licenses/>.
 
-from .input_media import InputMedia
-from .input_media_animation import InputMediaAnimation
-from .input_media_audio import InputMediaAudio
-from .input_media_document import InputMediaDocument
-from .input_media_photo import InputMediaPhoto
-from .input_media_video import InputMediaVideo
-from .input_phone_contact import InputPhoneContact
-from .link_preview_options import LinkPreviewOptions
-from .input_media_sticker import InputMediaSticker
+import io
+from typing import Union
 
-__all__ = [
-    "InputMedia", "InputMediaAnimation", "InputMediaAudio", "InputMediaDocument", "InputMediaPhoto", "InputMediaVideo",
-    "InputPhoneContact", "LinkPreviewOptions", "InputMediaSticker"
-]
+from ..object import Object
+
+
+class InputPaidMedia(Object):
+    """This object describes the paid media to be sent.
+
+    Currently, it can be one of:
+
+    - :obj:`~pyrogram_styled.types.InputPaidMediaPhoto`
+    - :obj:`~pyrogram_styled.types.InputPaidMediaVideo`
+    """
+
+    def __init__(
+        self,
+        media: Union[str, "io.BytesIO"]
+    ):
+        super().__init__()
+
+        self.media = media

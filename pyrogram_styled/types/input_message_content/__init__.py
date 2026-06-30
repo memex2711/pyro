@@ -22,7 +22,8 @@ from .input_reply_to_story import InputReplyToStory
 from .input_text_message_content import InputTextMessageContent
 from .input_poll_option import InputPollOption
 from .reply_parameters import ReplyParameters
+from .external_reply_info import ExternalReplyInfo
 
 __all__ = [
-    "InputMessageContent", "InputReplyToMessage", "InputReplyToStory", "InputTextMessageContent", "InputPollOption", "ReplyParameters"
+    "InputMessageContent", "InputReplyToMessage", "InputReplyToStory", "InputTextMessageContent", "InputPollOption", "ReplyParameters", "ExternalReplyInfo", 
 ]

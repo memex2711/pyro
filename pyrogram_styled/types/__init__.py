@@ -20,9 +20,11 @@ from .authorization import *
 from .bots_and_keyboards import *
 from .inline_mode import *
 from .input_media import *
+from .input_paid_media import *
 from .input_message_content import *
 from .list import List
 from .messages_and_media import *
+from .message_origin import *
 from .object import Object
 from .update import Update
 from .user_and_chats import *

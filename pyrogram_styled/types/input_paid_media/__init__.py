@@ -16,17 +16,24 @@
 #  You should have received a copy of the GNU Lesser General Public License
 #  along with Pyrogram.  If not, see <http://www.gnu.org/licenses/>.
 
-from .input_media import InputMedia
-from .input_media_animation import InputMediaAnimation
-from .input_media_audio import InputMediaAudio
-from .input_media_document import InputMediaDocument
-from .input_media_photo import InputMediaPhoto
-from .input_media_video import InputMediaVideo
-from .input_phone_contact import InputPhoneContact
-from .link_preview_options import LinkPreviewOptions
-from .input_media_sticker import InputMediaSticker
+from .input_paid_media import InputPaidMedia
+from .input_paid_media_photo import InputPaidMediaPhoto
+from .input_paid_media_video import InputPaidMediaVideo
+from .paid_media_info import PaidMediaInfo
+from .paid_media import PaidMedia
+from .paid_media_preview import PaidMediaPreview
+from .paid_media_photo import PaidMediaPhoto
+from .paid_media_video import PaidMediaVideo
+from .paid_media_purchased import PaidMediaPurchased
 
 __all__ = [
-    "InputMedia", "InputMediaAnimation", "InputMediaAudio", "InputMediaDocument", "InputMediaPhoto", "InputMediaVideo",
-    "InputPhoneContact", "LinkPreviewOptions", "InputMediaSticker"
+    "InputPaidMedia",
+    "InputPaidMediaPhoto",
+    "InputPaidMediaVideo",
+    "PaidMediaInfo",
+    "PaidMedia",
+    "PaidMediaPreview",
+    "PaidMediaPhoto",
+    "PaidMediaVideo",
+    "PaidMediaPurchased",
 ]
