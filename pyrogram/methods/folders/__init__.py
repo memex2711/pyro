@@ -16,43 +16,10 @@
 #  You should have received a copy of the GNU Lesser General Public License
 #  along with Pyrogram.  If not, see <http://www.gnu.org/licenses/>.
 
-from .advanced import Advanced
-from .auth import Auth
-from .bots import Bots
-from .chats import Chats
-from .contacts import Contacts
-from .decorators import Decorators
-from .invite_links import InviteLinks
-from .messages import Messages
-from .password import Password
-from .premium import Premium
-from .users import Users
-from .stories import Stories
-from .stickers import Stickers
-from .utilities import Utilities
-from .pyromod import Pyromod
-from .phone import Phone
-from .folders import Folders
-from .account import Account
+from .check_chat_folder_invite_link import CheckChatFolderInviteLink
 
-class Methods(
-    Advanced,
-    Auth,
-    Bots,
-    Contacts,
-    Password,
-    Premium,
-    Chats,
-    Users,
-    Stories,
-    Messages,
-    Decorators,
-    Stickers,
-    Utilities,
-    InviteLinks,
-    Pyromod,
-    Phone,
-    Folders,
-    Account
+
+class Folders(
+    CheckChatFolderInviteLink
 ):
     pass

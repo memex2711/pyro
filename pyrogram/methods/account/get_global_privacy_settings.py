@@ -16,30 +16,24 @@
 #  You should have received a copy of the GNU Lesser General Public License
 #  along with Pyrogram.  If not, see <http://www.gnu.org/licenses/>.
 
-from typing import Callable, Optional
-
 import pyrogram
+from pyrogram import raw, types
 
 
-class OnDisconnect:
-    def on_disconnect(self: Optional["OnDisconnect"] = None) -> Callable:
-        """Decorator for handling disconnections.
+class GetGlobalPrivacySettings:
+    async def get_global_privacy_settings(self: "pyrogram.Client") -> "types.GlobalPrivacySettings":
+        """Get account global privacy settings.
 
-        This does the same thing as :meth:`~pyrogram.Client.add_handler` using the
-        :obj:`~pyrogram.handlers.DisconnectHandler`.
+        .. include:: /_includes/usable-by/users.rst
 
-        .. include:: /_includes/usable-by/users-bots.rst
+        Returns:
+            :obj:`~pyrogram.types.GlobalPrivacySettings`: On success, the global privacy settings is returned.
+
+        Example:
+            .. code-block:: python
+
+                await app.get_global_privacy_settings()
         """
+        r = await self.invoke(raw.functions.account.GetGlobalPrivacySettings())
 
-        def decorator(func: Callable) -> Callable:
-            if isinstance(self, pyrogram.Client):
-                self.add_handler(pyrogram.handlers.DisconnectHandler(func))
-            else:
-                if not hasattr(func, "handlers"):
-                    func.handlers = []
-
-                func.handlers.append((pyrogram.handlers.DisconnectHandler(func), 0))
-
-            return func
-
-        return decorator
+        return types.GlobalPrivacySettings._parse(r)

@@ -25,16 +25,16 @@ if TYPE_CHECKING:
     import pyrogram.session
 
 
-class DisconnectHandler(Handler):
-    """The Disconnect handler class. Used to handle disconnections. It is intended to be used with
+class ConnectHandler(Handler):
+    """The Connect handler class. Used to handle connections. It is intended to be used with
     :meth:`~pyrogram.Client.add_handler`
 
     For a nicer way to register this handler, have a look at the
-    :meth:`~pyrogram.Client.on_disconnect` decorator.
+    :meth:`~pyrogram.Client.on_connect` decorator.
 
     Parameters:
         callback (``Callable``):
-            Pass a function that will be called when a disconnection occurs. It takes *(client)*
+            Pass a function that will be called when a connection occurs. It takes *(client)*
             as positional argument (look at the section below for a detailed description).
 
     Other parameters:

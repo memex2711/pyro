@@ -55,7 +55,7 @@ from .video_chat_members_invited import VideoChatMembersInvited
 from .video_chat_scheduled import VideoChatScheduled
 from .video_chat_started import VideoChatStarted
 from .birthday import Birthday
-
+from .global_privacy_settings import GlobalPrivacySettings
 
 __all__ = [
     "BotVerification",
@@ -95,5 +95,6 @@ __all__ = [
     "ChatJoiner",
     "EmojiStatus",
     "Folder",
-    "ChatReactions"
+    "ChatReactions",
+    "GlobalPrivacySettings"
 ]

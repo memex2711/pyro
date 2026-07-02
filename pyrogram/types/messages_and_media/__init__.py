@@ -59,6 +59,9 @@ from .message_reactions import MessageReactions
 from .message_story import MessageStory
 from .my_boost import MyBoost
 from .screenshot_taken import ScreenshotTaken
+from .business_message import BusinessMessage
+from .chat_background import ChatBackground
+from .group_call_member import GroupCallMember
 
 __all__ = [
     "Animation", "Audio", "AvailableEffect", "BoostsStatus", "Contact", "Document", "ExternalReplyInfo", "ForumTopic", "ForumTopicCreated",
@@ -66,5 +69,5 @@ __all__ = [
     "GeneralTopicUnhidden", "Game", "Giveaway", "Location", "Message", "MessageEntity", "Photo", "Thumbnail",
     "StrippedThumbnail", "Story", "StoryDeleted", "StorySkipped", "StoryViews", "TextQuote", "Poll", "PollOption", "Sticker",
     "StickerSet", "Venue", "Video", "VideoNote", "Voice", "WebPage", "Dice", "Reaction", "WebAppData",
-    "MessageReactions", "MessageStory", "MyBoost", "ScreenshotTaken",
+    "MessageReactions", "MessageStory", "MyBoost", "ScreenshotTaken", "BusinessMessage", "ChatBackground", "GroupCallMember"
 ]

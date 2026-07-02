@@ -16,30 +16,19 @@
 #  You should have received a copy of the GNU Lesser General Public License
 #  along with Pyrogram.  If not, see <http://www.gnu.org/licenses/>.
 
-from typing import Callable, Optional
+from pyrogram import raw
 
-import pyrogram
+from .auto_name import AutoName
 
 
-class OnDisconnect:
-    def on_disconnect(self: Optional["OnDisconnect"] = None) -> Callable:
-        """Decorator for handling disconnections.
+class BusinessSchedule(AutoName):
+    """Business away enumeration used in :obj:`~pyrogram.types.BusinessMessage`."""
 
-        This does the same thing as :meth:`~pyrogram.Client.add_handler` using the
-        :obj:`~pyrogram.handlers.DisconnectHandler`.
+    ALWAYS = raw.types.BusinessAwayMessageScheduleAlways
+    "Send always"
 
-        .. include:: /_includes/usable-by/users-bots.rst
-        """
+    OUTSIDE_WORK_HOURS = raw.types.BusinessAwayMessageScheduleOutsideWorkHours
+    "Outside of Business Hours"
 
-        def decorator(func: Callable) -> Callable:
-            if isinstance(self, pyrogram.Client):
-                self.add_handler(pyrogram.handlers.DisconnectHandler(func))
-            else:
-                if not hasattr(func, "handlers"):
-                    func.handlers = []
-
-                func.handlers.append((pyrogram.handlers.DisconnectHandler(func), 0))
-
-            return func
-
-        return decorator
+    CUSTOM = raw.types.BusinessAwayMessageScheduleCustom
+    "Custom Schedule"

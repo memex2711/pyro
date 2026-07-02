@@ -16,30 +16,40 @@
 #  You should have received a copy of the GNU Lesser General Public License
 #  along with Pyrogram.  If not, see <http://www.gnu.org/licenses/>.
 
-from typing import Callable, Optional
-
 import pyrogram
+from pyrogram import raw
 
 
-class OnDisconnect:
-    def on_disconnect(self: Optional["OnDisconnect"] = None) -> Callable:
-        """Decorator for handling disconnections.
+class SetAccountTTL:
+    async def set_account_ttl(
+        self: "pyrogram.Client",
+        days: int
+    ):
+        """Set days to live of account.
 
-        This does the same thing as :meth:`~pyrogram.Client.add_handler` using the
-        :obj:`~pyrogram.handlers.DisconnectHandler`.
+        .. note::
 
-        .. include:: /_includes/usable-by/users-bots.rst
+            Days should be in range 30-730
+
+        .. include:: /_includes/usable-by/users.rst
+
+        Parameters:
+            days (``int``):
+                Time to live in days.
+
+        Returns:
+            ``bool``: On success, True is returned.
+
+        Example:
+            .. code-block:: python
+
+                # Set account ttl to 1 year
+                await app.set_account_ttl(365)
         """
+        r = await self.invoke(
+            raw.functions.account.SetAccountTTL(
+                ttl=raw.types.AccountDaysTTL(days=days)
+            )
+        )
 
-        def decorator(func: Callable) -> Callable:
-            if isinstance(self, pyrogram.Client):
-                self.add_handler(pyrogram.handlers.DisconnectHandler(func))
-            else:
-                if not hasattr(func, "handlers"):
-                    func.handlers = []
-
-                func.handlers.append((pyrogram.handlers.DisconnectHandler(func), 0))
-
-            return func
-
-        return decorator
+        return r
