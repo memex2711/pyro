@@ -37,5 +37,4 @@ __all__ = [
     "PhoneNumberAuthenticationSettings",
     "SentCode",
     "TermsOfService",
-    "Session"
 ]
