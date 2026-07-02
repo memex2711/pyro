@@ -31,8 +31,9 @@ from .sign_in import SignIn
 from .sign_in_bot import SignInBot
 from .sign_up import SignUp
 from .terminate import Terminate
-from .get_sessions import GetSessions
-
+from .get_active_sessions import GetActiveSessions
+from .reset_session import ResetSession
+from .reset_sessions import ResetSessions
 
 class Auth(
     AcceptTermsOfService,
@@ -50,6 +51,8 @@ class Auth(
     SignInBot,
     SignUp,
     Terminate,
-    GetSessions
+    GetActiveSessions,
+    ResetSession,
+    ResetSessions
 ):
     pass
