@@ -168,6 +168,11 @@ class Session:
         self.is_started.set()
 
         log.info("Session started")
+        if callable(self.client.connect_handler):
+            try:
+                await self.client.connect_handler(self.client, self)
+            except Exception as e:
+                log.exception(e)
 
     async def stop(self):
         self.is_started.clear()
@@ -194,7 +199,7 @@ class Session:
 
         if not self.is_media and callable(self.client.disconnect_handler):
             try:
-                await self.client.disconnect_handler(self.client)
+                await self.client.disconnect_handler(self.client, self)
             except Exception as e:
                 log.exception(e)
 

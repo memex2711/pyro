@@ -17,7 +17,7 @@
 #  along with Pyrogram.  If not, see <http://www.gnu.org/licenses/>.
 
 import pyrogram
-from pyrogram.handlers import DisconnectHandler
+from pyrogram.handlers import DisconnectHandler, ConnectHandler
 from pyrogram.handlers.handler import Handler
 
 
@@ -59,5 +59,7 @@ class RemoveHandler:
         """
         if isinstance(handler, DisconnectHandler):
             self.disconnect_handler = None
+        elif isinstance(handler, ConnectHandler):
+            self.connect_handler = None
         else:
             self.dispatcher.remove_handler(handler, group)
