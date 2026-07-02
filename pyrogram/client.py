@@ -179,6 +179,10 @@ class Client(Methods):
             Defaults to False, because ``getpass`` (the library used) is known to be problematic in some
             terminal environments.
 
+        client_platform (:obj:`~pyrogram.enums.ClientPlatform`, *optional*):
+            The platform where this client is running.
+            Defaults to 'other'
+
         max_concurrent_transmissions (``bool``, *optional*):
             Set the maximum amount of concurrent transmissions (uploads & downloads).
             A value that is too high may result in network related issues.
@@ -231,6 +235,7 @@ class Client(Methods):
         takeout: bool = None,
         sleep_threshold: int = Session.SLEEP_THRESHOLD,
         hide_password: bool = False,
+        client_platform: enums.ClientPlatform = enums.ClientPlatform.OTHER,
         max_concurrent_transmissions: int = MAX_CONCURRENT_TRANSMISSIONS,
         connection_factory: builtins.type[Connection] = Connection,
         protocol_factory: builtins.type[TCP] = TCPAbridged,
@@ -262,6 +267,7 @@ class Client(Methods):
         self.takeout = takeout
         self.sleep_threshold = sleep_threshold
         self.hide_password = hide_password
+        self.client_platform = client_platform
         self.max_concurrent_transmissions = max_concurrent_transmissions
         self.connection_factory = connection_factory
         self.protocol_factory = protocol_factory
