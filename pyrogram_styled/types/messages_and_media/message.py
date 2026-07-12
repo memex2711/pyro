@@ -375,7 +375,7 @@ class Message(Object, Update):
         sender_chat: "types.Chat" = None,
         date: datetime = None,
         chat: "types.Chat" = None,
-        topics: "types.ForumTopic" = None,
+        topics: Optional["types.ForumTopic"] = None,
         forward_from: "types.User" = None,
         forward_sender_name: str = None,
         forward_from_chat: "types.Chat" = None,
