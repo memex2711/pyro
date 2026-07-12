@@ -456,6 +456,7 @@ class SendMediaGroup:
                     r.updates
                 )],
                 users=r.users,
-                chats=r.chats
+                chats=r.chats,
+                topics=getattr(r, "topics", [])
             )
         )
