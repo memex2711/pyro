@@ -25,7 +25,7 @@ from typing import List, Match, Union, BinaryIO, Optional, Callable
 import pyrogram_styled
 from pyrogram_styled import raw, enums, types, utils
 from pyrogram_styled.types.pyromod import ListenerTypes
-from pyrogram_styled.errors import MessageIdsEmpty, PeerIdInvalid, ChannelPrivate, FloodWait, FloodPremiumWait
+from pyrogram_styled.errors import MessageIdsEmpty, PeerIdInvalid, ChannelPrivate, FloodWait, FloodPremiumWait, ChannelInvalid
 from pyrogram_styled.parser import utils as parser_utils, Parser
 from ..object import Object
 from ..update import Update
@@ -1096,7 +1096,7 @@ class Message(Object, Update):
                                         replies=replies - 1,
                                         **reply_to_params
                                     )
-                                except ChannelPrivate:
+                                except (ChannelPrivate, ChannelInvalid):
                                     pass
                             if reply_to_message and not reply_to_message.forum_topic_created:
                                 parsed_message.reply_to_message = reply_to_message
