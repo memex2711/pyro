@@ -362,6 +362,9 @@ class Message(Object, Update):
         edit_hide (``bool``, *optional*):
             The message shown as not modified.
             A message can be not modified in case it has received a reaction.
+
+        rich_message (:obj:`~pyrogram.types.Message`, *optional*):
+            Message is a rich formatted message.
     """
 
     # TODO: Add game missing field. Also invoice, successful_payment, connected_website
@@ -464,7 +467,8 @@ class Message(Object, Update):
             "types.ReplyKeyboardRemove",
             "types.ForceReply"
         ] = None,
-        reactions: List["types.Reaction"] = None
+        reactions: List["types.Reaction"] = None,
+        rich_message: Optional["types.RichMessage"] = None,
     ):
         super().__init__(client)
 
@@ -558,6 +562,7 @@ class Message(Object, Update):
         self.web_app_data = web_app_data
         self.giveaway_launched = giveaway_launched
         self.reactions = reactions
+        self.rich_message = rich_message
 
     async def wait_for_click(
         self,
@@ -964,6 +969,7 @@ class Message(Object, Update):
                 id=message.id,
                 message_thread_id=message_thread_id,
                 effect_id=getattr(message, "effect", None),
+                
                 date=utils.timestamp_to_datetime(message.date),
                 chat=types.Chat._parse(client, message, users, chats, is_chat=True),
                 topics=None,
@@ -1030,6 +1036,7 @@ class Message(Object, Update):
                 outgoing=message.out,
                 reply_markup=reply_markup,
                 reactions=reactions,
+                rich_message=await types.RichMessage._parse(client, message.rich_message, users, chats),
                 client=client
             )
 

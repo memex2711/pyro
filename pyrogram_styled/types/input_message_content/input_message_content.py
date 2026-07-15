@@ -20,10 +20,6 @@ import pyrogram_styled
 
 from ..object import Object
 
-"""- :obj:`~pyrogram_styled.types.InputLocationMessageContent`
-    - :obj:`~pyrogram_styled.types.InputVenueMessageContent`
-    - :obj:`~pyrogram_styled.types.InputContactMessageContent`"""
-
 
 class InputMessageContent(Object):
     """Content of a message to be sent as a result of an inline query.
@@ -31,6 +27,10 @@ class InputMessageContent(Object):
     Pyrogram currently supports the following types:
 
     - :obj:`~pyrogram_styled.types.InputTextMessageContent`
+    - :obj:`~pyrogram.types.InputRichMessageContent`
+    - :obj:`~pyrogram_styled.types.InputLocationMessageContent`
+    - :obj:`~pyrogram_styled.types.InputVenueMessageContent`
+    - :obj:`~pyrogram_styled.types.InputContactMessageContent`
     """
 
     def __init__(self):

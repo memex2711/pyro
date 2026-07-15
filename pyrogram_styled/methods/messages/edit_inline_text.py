@@ -32,6 +32,7 @@ class EditInlineText:
         text: str,
         parse_mode: Optional["enums.ParseMode"] = None,
         entities: list["types.MessageEntity"] = None,
+        rich_message: Optional["types.InputRichMessage"] = None,
         disable_web_page_preview: bool = None,
         reply_markup: "types.InlineKeyboardMarkup" = None
     ) -> bool:
@@ -56,6 +57,10 @@ class EditInlineText:
             reply_markup (:obj:`~pyrogram_styled.types.InlineKeyboardMarkup`, *optional*):
                 An InlineKeyboardMarkup object.
 
+            rich_message (:obj:`~pyrogram.types.InputRichMessage`, *optional*):
+                New rich content of the message.
+                Required if ``text`` isn't specified.
+
         Returns:
             ``bool``: On success, True is returned.
 
@@ -66,6 +71,14 @@ class EditInlineText:
 
                 # Simple edit text
                 await app.edit_inline_text(inline_message_id, "new text")
+
+                # Edit rich text
+                await app.edit_inline_text(
+                    inline_message_id,
+                    rich_message=types.InputRichMessage(
+                        html="new <b>text</b>"
+                    )
+                )
 
                 # Take the same text message, remove the web page preview only
                 await app.edit_inline_text(
@@ -78,12 +91,27 @@ class EditInlineText:
 
         session = await get_session(self, dc_id)
 
+        message = ""
+        _entities = None
+        input_rich_message = None
+
+        if text is not None:
+            message, _entities = (
+                await utils.parse_text_entities(self, text, parse_mode, entities)
+            ).values()
+        elif rich_message is not None:
+            input_rich_message = rich_message.write()
+        else:
+            raise ValueError("Either text or rich_message must be specified")
+
         return await session.invoke(
             raw.functions.messages.EditInlineBotMessage(
                 id=unpacked,
                 no_webpage=disable_web_page_preview or None,
                 reply_markup=await reply_markup.write(self) if reply_markup else None,
-                **await utils.parse_text_entities(self, text, parse_mode, entities)
+                message=message,
+                entities=_entities,
+                rich_message=input_rich_message,
             ),
             sleep_threshold=self.sleep_threshold
         )

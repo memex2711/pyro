@@ -33,6 +33,8 @@ class EditMessageText:
         parse_mode: Optional["enums.ParseMode"] = None,
         entities: List["types.MessageEntity"] = None,
         disable_web_page_preview: bool = None,
+        business_connection_id: Optional[str] = None,
+        rich_message: Optional["types.InputRichMessage"] = None,
         reply_markup: "types.InlineKeyboardMarkup" = None
     ) -> "types.Message":
         """Edit the text of messages.
@@ -64,6 +66,10 @@ class EditMessageText:
             reply_markup (:obj:`~pyrogram_styled.types.InlineKeyboardMarkup`, *optional*):
                 An InlineKeyboardMarkup object.
 
+            rich_message (:obj:`~pyrogram.types.InputRichMessage`, *optional*):
+                New rich content of the message.
+                Required if text isn't specified.
+
         Returns:
             :obj:`~pyrogram_styled.types.Message`: On success, the edited message is returned.
 
@@ -79,14 +85,30 @@ class EditMessageText:
                     disable_web_page_preview=True)
         """
 
+        message = ""
+        input_rich_message = None
+        entities = None
+
+        if text is not None:
+            message, entities = (
+                await utils.parse_text_entities(self, text, parse_mode, entities)
+            ).values()
+        elif rich_message is not None:
+            input_rich_message = rich_message.write()
+        else:
+            raise ValueError("Either text or rich_message must be specified")
+
         r = await self.invoke(
             raw.functions.messages.EditMessage(
                 peer=await self.resolve_peer(chat_id),
                 id=message_id,
                 no_webpage=disable_web_page_preview or None,
                 reply_markup=await reply_markup.write(self) if reply_markup else None,
-                **await utils.parse_text_entities(self, text, parse_mode, entities)
-            )
+                message=message,
+                entities=entities,
+                rich_message=input_rich_message,
+            ),
+            business_connection_id=business_connection_id,
         )
 
         for i in r.updates:

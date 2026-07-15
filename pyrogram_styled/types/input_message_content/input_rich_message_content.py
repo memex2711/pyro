@@ -16,16 +16,34 @@
 #  You should have received a copy of the GNU Lesser General Public License
 #  along with Pyrogram.  If not, see <http://www.gnu.org/licenses/>.
 
-from .input_message_content import InputMessageContent
-from .input_reply_to_message import InputReplyToMessage
-from .input_reply_to_story import InputReplyToStory
-from .input_text_message_content import InputTextMessageContent
-from .input_poll_option import InputPollOption
-from .reply_parameters import ReplyParameters
-from .external_reply_info import ExternalReplyInfo
-from .input_rich_message import InputRichMessage
-from .input_rich_message_content import InputRichMessageContent
+import logging
 
-__all__ = [
-    "InputMessageContent", "InputReplyToMessage", "InputReplyToStory", "InputTextMessageContent", "InputPollOption", "ReplyParameters", "ExternalReplyInfo", "InputRichMessageContent", "InputRichMessage"
-]
+import pyrogram
+from pyrogram import raw, types
+
+from .input_message_content import InputMessageContent
+
+log = logging.getLogger(__name__)
+
+
+class InputRichMessageContent(InputMessageContent):
+    """Content of a rich message to be sent as the result of an inline query.
+
+    Parameters:
+        rich_message (:obj:`pyrogram.types.InputRichMessage`):
+            The message to be sent.
+    """
+
+    def __init__(
+        self,
+        rich_message: "types.InputRichMessage",
+    ):
+        super().__init__()
+
+        self.rich_message = rich_message
+
+    async def write(self, client: "pyrogram.Client", reply_markup):
+        return raw.types.InputBotInlineMessageRichMessage(
+            rich_message=self.rich_message.write(),
+            reply_markup=await reply_markup.write(client) if reply_markup else None,
+        )
