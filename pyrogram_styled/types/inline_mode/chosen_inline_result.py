@@ -93,18 +93,19 @@ class ChosenInlineResult(Object, Update):
     
     async def edit_message_text(
         self,
-        text: str,
+        text: Optional[str] = None,
         parse_mode: Optional["enums.ParseMode"] = None,
         entities: list["types.MessageEntity"] = None,
-        reply_markup: "types.InlineKeyboardMarkup" = None
+        reply_markup: "types.InlineKeyboardMarkup" = None,
+        rich_message: Optional["types.InputRichMessage"] = None,
     ) -> bool:
         """Edit the text of messages attached to sent :obj:`~pyrogram_styled.types.InlineQueryResult` messages.
 
         Bound method *edit_message_text* of :obj:`~pyrogram_styled.types.ChosenInlineResult`.
 
         Parameters:
-            text (``str``):
-                New text of the message.
+            text (``str``, *optional*):
+                New text of the message. Required if ``rich_message`` isn't specified.
 
             parse_mode (:obj:`~pyrogram_styled.enums.ParseMode`, *optional*):
                 By default, texts are parsed using both Markdown and HTML styles.
@@ -112,6 +113,9 @@ class ChosenInlineResult(Object, Update):
 
             entities (List of :obj:`~pyrogram_styled.types.MessageEntity`):
                 List of special entities that appear in message text, which can be specified instead of *parse_mode*.
+
+            rich_message (:obj:`~pyrogram_styled.types.InputRichMessage`, *optional*):
+                New rich content of the message. Required if ``text`` isn't specified.
 
             reply_markup (:obj:`~pyrogram_styled.types.InlineKeyboardMarkup`, *optional*):
                 An InlineKeyboardMarkup object.
@@ -130,7 +134,8 @@ class ChosenInlineResult(Object, Update):
                 text=text,
                 parse_mode=parse_mode,
                 entities=entities,
-                reply_markup=reply_markup
+                reply_markup=reply_markup,
+                rich_message=rich_message,
             )
 
     async def edit_message_caption(
