@@ -29,10 +29,10 @@ class GetOwnedBots:
         .. include:: /_includes/usable-by/users.rst
 
         Returns:
-            List of :obj:`~pyrogram.types.User`: On success.
+            List of :obj:`~pyrogram_styled.types.User`: On success.
 
         Raises:
-            :obj:`~pyrogram.errors.RPCError`: In case of a Telegram RPC error.
+            :obj:`~pyrogram_styled.errors.RPCError`: In case of a Telegram RPC error.
 
         Example:
             .. code-block:: python

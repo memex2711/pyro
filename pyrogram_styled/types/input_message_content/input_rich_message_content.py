@@ -18,8 +18,8 @@
 
 import logging
 
-import pyrogram
-from pyrogram import raw, types
+import pyrogram_styled
+from pyrogram_styled import raw, types
 
 from .input_message_content import InputMessageContent
 
@@ -30,7 +30,7 @@ class InputRichMessageContent(InputMessageContent):
     """Content of a rich message to be sent as the result of an inline query.
 
     Parameters:
-        rich_message (:obj:`pyrogram.types.InputRichMessage`):
+        rich_message (:obj:`pyrogram_styled.types.InputRichMessage`):
             The message to be sent.
     """
 
@@ -42,7 +42,7 @@ class InputRichMessageContent(InputMessageContent):
 
         self.rich_message = rich_message
 
-    async def write(self, client: "pyrogram.Client", reply_markup):
+    async def write(self, client: "pyrogram_styled.Client", reply_markup):
         return raw.types.InputBotInlineMessageRichMessage(
             rich_message=self.rich_message.write(),
             reply_markup=await reply_markup.write(client) if reply_markup else None,

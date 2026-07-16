@@ -18,8 +18,8 @@
 
 from typing import Dict, List, Literal, Optional, Union
 
-import pyrogram
-from pyrogram import raw, types
+import pyrogram_styled
+from pyrogram_styled import raw, types
 
 from ..object import Object
 
@@ -73,31 +73,31 @@ class RichBlock(Object):
 
     It can be one of:
 
-    - :obj:`~pyrogram.types.RichBlockCaption`
-    - :obj:`~pyrogram.types.RichBlockTableCell`
-    - :obj:`~pyrogram.types.RichBlockListItem`
-    - :obj:`~pyrogram.types.RichBlockParagraph`
-    - :obj:`~pyrogram.types.RichBlockSectionHeading`
-    - :obj:`~pyrogram.types.RichBlockPreformatted`
-    - :obj:`~pyrogram.types.RichBlockFooter`
-    - :obj:`~pyrogram.types.RichBlockDivider`
-    - :obj:`~pyrogram.types.RichBlockMathematicalExpression`
-    - :obj:`~pyrogram.types.RichBlockAnchor`
-    - :obj:`~pyrogram.types.RichBlockList`
-    - :obj:`~pyrogram.types.RichBlockBlockQuotation`
-    - :obj:`~pyrogram.types.RichBlockPullQuotation`
-    - :obj:`~pyrogram.types.RichBlockCollage`
-    - :obj:`~pyrogram.types.RichBlockSlideshow`
-    - :obj:`~pyrogram.types.RichBlockTable`
-    - :obj:`~pyrogram.types.RichBlockDetails`
-    - :obj:`~pyrogram.types.RichBlockMap`
-    - :obj:`~pyrogram.types.RichBlockAnimation`
-    - :obj:`~pyrogram.types.RichBlockAudio`
-    - :obj:`~pyrogram.types.RichBlockPhoto`
-    - :obj:`~pyrogram.types.RichBlockVideo`
-    - :obj:`~pyrogram.types.RichBlockVoiceNote`
-    - :obj:`~pyrogram.types.RichBlockThinking`
-    - :obj:`~pyrogram.types.RichBlockUnsupported`
+    - :obj:`~pyrogram_styled.types.RichBlockCaption`
+    - :obj:`~pyrogram_styled.types.RichBlockTableCell`
+    - :obj:`~pyrogram_styled.types.RichBlockListItem`
+    - :obj:`~pyrogram_styled.types.RichBlockParagraph`
+    - :obj:`~pyrogram_styled.types.RichBlockSectionHeading`
+    - :obj:`~pyrogram_styled.types.RichBlockPreformatted`
+    - :obj:`~pyrogram_styled.types.RichBlockFooter`
+    - :obj:`~pyrogram_styled.types.RichBlockDivider`
+    - :obj:`~pyrogram_styled.types.RichBlockMathematicalExpression`
+    - :obj:`~pyrogram_styled.types.RichBlockAnchor`
+    - :obj:`~pyrogram_styled.types.RichBlockList`
+    - :obj:`~pyrogram_styled.types.RichBlockBlockQuotation`
+    - :obj:`~pyrogram_styled.types.RichBlockPullQuotation`
+    - :obj:`~pyrogram_styled.types.RichBlockCollage`
+    - :obj:`~pyrogram_styled.types.RichBlockSlideshow`
+    - :obj:`~pyrogram_styled.types.RichBlockTable`
+    - :obj:`~pyrogram_styled.types.RichBlockDetails`
+    - :obj:`~pyrogram_styled.types.RichBlockMap`
+    - :obj:`~pyrogram_styled.types.RichBlockAnimation`
+    - :obj:`~pyrogram_styled.types.RichBlockAudio`
+    - :obj:`~pyrogram_styled.types.RichBlockPhoto`
+    - :obj:`~pyrogram_styled.types.RichBlockVideo`
+    - :obj:`~pyrogram_styled.types.RichBlockVoiceNote`
+    - :obj:`~pyrogram_styled.types.RichBlockThinking`
+    - :obj:`~pyrogram_styled.types.RichBlockUnsupported`
     """
 
     def __init__(self):
@@ -105,7 +105,7 @@ class RichBlock(Object):
 
     @staticmethod
     async def _parse(
-        client: "pyrogram.Client",
+        client: "pyrogram_styled.Client",
         rich_block: "raw.base.PageBlock",
         photos: Dict[int, "raw.base.Photo"] = {},
         documents: Dict[int, "raw.base.Document"] = {},
@@ -328,10 +328,10 @@ class RichBlockCaption(RichBlock):
     """Caption of a rich formatted block.
 
     Parameters:
-        text (:obj:`~pyrogram.types.RichText`):
+        text (:obj:`~pyrogram_styled.types.RichText`):
             Block caption.
 
-        credit (:obj:`~pyrogram.types.RichText`, *optional*):
+        credit (:obj:`~pyrogram_styled.types.RichText`, *optional*):
             Block credit which corresponds to the HTML tag <cite>.
     """
 
@@ -358,7 +358,7 @@ class RichBlockTableCell(RichBlock):
     """Cell in a table.
 
     Parameters:
-        text (:obj:`~pyrogram.types.RichText`, *optional*):
+        text (:obj:`~pyrogram_styled.types.RichText`, *optional*):
             Text in the cell.
             If omitted, then the cell is invisible.
 
@@ -429,7 +429,7 @@ class RichBlockListItem(RichBlock):
         label (``str``):
             Label of the item.
 
-        blocks (List of :obj:`pyrogram.types.RichBlock`):
+        blocks (List of :obj:`pyrogram_styled.types.RichBlock`):
             The content of the item.
 
         has_checkbox (``bool``, *optional*):
@@ -542,7 +542,7 @@ class RichBlockParagraph(RichBlock):
     """A text paragraph, corresponding to the HTML tag ``<p>``.
 
     Parameters:
-        text (:obj:`~pyrogram.types.RichText`):
+        text (:obj:`~pyrogram_styled.types.RichText`):
             Text of the block.
     """
 
@@ -559,7 +559,7 @@ class RichBlockSectionHeading(RichBlock):
     """A section heading, corresponding to the HTML tags ``<h1>``, ``<h2>``, ``<h3>``, ``<h4>``, ``<h5>``, or ``<h6>``.
 
     Parameters:
-        text (:obj:`~pyrogram.types.RichText`):
+        text (:obj:`~pyrogram_styled.types.RichText`):
             Text of the block.
 
         size (``int``):
@@ -582,7 +582,7 @@ class RichBlockPreformatted(RichBlock):
     """A preformatted text block, corresponding to the nested HTML tags ``<pre>`` and ``<code>``.
 
     Parameters:
-        text (:obj:`~pyrogram.types.RichText`):
+        text (:obj:`~pyrogram_styled.types.RichText`):
             Text of the block.
 
         language (``str``, *optional*):
@@ -604,7 +604,7 @@ class RichBlockFooter(RichBlock):
     """A footer, corresponding to the HTML tag ``<footer>``.
 
     Parameters:
-        text (:obj:`~pyrogram.types.RichText`):
+        text (:obj:`~pyrogram_styled.types.RichText`):
             Text of the block.
     """
 
@@ -653,7 +653,7 @@ class RichBlockList(RichBlock):
     """A list of blocks, corresponding to the HTML tag ``<ul>`` or ``<ol>`` with multiple nested tags ``<li>``.
 
     Parameters:
-        items (List of :obj:`pyrogram.types.RichBlockListItem`):
+        items (List of :obj:`pyrogram_styled.types.RichBlockListItem`):
             Items of the list.
     """
 
@@ -667,10 +667,10 @@ class RichBlockBlockQuotation(RichBlock):
     """A block quotation, corresponding to the HTML tag ``<blockquote>``.
 
     Parameters:
-        blocks (List of :obj:`pyrogram.types.RichBlock`):
+        blocks (List of :obj:`pyrogram_styled.types.RichBlock`):
             Content of the block.
 
-        credit (:obj:`~pyrogram.types.RichText`, *optional*):
+        credit (:obj:`~pyrogram_styled.types.RichText`, *optional*):
             Credit of the block.
     """
 
@@ -685,10 +685,10 @@ class RichBlockPullQuotation(RichBlock):
     """A quotation with centered text, loosely corresponding to the HTML tag ``<aside>``.
 
     Parameters:
-        text (:obj:`~pyrogram.types.RichText`):
+        text (:obj:`~pyrogram_styled.types.RichText`):
             Text of the block.
 
-        credit (:obj:`~pyrogram.types.RichText`, *optional*):
+        credit (:obj:`~pyrogram_styled.types.RichText`, *optional*):
             Credit of the block.
     """
 
@@ -703,10 +703,10 @@ class RichBlockCollage(RichBlock):
     """A collage, corresponding to the custom HTML tag ``<tg-collage>``.
 
     Parameters:
-        blocks (List of :obj:`~pyrogram.types.RichBlock`):
+        blocks (List of :obj:`~pyrogram_styled.types.RichBlock`):
             Elements of the collage.
 
-        caption (:obj:`~pyrogram.types.RichBlockCaption`, *optional*):
+        caption (:obj:`~pyrogram_styled.types.RichBlockCaption`, *optional*):
             Caption of the block.
     """
 
@@ -723,10 +723,10 @@ class RichBlockSlideshow(RichBlock):
     """A slideshow, corresponding to the custom HTML tag ``<tg-slideshow>``.
 
     Parameters:
-        blocks (List of :obj:`~pyrogram.types.RichBlock`):
+        blocks (List of :obj:`~pyrogram_styled.types.RichBlock`):
             Elements of the slideshow.
 
-        caption (:obj:`~pyrogram.types.RichBlockCaption`, *optional*):
+        caption (:obj:`~pyrogram_styled.types.RichBlockCaption`, *optional*):
             Caption of the block.
     """
 
@@ -743,7 +743,7 @@ class RichBlockTable(RichBlock):
     """A table, corresponding to the HTML tag ``<table>``.
 
     Parameters:
-        cells (List of List of :obj:`~pyrogram.types.RichBlockTableCell`):
+        cells (List of List of :obj:`~pyrogram_styled.types.RichBlockTableCell`):
             Cells of the table.
 
         is_bordered (``bool``, *optional*):
@@ -752,7 +752,7 @@ class RichBlockTable(RichBlock):
         is_striped (``bool``, *optional*):
             True, if the table is striped.
 
-        caption (:obj:`~pyrogram.types.RichBlockCaption`, *optional*):
+        caption (:obj:`~pyrogram_styled.types.RichBlockCaption`, *optional*):
             Caption of the block.
     """
 
@@ -797,10 +797,10 @@ class RichBlockDetails(RichBlock):
     """An expandable block for details disclosure, corresponding to the HTML tag ``<details>``.
 
     Parameters:
-        summary (:obj:`~pyrogram.types.RichText`):
+        summary (:obj:`~pyrogram_styled.types.RichText`):
             Always shown summary of the block.
 
-        blocks (List of :obj:`~pyrogram.types.RichBlock`):
+        blocks (List of :obj:`~pyrogram_styled.types.RichBlock`):
             Content of the block.
 
         is_open (``bool``, *optional*):
@@ -824,7 +824,7 @@ class RichBlockMap(RichBlock):
     """A block with a map, corresponding to the custom HTML tag ``<tg-map>``.
 
     Parameters:
-        location (:obj:`~pyrogram.types.Location`):
+        location (:obj:`~pyrogram_styled.types.Location`):
             Location of the center of the map.
 
         zoom (``int``):
@@ -836,7 +836,7 @@ class RichBlockMap(RichBlock):
         height (``int``):
             Expected height of the map.
 
-        caption (:obj:`~pyrogram.types.RichBlockCaption`, *optional*):
+        caption (:obj:`~pyrogram_styled.types.RichBlockCaption`, *optional*):
             Caption of the block.
     """
 
@@ -861,13 +861,13 @@ class RichBlockAnimation(RichBlock):
     """A block with an animation, corresponding to the HTML tag ``<video>``.
 
     Parameters:
-        animation (:obj:`~pyrogram.types.Animation`):
+        animation (:obj:`~pyrogram_styled.types.Animation`):
             The animation.
 
         has_spoiler (``bool``, *optional*):
             True, if the media preview is covered by a spoiler animation.
 
-        caption (:obj:`~pyrogram.types.RichBlockCaption`, *optional*):
+        caption (:obj:`~pyrogram_styled.types.RichBlockCaption`, *optional*):
             Caption of the block.
     """
 
@@ -888,10 +888,10 @@ class RichBlockAudio(RichBlock):
     """A block with a music file, corresponding to the HTML tag ``<audio>``.
 
     Parameters:
-        audio (:obj:`~pyrogram.types.Audio`):
+        audio (:obj:`~pyrogram_styled.types.Audio`):
             The audio.
 
-        caption (:obj:`~pyrogram.types.RichBlockCaption`, *optional*):
+        caption (:obj:`~pyrogram_styled.types.RichBlockCaption`, *optional*):
             Caption of the block.
     """
 
@@ -906,13 +906,13 @@ class RichBlockPhoto(RichBlock):
     """A block with a photo, corresponding to the HTML tag ``<photo>``.
 
     Parameters:
-        photo (:obj:`~pyrogram.types.Photo`):
+        photo (:obj:`~pyrogram_styled.types.Photo`):
             The photo.
 
         has_spoiler (``bool``, *optional*):
             True, if the media preview is covered by a spoiler animation.
 
-        caption (:obj:`~pyrogram.types.RichBlockCaption`, *optional*):
+        caption (:obj:`~pyrogram_styled.types.RichBlockCaption`, *optional*):
             Caption of the block.
     """
 
@@ -933,13 +933,13 @@ class RichBlockVideo(RichBlock):
     """A block with a video, corresponding to the HTML tag ``<video>``.
 
     Parameters:
-        video (:obj:`~pyrogram.types.Video`):
+        video (:obj:`~pyrogram_styled.types.Video`):
             The video.
 
         has_spoiler (``bool``, *optional*):
             True, if the media preview is covered by a spoiler animation.
 
-        caption (:obj:`~pyrogram.types.RichBlockCaption`, *optional*):
+        caption (:obj:`~pyrogram_styled.types.RichBlockCaption`, *optional*):
             Caption of the block.
     """
 
@@ -960,13 +960,13 @@ class RichBlockVoiceNote(RichBlock):
     """A block with a voice note, corresponding to the HTML tag ``<audio>``.
 
     Parameters:
-        voice_note (:obj:`~pyrogram.types.Voice`):
+        voice_note (:obj:`~pyrogram_styled.types.Voice`):
             The voice note.
 
         has_spoiler (``bool``, *optional*):
             True, if the media preview is covered by a spoiler animation.
 
-        caption (:obj:`~pyrogram.types.RichBlockCaption`, *optional*):
+        caption (:obj:`~pyrogram_styled.types.RichBlockCaption`, *optional*):
             Caption of the block.
     """
 
@@ -981,11 +981,11 @@ class RichBlockVoiceNote(RichBlock):
 
 class RichBlockThinking(RichBlock):
     """A block with a "Thinking..." placeholder, corresponding to the custom HTML tag ``<tg-thinking>``.
-    The block may be used only in :meth:`~pyrogram.Client.send_rich_message_draft`, therefore it can't be received in messages.
+    The block may be used only in :meth:`~pyrogram_styled.Client.send_rich_message_draft`, therefore it can't be received in messages.
     See https://t.me/addemoji/AIActions for examples of custom emoji, which are recommended for usage in the block.
 
     Parameters:
-        text (:obj:`~pyrogram.types.RichText`):
+        text (:obj:`~pyrogram_styled.types.RichText`):
             Text of the block.
             See https://t.me/addemoji/AIActions for examples of custom emoji, which are recommended for usage in the block.
     """

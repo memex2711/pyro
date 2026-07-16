@@ -19,8 +19,8 @@
 from datetime import datetime
 from typing import Dict, List, Optional, Union
 
-import pyrogram
-from pyrogram import raw, types, utils
+import pyrogram_styled
+from pyrogram_styled import raw, types, utils
 
 from ..object import Object
 
@@ -31,32 +31,32 @@ class RichText(Object):
     It can be one of:
 
     - ``str``
-    - List of :obj:`~pyrogram.types.RichText`
-    - :obj:`~pyrogram.types.RichTextBold`
-    - :obj:`~pyrogram.types.RichTextItalic`
-    - :obj:`~pyrogram.types.RichTextUnderline`
-    - :obj:`~pyrogram.types.RichTextStrikethrough`
-    - :obj:`~pyrogram.types.RichTextSpoiler`
-    - :obj:`~pyrogram.types.RichTextDateTime`
-    - :obj:`~pyrogram.types.RichTextTextMention`
-    - :obj:`~pyrogram.types.RichTextSubscript`
-    - :obj:`~pyrogram.types.RichTextSuperscript`
-    - :obj:`~pyrogram.types.RichTextMarked`
-    - :obj:`~pyrogram.types.RichTextCode`
-    - :obj:`~pyrogram.types.RichTextCustomEmoji`
-    - :obj:`~pyrogram.types.RichTextMathematicalExpression`
-    - :obj:`~pyrogram.types.RichTextUrl`
-    - :obj:`~pyrogram.types.RichTextEmailAddress`
-    - :obj:`~pyrogram.types.RichTextPhoneNumber`
-    - :obj:`~pyrogram.types.RichTextBankCardNumber`
-    - :obj:`~pyrogram.types.RichTextMention`
-    - :obj:`~pyrogram.types.RichTextHashtag`
-    - :obj:`~pyrogram.types.RichTextCashtag`
-    - :obj:`~pyrogram.types.RichTextBotCommand`
-    - :obj:`~pyrogram.types.RichTextAnchor`
-    - :obj:`~pyrogram.types.RichTextAnchorLink`
-    - :obj:`~pyrogram.types.RichTextReference`
-    - :obj:`~pyrogram.types.RichTextReferenceLink`
+    - List of :obj:`~pyrogram_styled.types.RichText`
+    - :obj:`~pyrogram_styled.types.RichTextBold`
+    - :obj:`~pyrogram_styled.types.RichTextItalic`
+    - :obj:`~pyrogram_styled.types.RichTextUnderline`
+    - :obj:`~pyrogram_styled.types.RichTextStrikethrough`
+    - :obj:`~pyrogram_styled.types.RichTextSpoiler`
+    - :obj:`~pyrogram_styled.types.RichTextDateTime`
+    - :obj:`~pyrogram_styled.types.RichTextTextMention`
+    - :obj:`~pyrogram_styled.types.RichTextSubscript`
+    - :obj:`~pyrogram_styled.types.RichTextSuperscript`
+    - :obj:`~pyrogram_styled.types.RichTextMarked`
+    - :obj:`~pyrogram_styled.types.RichTextCode`
+    - :obj:`~pyrogram_styled.types.RichTextCustomEmoji`
+    - :obj:`~pyrogram_styled.types.RichTextMathematicalExpression`
+    - :obj:`~pyrogram_styled.types.RichTextUrl`
+    - :obj:`~pyrogram_styled.types.RichTextEmailAddress`
+    - :obj:`~pyrogram_styled.types.RichTextPhoneNumber`
+    - :obj:`~pyrogram_styled.types.RichTextBankCardNumber`
+    - :obj:`~pyrogram_styled.types.RichTextMention`
+    - :obj:`~pyrogram_styled.types.RichTextHashtag`
+    - :obj:`~pyrogram_styled.types.RichTextCashtag`
+    - :obj:`~pyrogram_styled.types.RichTextBotCommand`
+    - :obj:`~pyrogram_styled.types.RichTextAnchor`
+    - :obj:`~pyrogram_styled.types.RichTextAnchorLink`
+    - :obj:`~pyrogram_styled.types.RichTextReference`
+    - :obj:`~pyrogram_styled.types.RichTextReferenceLink`
     """
 
     def __init__(self):
@@ -64,7 +64,7 @@ class RichText(Object):
 
     @staticmethod
     async def _parse(
-        client: "pyrogram.Client",
+        client: "pyrogram_styled.Client",
         rich_text: "raw.base.RichText",
         users: Dict[int, "raw.base.User"] = {},
         chats: Dict[int, "raw.base.Chat"] = {},
@@ -240,7 +240,7 @@ class RichTextBold(RichText):
     """A bold text.
 
     Parameters:
-        text (:obj:`~pyrogram.types.RichText`):
+        text (:obj:`~pyrogram_styled.types.RichText`):
             The text.
     """
 
@@ -257,7 +257,7 @@ class RichTextItalic(RichText):
     """A italicized text.
 
     Parameters:
-        text (:obj:`~pyrogram.types.RichText`):
+        text (:obj:`~pyrogram_styled.types.RichText`):
             The text.
     """
 
@@ -274,7 +274,7 @@ class RichTextUnderline(RichText):
     """A underlined text.
 
     Parameters:
-        text (:obj:`~pyrogram.types.RichText`):
+        text (:obj:`~pyrogram_styled.types.RichText`):
             The text.
     """
 
@@ -291,7 +291,7 @@ class RichTextStrikethrough(RichText):
     """A strikethrough text.
 
     Parameters:
-        text (:obj:`~pyrogram.types.RichText`):
+        text (:obj:`~pyrogram_styled.types.RichText`):
             The text.
     """
 
@@ -308,7 +308,7 @@ class RichTextSpoiler(RichText):
     """A text covered by a spoiler.
 
     Parameters:
-        text (:obj:`~pyrogram.types.RichText`):
+        text (:obj:`~pyrogram_styled.types.RichText`):
             The text.
     """
 
@@ -325,7 +325,7 @@ class RichTextDateTime(RichText):
     """Formatted date and time.
 
     Parameters:
-        text (:obj:`~pyrogram.types.RichText`):
+        text (:obj:`~pyrogram_styled.types.RichText`):
             The text.
 
         date (:py:obj:`datetime.datetime`):
@@ -353,10 +353,10 @@ class RichTextTextMention(RichText):
     """A mention of a Telegram user by their identifier.
 
     Parameters:
-        text (:obj:`~pyrogram.types.RichText`):
+        text (:obj:`~pyrogram_styled.types.RichText`):
             The text.
 
-        user (:obj:`~pyrogram.types.User`):
+        user (:obj:`~pyrogram_styled.types.User`):
             The mentioned user.
     """
 
@@ -375,7 +375,7 @@ class RichTextSubscript(RichText):
     """A subscript text.
 
     Parameters:
-        text (:obj:`~pyrogram.types.RichText`):
+        text (:obj:`~pyrogram_styled.types.RichText`):
             The text.
     """
 
@@ -392,7 +392,7 @@ class RichTextSuperscript(RichText):
     """A superscript text.
 
     Parameters:
-        text (:obj:`~pyrogram.types.RichText`):
+        text (:obj:`~pyrogram_styled.types.RichText`):
             The text.
     """
 
@@ -409,7 +409,7 @@ class RichTextMarked(RichText):
     """A marked text.
 
     Parameters:
-        text (:obj:`~pyrogram.types.RichText`):
+        text (:obj:`~pyrogram_styled.types.RichText`):
             The text.
     """
 
@@ -426,7 +426,7 @@ class RichTextCode(RichText):
     """A monowidth text.
 
     Parameters:
-        text (:obj:`~pyrogram.types.RichText`):
+        text (:obj:`~pyrogram_styled.types.RichText`):
             The text.
     """
 
@@ -445,7 +445,7 @@ class RichTextCustomEmoji(RichText):
     Parameters:
         custom_emoji_id (``str``):
             Unique identifier of the custom emoji.
-            Use :meth:`pyrogram.Client.get_custom_emoji_stickers` to get full information about the sticker.
+            Use :meth:`pyrogram_styled.Client.get_custom_emoji_stickers` to get full information about the sticker.
 
         alternative_text (``str``):
             Alternative emoji for the custom emoji.
@@ -479,7 +479,7 @@ class RichTextUrl(RichText):
     """A text with a link.
 
     Parameters:
-        text (:obj:`~pyrogram.types.RichText`):
+        text (:obj:`~pyrogram_styled.types.RichText`):
             The text.
 
         url (``str``):
@@ -497,7 +497,7 @@ class RichTextEmailAddress(RichText):
     """A text with an email address.
 
     Parameters:
-        text (:obj:`~pyrogram.types.RichText`):
+        text (:obj:`~pyrogram_styled.types.RichText`):
             The text.
 
         email_address (``str``):
@@ -515,7 +515,7 @@ class RichTextPhoneNumber(RichText):
     """A text with a phone number.
 
     Parameters:
-        text (:obj:`~pyrogram.types.RichText`):
+        text (:obj:`~pyrogram_styled.types.RichText`):
             The text.
 
         phone_number (``str``):
@@ -533,7 +533,7 @@ class RichTextBankCardNumber(RichText):
     """A text with a bank card number.
 
     Parameters:
-        text (:obj:`~pyrogram.types.RichText`):
+        text (:obj:`~pyrogram_styled.types.RichText`):
             The text.
 
         bank_card_number (``str``):
@@ -551,7 +551,7 @@ class RichTextMention(RichText):
     """A mention by a username.
 
     Parameters:
-        text (:obj:`~pyrogram.types.RichText`):
+        text (:obj:`~pyrogram_styled.types.RichText`):
             The text.
 
         username (``str``):
@@ -569,7 +569,7 @@ class RichTextHashtag(RichText):
     """A hashtag.
 
     Parameters:
-        text (:obj:`~pyrogram.types.RichText`):
+        text (:obj:`~pyrogram_styled.types.RichText`):
             The text.
 
         hashtag (``str``):
@@ -587,7 +587,7 @@ class RichTextCashtag(RichText):
     """A cashtag.
 
     Parameters:
-        text (:obj:`~pyrogram.types.RichText`):
+        text (:obj:`~pyrogram_styled.types.RichText`):
             The text.
 
         cashtag (``str``):
@@ -605,7 +605,7 @@ class RichTextBotCommand(RichText):
     """A bot command.
 
     Parameters:
-        text (:obj:`~pyrogram.types.RichText`):
+        text (:obj:`~pyrogram_styled.types.RichText`):
             The text.
 
         bot_command (``str``):
@@ -623,7 +623,7 @@ class RichTextAnchor(RichText):
     """An anchor.
 
     Parameters:
-        text (:obj:`~pyrogram.types.RichText`):
+        text (:obj:`~pyrogram_styled.types.RichText`):
             The text.
 
         name (``str``):
@@ -641,7 +641,7 @@ class RichTextAnchorLink(RichText):
     """A link to an anchor.
 
     Parameters:
-        text (:obj:`~pyrogram.types.RichText`):
+        text (:obj:`~pyrogram_styled.types.RichText`):
             The text.
 
         anchor_name (``str``):
@@ -660,7 +660,7 @@ class RichTextReference(RichText):
     """A reference.
 
     Parameters:
-        text (:obj:`~pyrogram.types.RichText`):
+        text (:obj:`~pyrogram_styled.types.RichText`):
             The text.
 
         name (``str``):
@@ -678,7 +678,7 @@ class RichTextReferenceLink(RichText):
     """A link to a reference.
 
     Parameters:
-        text (:obj:`~pyrogram.types.RichText`):
+        text (:obj:`~pyrogram_styled.types.RichText`):
             The text.
 
         reference_name (``str``):

@@ -22,7 +22,7 @@ from .auto_name import AutoName
 
 
 class MessageOriginType(AutoName):
-    """Message origin type enumeration used in :obj:`~pyrogram.types.MessageOrigin`."""
+    """Message origin type enumeration used in :obj:`~pyrogram_styled.types.MessageOrigin`."""
 
     CHANNEL = auto()
     "The message was originally a post in a channel"

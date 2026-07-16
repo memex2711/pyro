@@ -66,7 +66,7 @@ class EditMessageText:
             reply_markup (:obj:`~pyrogram_styled.types.InlineKeyboardMarkup`, *optional*):
                 An InlineKeyboardMarkup object.
 
-            rich_message (:obj:`~pyrogram.types.InputRichMessage`, *optional*):
+            rich_message (:obj:`~pyrogram_styled.types.InputRichMessage`, *optional*):
                 New rich content of the message.
                 Required if text isn't specified.
 

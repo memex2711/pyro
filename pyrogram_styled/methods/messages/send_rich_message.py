@@ -19,15 +19,15 @@
 import logging
 from typing import Optional, Union
 
-import pyrogram
-from pyrogram import enums, raw, types, utils
+import pyrogram_styled
+from pyrogram_styled import enums, raw, types, utils
 
 log = logging.getLogger(__name__)
 
 
 class SendRichMessage:
     async def send_rich_message(
-        self: "pyrogram.Client",
+        self: "pyrogram_styled.Client",
         chat_id: Union[int, str],
         rich_message: "types.InputRichMessage",
         disable_notification: Optional[bool] = None,
@@ -58,7 +58,7 @@ class SendRichMessage:
                 For your personal cloud (Saved Messages) you can simply use "me" or "self".
                 For a contact that exists in your Telegram address book you can use his phone number (str).
 
-            rich_message (:obj:`~pyrogram.types.InputRichMessage`):
+            rich_message (:obj:`~pyrogram_styled.types.InputRichMessage`):
                 The message to be sent.
 
             disable_notification (``bool``, *optional*):
@@ -77,7 +77,7 @@ class SendRichMessage:
                 Unique identifier of the message effect.
                 For private chats only.
 
-            reply_parameters (:obj:`~pyrogram.types.ReplyParameters`, *optional*):
+            reply_parameters (:obj:`~pyrogram_styled.types.ReplyParameters`, *optional*):
                 Describes reply parameters for the message that is being sent.
 
             protect_content (``bool``, *optional*):
@@ -92,20 +92,20 @@ class SendRichMessage:
                 The relevant Stars will be withdrawn from the bot's balance.
                 For bots only.
 
-            suggested_post_parameters (:obj:`~pyrogram.types.SuggestedPostParameters`, *optional*):
+            suggested_post_parameters (:obj:`~pyrogram_styled.types.SuggestedPostParameters`, *optional*):
                 Information about the suggested post.
 
-            reply_markup (:obj:`~pyrogram.types.InlineKeyboardMarkup` | :obj:`~pyrogram.types.ReplyKeyboardMarkup` | :obj:`~pyrogram.types.ReplyKeyboardRemove` | :obj:`~pyrogram.types.ForceReply`, *optional*):
+            reply_markup (:obj:`~pyrogram_styled.types.InlineKeyboardMarkup` | :obj:`~pyrogram_styled.types.ReplyKeyboardMarkup` | :obj:`~pyrogram_styled.types.ReplyKeyboardRemove` | :obj:`~pyrogram_styled.types.ForceReply`, *optional*):
                 Additional interface options. An object for an inline keyboard, custom reply keyboard,
                 instructions to remove reply keyboard or to force a reply from the user.
 
         Returns:
-            :obj:`~pyrogram.types.Message`: On success, the sent text message is returned.
+            :obj:`~pyrogram_styled.types.Message`: On success, the sent text message is returned.
 
         Example:
             .. code-block:: python
 
-                from pyrogram import types
+                from pyrogram_styled import types
 
                 await app.send_rich_message(
                     chat_id=chat_id,
@@ -113,7 +113,7 @@ class SendRichMessage:
                     reply_markup=types.InlineKeyboardMarkup(
                         [
                             [types.InlineKeyboardButton("Data", callback_data="callback_data")],
-                            [types.InlineKeyboardButton("Docs", url="https://docs.pyrogram.org")],
+                            [types.InlineKeyboardButton("Docs", url="https://docs.pyrogram_styled.org")],
                         ]
                     ),
                 )

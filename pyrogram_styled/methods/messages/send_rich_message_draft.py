@@ -18,13 +18,13 @@
 
 from typing import Optional, Union
 
-import pyrogram
-from pyrogram import raw, types
+import pyrogram_styled
+from pyrogram_styled import raw, types
 
 
 class SendRichMessageDraft:
     async def send_rich_message_draft(
-        self: "pyrogram.Client",
+        self: "pyrogram_styled.Client",
         chat_id: Union[int, str],
         draft_id: int,
         rich_message: "types.InputRichMessage",
@@ -35,7 +35,7 @@ class SendRichMessageDraft:
         .. note::
 
             The streamed draft is ephemeral and acts as a temporary 30-second preview - once the output is finalized,
-            you must call :meth:`~pyrogram.Client.send_rich_message` with the complete message to persist it in the user's chat.
+            you must call :meth:`~pyrogram_styled.Client.send_rich_message` with the complete message to persist it in the user's chat.
 
         .. include:: /_includes/usable-by/bots.rst
 
@@ -47,7 +47,7 @@ class SendRichMessageDraft:
                 Unique identifier of the message draft, must be non-zero.
                 Changes of drafts with the same identifier are animated.
 
-            rich_message (:obj:`pyrogram.types.InputRichMessage`):
+            rich_message (:obj:`pyrogram_styled.types.InputRichMessage`):
                 The partial message to be streamed.
 
             message_thread_id (``int``, *optional*):

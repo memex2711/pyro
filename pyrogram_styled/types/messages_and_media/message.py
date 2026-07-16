@@ -363,7 +363,7 @@ class Message(Object, Update):
             The message shown as not modified.
             A message can be not modified in case it has received a reaction.
 
-        rich_message (:obj:`~pyrogram.types.Message`, *optional*):
+        rich_message (:obj:`~pyrogram_styled.types.Message`, *optional*):
             Message is a rich formatted message.
     """
 

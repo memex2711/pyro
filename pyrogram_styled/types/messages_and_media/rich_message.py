@@ -18,8 +18,8 @@
 
 from typing import Dict, List, Optional
 
-import pyrogram
-from pyrogram import raw, types
+import pyrogram_styled
+from pyrogram_styled import raw, types
 
 from ..object import Object
 
@@ -28,7 +28,7 @@ class RichMessage(Object):
     """Rich formatted message.
 
     Parameters:
-        blocks (List of :obj:`pyrogram.types.RichBlock`):
+        blocks (List of :obj:`pyrogram_styled.types.RichBlock`):
             Content of the message.
 
         is_rtl (``bool``, *optional*):
@@ -43,7 +43,7 @@ class RichMessage(Object):
 
     @staticmethod
     async def _parse(
-        client: "pyrogram.Client",
+        client: "pyrogram_styled.Client",
         rich_message: "raw.types.RichMessage",
         users: Dict[int, "raw.base.User"] = {},
         chats: Dict[int, "raw.base.Chat"] = {},
