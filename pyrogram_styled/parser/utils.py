@@ -16,6 +16,7 @@
 #  You should have received a copy of the GNU Lesser General Public License
 #  along with Pyrogram.  If not, see <http://www.gnu.org/licenses/>.
 
+
 import re
 from struct import unpack
 
@@ -34,8 +35,62 @@ def add_surrogates(text):
 
 def remove_surrogates(text):
     # Replace each surrogate pair with a SMP code point
-    return text.encode("utf-16", "surrogatepass").decode("utf-16")
+    return text.encode("utf-16", "surrogatepass").decode("utf-16", "ignore")
 
 
 def replace_once(source: str, old: str, new: str, start: int):
     return source[:start] + source[start:].replace(old, new, 1)
+
+
+def within_surrogate(text, index, *, length=None):
+    """
+    https://github.com/LonamiWebs/Telethon/blob/63d9b26/telethon/helpers.py#L52-L63
+
+    `True` if ``index`` is within a surrogate (before and after it, not at!).
+    """
+    if length is None:
+        length = len(text)
+
+    return (
+            1 < index < len(text) and  # in bounds
+            '\ud800' <= text[index - 1] <= '\udbff' and  # previous is
+            '\ud800' <= text[index] <= '\udfff'  # current is
+    )
+
+
+dtf_reegex = r"r|w?[dD]?[tT]?"
+
+
+def parse_date_time_format_tl(args, date_time_format: str):
+    # Initialize all flags to False (matches the empty string behavior)
+    args["relative"] = False
+    args["short_time"] = False
+    args["long_time"] = False
+    args["short_date"] = False
+    args["long_date"] = False
+    args["day_of_week"] = False
+
+    if date_time_format:
+        # Strictly validate against TDLib's required regex
+        if not re.fullmatch(dtf_reegex, date_time_format):
+            raise ValueError(f"Invalid date-time format string: '{date_time_format}'")
+        
+        # Handle the mutually exclusive relative flag
+        if date_time_format == "r":
+            args["relative"] = True
+        else:
+            # Map the remaining control characters
+            if "w" in date_time_format:
+                args["day_of_week"] = True
+                
+            if "d" in date_time_format:
+                args["short_date"] = True
+            elif "D" in date_time_format:
+                args["long_date"] = True
+                
+            if "t" in date_time_format:
+                args["short_time"] = True
+            elif "T" in date_time_format:
+                args["long_time"] = True
+    
+    return args
