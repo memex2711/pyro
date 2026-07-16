@@ -201,19 +201,20 @@ class CallbackQuery(Object, Update):
 
     async def edit_message_text(
         self,
-        text: str,
+        text: Optional[str] = None,
         parse_mode: Optional["enums.ParseMode"] = None,
         entities: list["types.MessageEntity"] = None,
         reply_markup: "types.InlineKeyboardMarkup" = None,
-        disable_web_page_preview: bool = None
+        disable_web_page_preview: bool = None,
+        rich_message: Optional["types.InputRichMessage"] = None,
     ) -> Union["types.Message", bool]:
         """Edit the text of messages attached to callback queries.
 
         Bound method *edit_message_text* of :obj:`~pyrogram_styled.types.CallbackQuery`.
 
         Parameters:
-            text (``str``):
-                New text of the message.
+            text (``str``, *optional*):
+                New text of the message. Required if ``rich_message`` isn't specified.
 
             parse_mode (:obj:`~pyrogram_styled.enums.ParseMode`, *optional*):
                 By default, texts are parsed using both Markdown and HTML styles.
@@ -222,8 +223,14 @@ class CallbackQuery(Object, Update):
             entities (List of :obj:`~pyrogram_styled.types.MessageEntity`):
                 List of special entities that appear in message text, which can be specified instead of *parse_mode*.
 
+            rich_message (:obj:`~pyrogram_styled.types.InputRichMessage`, *optional*):
+                New rich content of the message. Required if ``text`` isn't specified.
+
             reply_markup (:obj:`~pyrogram_styled.types.InlineKeyboardMarkup`, *optional*):
                 An InlineKeyboardMarkup object.
+
+            disable_web_page_preview (``bool``, *optional*):
+                Disables link previews for links in this message.
 
         Returns:
             :obj:`~pyrogram_styled.types.Message` | ``bool``: On success, if the edited message was sent by the bot, the edited
@@ -239,6 +246,7 @@ class CallbackQuery(Object, Update):
                 text=text,
                 parse_mode=parse_mode,
                 entities=entities,
+                rich_message=rich_message,
                 reply_markup=reply_markup,
                 disable_web_page_preview=disable_web_page_preview,
             )
@@ -248,6 +256,7 @@ class CallbackQuery(Object, Update):
                 text=text,
                 parse_mode=parse_mode,
                 entities=entities,
+                rich_message=rich_message,
                 reply_markup=reply_markup,
                 disable_web_page_preview=disable_web_page_preview
             )
