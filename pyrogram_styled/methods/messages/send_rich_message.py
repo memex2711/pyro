@@ -158,4 +158,26 @@ class SendRichMessage:
                 client=self,
             )
 
+        if isinstance(r, (raw.types.Updates, raw.types.UpdatesCombined)):
+            extracted_messages = []
+            for update in r.updates:
+                if isinstance(
+                    update,
+                    (
+                        raw.types.UpdateNewMessage,
+                        raw.types.UpdateNewChannelMessage,
+                        raw.types.UpdateNewScheduledMessage,
+                    ),
+                ):
+                    extracted_messages.append(update.message)
+
+            r = raw.types.messages.Messages(
+                messages=extracted_messages,
+                users=r.users,
+                chats=r.chats,
+                date=0,
+                count=len(extracted_messages),
+            )
+        # ------------------------------
+
         return next(iter(await utils.parse_messages(client=self, messages=r)), None)
