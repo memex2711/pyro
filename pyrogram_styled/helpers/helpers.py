@@ -1,9 +1,11 @@
+import re
+from pyrogram_styled.enums import ButtonStyle
 from pyrogram_styled.types import (
+    CopyTextButton,
     InlineKeyboardButton,
     InlineKeyboardMarkup,
     KeyboardButton,
     ReplyKeyboardMarkup,
-    ForceReply,
 )
 
 # The inverse of above
@@ -48,6 +50,12 @@ def ntb(button):
     return button
     # return {'text': text, type: value}
 
+def clean_emoji(text):
+    if not text:
+        return "Uncategorized"
+    text = re.sub(r"<emoji id=\d+>(.*?)</emoji>", r"\1", text)
+    return text.strip()
+
 
 def ikb(rows=None):
     if rows is None:
@@ -58,34 +66,36 @@ def ikb(rows=None):
         for button in row:
             if isinstance(button, str):
                 button = btn(button, button)
-            elif len(button) == 4:          
-                text, value, typ, style = button
-                button = btn(text, value, typ, style)
+            elif len(button) == 5:
+                text, value, typ, style, icon = button
+                button = btn(text, value, typ, style, icon)
+            elif len(button) == 4:
+                if isinstance(button[2], ButtonStyle):
+                    text, value, style, icon = button
+                    button = btn(text, value, style=style, icon=icon)
+                else:
+                    text, value, typ, icon_or_style = button
+                    if isinstance(icon_or_style, ButtonStyle):
+                        button = btn(text, value, typ=typ, style=icon_or_style)
+                    else:
+                        button = btn(text, value, typ=typ, icon=icon_or_style)
             elif len(button) == 3:
-                text, value, style = button
-                button = btn(text, value, "callback_data", style)
-            else:                           
+                if isinstance(button[2], ButtonStyle):
+                    text, value, style = button
+                    button = btn(text, value, style=style)
+                else:
+                    text, value, icon = button
+                    button = btn(text, value, icon=icon)
+            else:
                 button = btn(*button)
             line.append(button)
         lines.append(line)
     return InlineKeyboardMarkup(inline_keyboard=lines)
 
-def btn(text, value, type="callback_data", style=None):
-    if not isinstance(type, str):
-        raise TypeError(f"Parameter 'type' harus string, got {type(type)}")    
-    if type == "callback_data" and not isinstance(value, bytes):
-        value = str(value).encode()
-    
-    kwargs = {type: value}
-    if style is not None:
-        kwargs["style"] = style
-    return InlineKeyboardButton(text, **kwargs)
 
 def kb(rows=None, **kwargs):
-
     if rows is None:
         rows = []
-
     lines = []
     for row in rows:
         line = []
@@ -94,14 +104,39 @@ def kb(rows=None, **kwargs):
                 button = KeyboardButton(button)
             elif isinstance(button, dict):
                 button = KeyboardButton(**button)
-            elif isinstance(button, tuple) and len(button) == 2:
-                text, style = button
-                button = KeyboardButton(text, style=style)
+            elif isinstance(button, tuple):
+                if len(button) == 3:
+                    text, style, icon = button
+                    button = KeyboardButton(text, style=style, icon_custom_emoji_id=icon)
+                elif len(button) == 2:
+                    text, second = button
+                    if isinstance(second, ButtonStyle):
+                        button = KeyboardButton(text, style=second)
+                    else:
+                        button = KeyboardButton(text, icon_custom_emoji_id=second)
+                else:
+                    button = KeyboardButton(str(button[0]))
             else:
                 button = KeyboardButton(str(button))
             line.append(button)
         lines.append(line)
     return ReplyKeyboardMarkup(keyboard=lines, **kwargs)
+
+
+def btn(text, value, typ="callback_data", style=None, icon=None):
+    if not isinstance(typ, str):
+        raise TypeError(f"Parameter 'type' harus string, got {type(typ)}")
+    if typ == "callback_data" and not isinstance(value, bytes):
+        value = str(value).encode()
+    if typ == "copy_text" and isinstance(value, (str, int)):
+        value = CopyTextButton(text=str(value))
+    kwargs = {typ: value}
+    if style is not None:
+        kwargs["style"] = style
+    if icon is not None:
+        kwargs["icon_custom_emoji_id"] = icon
+    return InlineKeyboardButton(text, **kwargs)
+
 
 kbtn = KeyboardButton
 """
