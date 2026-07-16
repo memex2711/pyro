@@ -26,13 +26,14 @@ from pyrogram_styled.types import ListenerTypes
 if TYPE_CHECKING:
     import pyrogram_styled
     from pyrogram_styled.filters import Filter
+    from pyrogram_styled.types import InputRichMessage
 
 
 class Ask:
     async def ask(
         self: pyrogram_styled.Client,
         chat_id: int | str | list[int | str],
-        text: str,
+        text: str | None = None,
         filters: Filter | None = None,
         listener_type: ListenerTypes = ListenerTypes.MESSAGE,
         timeout: int | None = None,
@@ -40,6 +41,7 @@ class Ask:
         user_id: int | str | list[int | str] | None = None,
         message_id: int | list[int] | None = None,
         inline_message_id: str | list[str] | None = None,
+        rich_message: InputRichMessage | None = None,
         *args,
         **kwargs,
     ):
@@ -50,8 +52,8 @@ class Ask:
             chat_id (``Union[int, str], List[Union[int, str]]``):
                 The chat ID(s) to wait for a message from. The first chat ID will be used to send the message.
 
-            text (``str``):
-                The text to send.
+            text (``str``, *optional*):
+                The text to send. If None and rich_message is provided, rich_message will be used instead.
 
             filters (``Optional[Filter]``):
                 Same as :meth:`pyrogram_styled.Client.listen`.
@@ -74,19 +76,25 @@ class Ask:
             inline_message_id (``Optional[Union[str, List[str]]]``):
                 Same as :meth:`pyrogram_styled.Client.listen`.
 
+            rich_message (:obj:`~pyrogram_styled.types.InputRichMessage`, *optional*):
+                Rich message content to send. Used when text is None.
+
             args (``Any``):
-                Additional arguments to pass to :meth:`pyrogram_styled.Client.send_message`.
+                Additional arguments to pass to :meth:`pyrogram_styled.Client.send_message` or :meth:`pyrogram_styled.Client.send_rich_message`.
 
             kwargs (``Any``):
-                Additional keyword arguments to pass to :meth:`pyrogram_styled.Client.send_message`.
+                Additional keyword arguments to pass to :meth:`pyrogram_styled.Client.send_message` or :meth:`pyrogram_styled.Client.send_rich_message`.
 
         Returns:
             Same as :meth:`pyrogram_styled.Client.listen`. The sent message is returned as the attribute ``sent_message``.
         """
         sent_message = None
-        if text.strip():
-            chat_to_ask = chat_id[0] if isinstance(chat_id, list) else chat_id
+        chat_to_ask = chat_id[0] if isinstance(chat_id, list) else chat_id
+
+        if text and text.strip():
             sent_message = await self.send_message(chat_to_ask, text, *args, **kwargs)
+        elif text is None and rich_message:
+            sent_message = await self.send_rich_message(chat_to_ask, rich_message, *args, **kwargs)
 
         response = await self.listen(
             filters=filters,
