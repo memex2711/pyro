@@ -408,7 +408,8 @@ def get_reply_to(
     reply_to_peer: Optional[raw.base.InputPeer] = None,
     quote_text: Optional[str] = None,
     quote_entities: Optional[List[raw.base.MessageEntity]] = None,
-    reply_to_story_id: Optional[int] = None
+    reply_to_story_id: Optional[int] = None,
+    direct_messages_topic_id: Optional[int] = None
 ) -> Optional[Union[raw.types.InputReplyToMessage, raw.types.InputReplyToStory]]:
     """Get InputReply for reply_to argument"""
     if all((reply_to_peer, reply_to_story_id)):
@@ -421,6 +422,10 @@ def get_reply_to(
             reply_to_peer_id=reply_to_peer,
             quote_text=quote_text,
             quote_entities=quote_entities,
+        )
+    if direct_messages_topic_id:
+        return raw.types.InputReplyToMonoForum(
+            monoforum_peer_id=direct_messages_topic_id
         )
 
     return None

@@ -118,13 +118,20 @@ class SendRichMessage:
                     ),
                 )
         """
+        if direct_messages_topic_id:
+            reply_to = utils.get_reply_to(direct_messages_topic_id=direct_messages_topic_id)
+        else:
+            reply_to = await utils._get_reply_message_parameters(
+                client=self,
+                message_thread_id=message_thread_id,
+                reply_parameters=reply_parameters
+            )
+
         r = await self.invoke(
             raw.functions.messages.SendMessage(
                 peer=await self.resolve_peer(chat_id),
                 silent=disable_notification or None,
-                reply_to=await utils.get_reply_to(
-                    self, reply_parameters, message_thread_id, direct_messages_topic_id
-                ),
+                reply_to=reply_to,
                 random_id=self.rnd_id(),
                 allow_paid_floodskip=allow_paid_broadcast,
                 suggested_post=suggested_post_parameters.write()
