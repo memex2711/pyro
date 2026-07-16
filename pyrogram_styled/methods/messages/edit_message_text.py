@@ -33,7 +33,6 @@ class EditMessageText:
         parse_mode: Optional["enums.ParseMode"] = None,
         entities: List["types.MessageEntity"] = None,
         disable_web_page_preview: bool = None,
-        business_connection_id: Optional[str] = None,
         rich_message: Optional["types.InputRichMessage"] = None,
         reply_markup: "types.InlineKeyboardMarkup" = None
     ) -> "types.Message":
@@ -108,7 +107,6 @@ class EditMessageText:
                 entities=entities,
                 rich_message=input_rich_message,
             ),
-            business_connection_id=business_connection_id,
         )
 
         for i in r.updates:
