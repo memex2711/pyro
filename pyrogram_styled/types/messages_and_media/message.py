@@ -1457,6 +1457,98 @@ class Message(Object, Update):
 
     reply = reply_text
 
+    async def reply_rich(
+        self,
+        rich_message: "types.InputRichMessage",
+        quote: bool = None,
+        disable_notification: bool = None,
+        message_thread_id: int = None,
+        reply_to_message_id: int = None,
+        reply_parameters: Optional["types.ReplyParameters"] = None,
+        protect_content: bool = None,
+        allow_paid_broadcast: bool = None,
+        reply_markup=None,
+    ) -> "types.Message":
+        """Bound method *reply_rich* of :obj:`~pyrogram_styled.types.Message`.
+
+        Use as a shortcut for:
+
+        .. code-block:: python
+
+            await client.send_rich_message(
+                chat_id=message.chat.id,
+                rich_message=rich_message,
+                reply_parameters=types.ReplyParameters(message_id=message.id)
+            )
+
+        Example:
+            .. code-block:: python
+
+                await message.reply_rich(rich_message, quote=True)
+
+        Parameters:
+            rich_message (:obj:`~pyrogram_styled.types.InputRichMessage`):
+                The rich message content to be sent.
+
+            quote (``bool``, *optional*):
+                If ``True``, the message will be sent as a reply to this message.
+                If *reply_to_message_id* or *reply_parameters* is passed, this parameter will be ignored.
+                Defaults to ``True`` in group chats and ``False`` in private chats.
+
+            disable_notification (``bool``, *optional*):
+                Sends the message silently.
+                Users will receive a notification with no sound.
+
+            message_thread_id (``int``, *optional*):
+                Unique identifier of a message thread to which the message belongs; for supergroups only
+
+            reply_to_message_id (``int``, *optional*):
+                If the message is a reply, ID of the original message.
+
+            reply_parameters (:obj:`~pyrogram_styled.types.ReplyParameters`, *optional*):
+                Describes reply parameters for the message that is being sent.
+                If passed, *quote* and *reply_to_message_id* will be ignored.
+
+            protect_content (``bool``, *optional*):
+                Protects the contents of the sent message from forwarding and saving.
+
+            allow_paid_broadcast (``bool``, *optional*):
+                If True, allows paid broadcast limits.
+
+            reply_markup (:obj:`~pyrogram_styled.types.InlineKeyboardMarkup` | :obj:`~pyrogram_styled.types.ReplyKeyboardMarkup` | :obj:`~pyrogram_styled.types.ReplyKeyboardRemove` | :obj:`~pyrogram_styled.types.ForceReply`, *optional*):
+                Additional interface options. An object for an inline keyboard, custom reply keyboard,
+                instructions to remove reply keyboard or to force a reply from the user.
+
+        Returns:
+            On success, the sent Message is returned.
+
+        Raises:
+            RPCError: In case of a Telegram RPC error.
+        """
+        if reply_parameters is None:
+            if quote is None:
+                quote = self.chat.type != enums.ChatType.PRIVATE
+
+            if reply_to_message_id is None and quote:
+                reply_to_message_id = self.id
+
+            if reply_to_message_id is not None:
+                reply_parameters = types.ReplyParameters(
+                    message_id=reply_to_message_id,
+                    chat_id=self.chat.id
+                )
+
+        return await self._client.send_rich_message(
+            chat_id=self.chat.id,
+            rich_message=rich_message,
+            disable_notification=disable_notification,
+            message_thread_id=message_thread_id,
+            reply_parameters=reply_parameters,
+            protect_content=protect_content,
+            allow_paid_broadcast=allow_paid_broadcast,
+            reply_markup=reply_markup
+        )
+
     async def reply_animation(
         self,
         animation: Union[str, BinaryIO],
