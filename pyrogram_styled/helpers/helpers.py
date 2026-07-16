@@ -16,7 +16,70 @@ ButtonInput = Union[
     str, Dict[str, Any], InlineKeyboardButton, KeyboardButton, ButtonTuple
 ]
 
-# The inverse of above
+# ── Style Parser ───────────────────────────────────────────────────────────────
+
+_STYLE_MAP: Dict[str, ButtonStyle] = {
+    # Default
+    "default": ButtonStyle.DEFAULT,     "d":  ButtonStyle.DEFAULT,
+    # Primary / Blue
+    "primary": ButtonStyle.PRIMARY,     "b":  ButtonStyle.PRIMARY,
+    "blue":    ButtonStyle.PRIMARY,
+    # Secondary / Gray
+    "secondary": ButtonStyle.SECONDARY, "s":  ButtonStyle.SECONDARY,
+    "gray":      ButtonStyle.SECONDARY, "grey": ButtonStyle.SECONDARY,
+    # Success / Green
+    "success": ButtonStyle.SUCCESS,     "g":  ButtonStyle.SUCCESS,
+    "green":   ButtonStyle.SUCCESS,
+    # Danger / Red
+    "danger":  ButtonStyle.DANGER,      "r":  ButtonStyle.DANGER,
+    "red":     ButtonStyle.DANGER,
+    # Warning / Yellow / Orange
+    "warning": ButtonStyle.WARNING,     "w":  ButtonStyle.WARNING,
+    "yellow":  ButtonStyle.WARNING,     "orange": ButtonStyle.WARNING,
+    # Info / Cyan
+    "info":    ButtonStyle.INFO,        "c":  ButtonStyle.INFO,
+    "cyan":    ButtonStyle.INFO,
+    # Light
+    "light":   ButtonStyle.LIGHT,       "l":  ButtonStyle.LIGHT,
+    # Dark
+    "dark":    ButtonStyle.DARK,        "dk": ButtonStyle.DARK,
+}
+
+
+def parse_style(style: Union[str, ButtonStyle, None]) -> Optional[ButtonStyle]:
+    """
+    Konversi string atau ButtonStyle ke objek ButtonStyle.
+
+    Alias yang didukung:
+        "default" / "d"
+        "primary" / "blue" / "b"
+        "secondary" / "gray" / "grey" / "s"
+        "success" / "green" / "g"
+        "danger"  / "red"   / "r"
+        "warning" / "yellow" / "orange" / "w"
+        "info"    / "cyan"  / "c"
+        "light"   / "l"
+        "dark"    / "dk"
+
+    Contoh:
+        parse_style("red")    → ButtonStyle.DANGER
+        parse_style("g")      → ButtonStyle.SUCCESS
+        parse_style(None)     → None
+    """
+    if style is None:
+        return None
+    if isinstance(style, ButtonStyle):
+        return style
+    key = str(style).lower().strip()
+    result = _STYLE_MAP.get(key)
+    if result is None:
+        valid = ", ".join(sorted(_STYLE_MAP.keys()))
+        raise ValueError(f"Style '{style}' tidak dikenal. Pilihan valid: {valid}")
+    return result
+
+
+# ── Helpers ────────────────────────────────────────────────────────────────────
+
 def bki(keyboard):
     """
     Create a list of lists of buttons from an InlineKeyboardMarkup.
@@ -28,11 +91,10 @@ def bki(keyboard):
     for row in keyboard.inline_keyboard:
         line = []
         for button in row:
-            button = ntb(button)  # btn() format
+            button = ntb(button)
             line.append(button)
         lines.append(line)
     return lines
-    # return ikb() format
 
 
 def ntb(button):
@@ -56,12 +118,11 @@ def ntb(button):
     if btn_type != "callback_data":
         button.append(btn_type)
     return button
-    # return {'text': text, type: value}
 
 
 def _normalize_rows(rows: List[Any]) -> List[List[Any]]:
     """
-    Internal helper untuk mendeteksi dan mengubah list 1-Dimensi (sejajar) 
+    Internal helper untuk mendeteksi dan mengubah list 1-Dimensi (sejajar)
     menjadi list 2-Dimensi (multi-baris) secara otomatis.
     """
     if not rows:
@@ -81,33 +142,30 @@ def _normalize_rows(rows: List[Any]) -> List[List[Any]]:
 
 def ikb(rows: List[Any] = None) -> InlineKeyboardMarkup:
     """
-    Membuat objek InlineKeyboardMarkup (Keyboard di dalam pesan) secara dinamis.
+    Membuat objek InlineKeyboardMarkup secara dinamis.
     Mendukung auto-normalization (list 1D otomatis dikonversi ke list 2D).
 
-    Format Tuple Tombol yang didukung:
-    - 2 Elemen: (text, value) -> Default callback data.
-      Contoh: ("Beli", "buy_item")
-    - 3 Elemen:
-      * (text, value, ButtonStyle) -> Callback dengan warna khusus.
-        Contoh: ("Hapus", "del", ButtonStyle.DANGER)
-      * (text, value, type) -> Tombol dengan tipe khusus (url, copy_text, web_app).
-        Contoh: ("Google", "https://google.com", "url")
-      * (text, value, icon) -> Callback dengan ikon emoji kustom.
-        Contoh: ("Mainkan", "play", "5301083932211550593")
-    - 4 Elemen:
-      * (text, value, style, icon) -> Callback dengan warna dan ikon.
-        Contoh: ("Alert", "alert", ButtonStyle.DANGER, "5249053508")
-      * (text, value, type, ButtonStyle) -> Tipe khusus dengan warna khusus.
-        Contoh: ("Buka Web", "https://site.com", "web_app", ButtonStyle.PRIMARY)
-      * (text, value, type, icon) -> Tipe khusus dengan ikon kustom.
-        Contoh: ("Group", "https://t.me/...", "url", "5301083932")
-    - 5 Elemen: (text, value, type, style, icon) -> Konfigurasi tombol lengkap.
-      Contoh: ("Copy", "12345", "copy_text", ButtonStyle.SUCCESS, "52490535")
+    Parameter style kini menerima string selain ButtonStyle:
+        "red"/"r", "green"/"g", "blue"/"b", "gray"/"s",
+        "yellow"/"w", "cyan"/"c", "light"/"l", "dark"/"dk", "default"/"d"
 
-    Contoh Penggunaan:
-        >>> markup = ikb([
-        >>>     [("🌐 Google", "https://google.com", "url"), ("📋 Salin ID", "12345", "copy_text")],
-        >>>     [("🗑️ Hapus Data", "confirm_delete", ButtonStyle.DANGER, "5249053508681883137")]
+    Format Tuple Tombol yang didukung:
+    - 2 Elemen: (text, value)
+    - 3 Elemen:
+      * (text, value, style)   → style bisa str atau ButtonStyle
+      * (text, value, type)    → tipe khusus: url, copy_text, web_app, dll
+      * (text, value, icon)    → icon emoji ID (string numerik panjang)
+    - 4 Elemen:
+      * (text, value, style, icon)
+      * (text, value, type, style)
+      * (text, value, type, icon)
+    - 5 Elemen: (text, value, type, style, icon)
+
+    Contoh:
+        >>> ikb([
+        >>>     [("✅ Konfirmasi", "ok", "green"), ("❌ Batal", "cancel", "red")],
+        >>>     [("🔗 Link", "https://t.me/bot", "url", "blue")],
+        >>>     [("📋 Copy", "12345", "copy_text", ButtonStyle.SUCCESS, "5249053508")],
         >>> ])
     """
     if rows is None:
@@ -115,16 +173,25 @@ def ikb(rows: List[Any] = None) -> InlineKeyboardMarkup:
 
     rows = _normalize_rows(rows)
 
-    _KNOWN_TYPES = frozenset(
-        {
-            "callback_data",
-            "url",
-            "copy_text",
-            "switch_inline_query",
-            "switch_inline_query_current_chat",
-            "web_app",
-        }
-    )
+    _KNOWN_TYPES = frozenset({
+        "callback_data",
+        "url",
+        "copy_text",
+        "switch_inline_query",
+        "switch_inline_query_current_chat",
+        "web_app",
+    })
+
+    def _is_style(val) -> bool:
+        """Cek apakah val adalah style (ButtonStyle atau string style yang dikenal)."""
+        if isinstance(val, ButtonStyle):
+            return True
+        if isinstance(val, str) and val.lower().strip() in _STYLE_MAP:
+            return True
+        return False
+
+    def _is_known_type(val) -> bool:
+        return isinstance(val, str) and val in _KNOWN_TYPES
 
     lines = []
     for row in rows:
@@ -136,36 +203,48 @@ def ikb(rows: List[Any] = None) -> InlineKeyboardMarkup:
 
             if isinstance(button, str):
                 button = btn(button, button)
+
             elif isinstance(button, (list, tuple)):
                 button_len = len(button)
+
                 if button_len == 5:
                     text, value, typ, style, icon = button
                     button = btn(text, value, typ, style, icon)
+
                 elif button_len == 4:
-                    if isinstance(button[2], ButtonStyle):
-                        text, value, style, icon = button
-                        button = btn(text, value, style=style, icon=icon)
-                    else:
-                        text, value, typ, icon_or_style = button
-                        if isinstance(icon_or_style, ButtonStyle):
-                            button = btn(text, value, typ=typ, style=icon_or_style)
+                    text, value, third, fourth = button
+                    if _is_known_type(third):
+                        # (text, value, type, style) atau (text, value, type, icon)
+                        if _is_style(fourth):
+                            button = btn(text, value, typ=third, style=fourth)
                         else:
-                            button = btn(text, value, typ=typ, icon=icon_or_style)
-                elif button_len == 3:
-                    if isinstance(button[2], ButtonStyle):
-                        text, value, style = button
-                        button = btn(text, value, style=style)
-                    elif isinstance(button[2], str) and button[2] in _KNOWN_TYPES:
-                        text, value, typ = button
-                        button = btn(text, value, typ=typ)
+                            button = btn(text, value, typ=third, icon=fourth)
+                    elif _is_style(third):
+                        # (text, value, style, icon)
+                        button = btn(text, value, style=third, icon=fourth)
                     else:
-                        text, value, icon = button
-                        button = btn(text, value, icon=icon)
+                        # (text, value, type, icon) — fallback
+                        button = btn(text, value, typ=third, icon=fourth)
+
+                elif button_len == 3:
+                    text, value, third = button
+                    if _is_known_type(third):
+                        # (text, value, type)
+                        button = btn(text, value, typ=third)
+                    elif _is_style(third):
+                        # (text, value, style)
+                        button = btn(text, value, style=third)
+                    else:
+                        # (text, value, icon)
+                        button = btn(text, value, icon=third)
+
                 elif button_len == 2:
                     text, value = button
                     button = btn(text, value)
+
                 else:
                     button = btn(*button)
+
             else:
                 button = btn(str(button), str(button))
 
@@ -177,25 +256,24 @@ def ikb(rows: List[Any] = None) -> InlineKeyboardMarkup:
 
 def kb(rows: List[Any] = None, **kwargs) -> ReplyKeyboardMarkup:
     """
-    Membuat objek ReplyKeyboardMarkup (Tombol menu di bawah kolom input chat) secara dinamis.
+    Membuat objek ReplyKeyboardMarkup secara dinamis.
     Mendukung auto-normalization (list 1D otomatis dikonversi ke list 2D).
 
+    Parameter style kini menerima string selain ButtonStyle.
+
     Format Input Tombol yang didukung:
-    - str: Tombol teks biasa. Contoh: "Kirim Lokasi"
-    - dict: Dikirim sebagai unpacked kwargs. Contoh: {"text": "Kontak", "request_contact": True}
+    - str: Tombol teks biasa.
+    - dict: Unpacked sebagai kwargs KeyboardButton.
     - KeyboardButton: Objek tombol manual.
     - Tuple 2 Elemen:
-      * (text, ButtonStyle) -> Tombol menu dengan warna/gaya khusus.
-        Contoh: ("Utama 🏠", ButtonStyle.PRIMARY)
-      * (text, icon) -> Tombol menu dengan custom emoji ID khusus.
-        Contoh: ("Bantuan ❓", "5301083932211550593")
-    - Tuple 3 Elemen: (text, style, icon) -> Tombol lengkap dengan warna dan emoji.
-      Contoh: ("Setting ⚙️", ButtonStyle.SECONDARY, "5249053508681883137")
+      * (text, style) → style bisa str atau ButtonStyle
+      * (text, icon)  → icon emoji ID
+    - Tuple 3 Elemen: (text, style, icon)
 
-    Contoh Penggunaan:
-        >>> reply_markup = kb([
-        >>>     [("Layanan Premium 👑", ButtonStyle.PRIMARY), ("Hubungi Admin 👤", "52490535")],
-        >>>     ["Kembali ke Menu Utama"]
+    Contoh:
+        >>> kb([
+        >>>     [("Premium 👑", "primary"), ("Admin 👤", "52490535")],
+        >>>     ["Kembali ke Menu"]
         >>> ], resize_keyboard=True)
     """
     if rows is None:
@@ -220,18 +298,21 @@ def kb(rows: List[Any] = None, **kwargs) -> ReplyKeyboardMarkup:
                 if button_len == 3:
                     text, style, icon = button
                     button = KeyboardButton(
-                        text, style=style, icon_custom_emoji_id=icon
+                        text,
+                        style=parse_style(style),
+                        icon_custom_emoji_id=icon
                     )
                 elif button_len == 2:
                     text, second = button
-                    if isinstance(second, ButtonStyle):
-                        button = KeyboardButton(text, style=second)
+                    if isinstance(second, (ButtonStyle, str)) and second in _STYLE_MAP or isinstance(second, ButtonStyle):
+                        button = KeyboardButton(text, style=parse_style(second))
                     else:
                         button = KeyboardButton(text, icon_custom_emoji_id=second)
                 else:
                     button = KeyboardButton(str(button[0]))
             else:
                 button = KeyboardButton(str(button))
+
             line.append(button)
         lines.append(line)
 
@@ -242,25 +323,31 @@ def btn(
     text: str,
     value: Any,
     typ: str = "callback_data",
-    style: ButtonStyle = None,
+    style: Union[str, ButtonStyle, None] = None,
     icon: str = None,
 ) -> InlineKeyboardButton:
     """
-    Membuat objek tunggal InlineKeyboardButton secara manual.
+    Membuat objek tunggal InlineKeyboardButton.
 
     Parameters:
-        text (str): Teks label yang akan ditampilkan di tombol.
-        value (Any): Payload tombol (bisa string callback, url, atau teks salin).
-        typ (str): Tipe aksi tombol. Default: "callback_data". 
-                   Mendukung: "url", "copy_text", "web_app", dll.
-        style (ButtonStyle, opsional): Warna/gaya khusus untuk tombol.
-        icon (str, opsional): ID custom emoji yang akan ditaruh sebagai ikon tombol.
+        text  (str): Label tombol.
+        value (Any): Payload (callback string, url, teks salin, dll).
+        typ   (str): Tipe aksi. Default: "callback_data".
+                     Mendukung: "url", "copy_text", "web_app", dll.
+        style (str | ButtonStyle, opsional): Warna tombol.
+              Bisa string: "red"/"r", "green"/"g", "blue"/"b", dll.
+        icon  (str, opsional): ID custom emoji ikon tombol.
 
-    Returns:
-        InlineKeyboardButton: Objek tombol yang telah terkonfigurasi.
+    Contoh:
+        btn("Hapus", "del_123", style="red")
+        btn("Link", "https://t.me/bot", typ="url", style="blue")
+        btn("Copy", "ABC123", typ="copy_text", style="g", icon="5249053508")
     """
     if not isinstance(typ, str):
         raise TypeError(f"Parameter 'type' harus string, got {type(typ)}")
+
+    # Parse style string → ButtonStyle
+    resolved_style = parse_style(style)
 
     if typ == "callback_data" and not isinstance(value, (bytes, str)):
         value = str(value)
@@ -269,8 +356,8 @@ def btn(
         value = CopyTextButton(text=str(value))
 
     kwargs = {typ: value}
-    if style is not None:
-        kwargs["style"] = style
+    if resolved_style is not None:
+        kwargs["style"] = resolved_style
     if icon is not None:
         kwargs["icon_custom_emoji_id"] = icon
 
@@ -279,7 +366,7 @@ def btn(
 
 def clean_emoji(text: str) -> str:
     """
-    Menghapus tag XML custom emoji Telegram secara bersih dari string teks yang diberikan.
+    Menghapus tag XML custom emoji Telegram dari string teks.
 
     Contoh:
         >>> clean_emoji("<emoji id=5301083932211550593>🔥</emoji> Bot Started")
@@ -290,10 +377,9 @@ def clean_emoji(text: str) -> str:
     text = re.sub(r"<emoji id=\d+>(.*?)</emoji>", r"\1", text)
     return text.strip()
 
+
 kbtn = KeyboardButton
-"""
-Create a KeyboardButton.
-"""
+"""Alias untuk KeyboardButton."""
 
 
 def force_reply(selective=True):
