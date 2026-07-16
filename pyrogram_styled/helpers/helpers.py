@@ -16,33 +16,23 @@ ButtonInput = Union[
     str, Dict[str, Any], InlineKeyboardButton, KeyboardButton, ButtonTuple
 ]
 
-# ── Style Parser ───────────────────────────────────────────────────────────────
 
 _STYLE_MAP: Dict[str, ButtonStyle] = {
     # Default
-    "default": ButtonStyle.DEFAULT,     "d":  ButtonStyle.DEFAULT,
+    "default": ButtonStyle.DEFAULT,
+    "d": ButtonStyle.DEFAULT,
     # Primary / Blue
-    "primary": ButtonStyle.PRIMARY,     "b":  ButtonStyle.PRIMARY,
-    "blue":    ButtonStyle.PRIMARY,
-    # Secondary / Gray
-    "secondary": ButtonStyle.SECONDARY, "s":  ButtonStyle.SECONDARY,
-    "gray":      ButtonStyle.SECONDARY, "grey": ButtonStyle.SECONDARY,
+    "primary": ButtonStyle.PRIMARY,
+    "b": ButtonStyle.PRIMARY,
+    "blue": ButtonStyle.PRIMARY,
     # Success / Green
-    "success": ButtonStyle.SUCCESS,     "g":  ButtonStyle.SUCCESS,
-    "green":   ButtonStyle.SUCCESS,
+    "success": ButtonStyle.SUCCESS,
+    "g":  ButtonStyle.SUCCESS,
+    "green": ButtonStyle.SUCCESS,
     # Danger / Red
-    "danger":  ButtonStyle.DANGER,      "r":  ButtonStyle.DANGER,
-    "red":     ButtonStyle.DANGER,
-    # Warning / Yellow / Orange
-    "warning": ButtonStyle.WARNING,     "w":  ButtonStyle.WARNING,
-    "yellow":  ButtonStyle.WARNING,     "orange": ButtonStyle.WARNING,
-    # Info / Cyan
-    "info":    ButtonStyle.INFO,        "c":  ButtonStyle.INFO,
-    "cyan":    ButtonStyle.INFO,
-    # Light
-    "light":   ButtonStyle.LIGHT,       "l":  ButtonStyle.LIGHT,
-    # Dark
-    "dark":    ButtonStyle.DARK,        "dk": ButtonStyle.DARK,
+    "danger": ButtonStyle.DANGER,
+    "r": ButtonStyle.DANGER,
+    "red": ButtonStyle.DANGER,
 }
 
 
@@ -53,13 +43,8 @@ def parse_style(style: Union[str, ButtonStyle, None]) -> Optional[ButtonStyle]:
     Alias yang didukung:
         "default" / "d"
         "primary" / "blue" / "b"
-        "secondary" / "gray" / "grey" / "s"
         "success" / "green" / "g"
         "danger"  / "red"   / "r"
-        "warning" / "yellow" / "orange" / "w"
-        "info"    / "cyan"  / "c"
-        "light"   / "l"
-        "dark"    / "dk"
 
     Contoh:
         parse_style("red")    → ButtonStyle.DANGER
@@ -146,8 +131,7 @@ def ikb(rows: List[Any] = None) -> InlineKeyboardMarkup:
     Mendukung auto-normalization (list 1D otomatis dikonversi ke list 2D).
 
     Parameter style kini menerima string selain ButtonStyle:
-        "red"/"r", "green"/"g", "blue"/"b", "gray"/"s",
-        "yellow"/"w", "cyan"/"c", "light"/"l", "dark"/"dk", "default"/"d"
+        "red"/"r", "green"/"g", "blue"/"b", "default"/"d"
 
     Format Tuple Tombol yang didukung:
     - 2 Elemen: (text, value)
