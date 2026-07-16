@@ -36,7 +36,6 @@ class SendRichMessage:
         effect_id: Optional[int] = None,
         reply_parameters: Optional["types.ReplyParameters"] = None,
         protect_content: Optional[bool] = None,
-        business_connection_id: Optional[str] = None,
         allow_paid_broadcast: Optional[bool] = None,
         suggested_post_parameters: Optional["types.SuggestedPostParameters"] = None,
         reply_markup: Optional[
@@ -143,7 +142,6 @@ class SendRichMessage:
                 rich_message=rich_message.write(),
                 effect=effect_id,
             ),
-            business_connection_id=business_connection_id,
         )
 
         if isinstance(r, raw.types.UpdateShortSentMessage):
