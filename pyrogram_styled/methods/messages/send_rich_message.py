@@ -175,9 +175,5 @@ class SendRichMessage:
                 messages=extracted_messages,
                 users=r.users,
                 chats=r.chats,
-                date=0,
-                count=len(extracted_messages),
+                topics=[],
             )
-        # ------------------------------
-
-        return next(iter(await utils.parse_messages(client=self, messages=r)), None)
