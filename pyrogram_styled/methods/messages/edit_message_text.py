@@ -29,7 +29,7 @@ class EditMessageText:
         self: "pyrogram_styled.Client",
         chat_id: Union[int, str],
         message_id: int,
-        text: str,
+        text: Optional[str] = None,
         parse_mode: Optional["enums.ParseMode"] = None,
         entities: List["types.MessageEntity"] = None,
         disable_web_page_preview: bool = None,

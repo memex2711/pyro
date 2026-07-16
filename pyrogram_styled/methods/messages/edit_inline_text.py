@@ -29,7 +29,7 @@ class EditInlineText:
     async def edit_inline_text(
         self: "pyrogram_styled.Client",
         inline_message_id: str,
-        text: str,
+        text: Optional[str] = None,
         parse_mode: Optional["enums.ParseMode"] = None,
         entities: list["types.MessageEntity"] = None,
         rich_message: Optional["types.InputRichMessage"] = None,
