@@ -1461,6 +1461,7 @@ class Message(Object, Update):
         self,
         rich_message: "types.InputRichMessage",
         quote: bool = None,
+        effect_id: int = None,
         disable_notification: bool = None,
         message_thread_id: int = None,
         reply_to_message_id: int = None,
@@ -1541,6 +1542,7 @@ class Message(Object, Update):
         return await self._client.send_rich_message(
             chat_id=self.chat.id,
             rich_message=rich_message,
+            effect_id=effect_id,
             disable_notification=disable_notification,
             message_thread_id=message_thread_id,
             reply_parameters=reply_parameters,
