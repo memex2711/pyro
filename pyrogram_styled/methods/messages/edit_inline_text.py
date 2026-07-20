@@ -31,7 +31,7 @@ class EditInlineText:
         inline_message_id: str,
         text: Optional[str] = None,
         parse_mode: Optional["enums.ParseMode"] = None,
-        entities: list["types.MessageEntity"] = None,
+        entities: Optional[list["types.MessageEntity"]] = None,
         rich_message: Optional["types.InputRichMessage"] = None,
         disable_web_page_preview: bool = None,
         reply_markup: "types.InlineKeyboardMarkup" = None

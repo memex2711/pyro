@@ -47,9 +47,9 @@ class SendRichMessage:
             ]
         ] = None,
     ) -> "types.Message":
-        """Send text messages.
+        """Send rich messages.
 
-        .. include:: /_includes/usable-by/bots.rst
+        .. include:: /_includes/usable-by/users-bots.rst
 
         Parameters:
             chat_id (``int`` | ``str``):
