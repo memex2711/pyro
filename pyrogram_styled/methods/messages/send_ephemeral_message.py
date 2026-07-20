@@ -104,8 +104,10 @@ class SendEphemeralMessage:
 
         for update in r.updates:
             if isinstance(update, raw.types.UpdateNewEphemeralMessage):
+                users = {u.id: u for u in r.users}
+                chats = {c.id: c for c in r.chats}
                 return await types.EphemeralMessage._parse(
-                    self, update.message, r.users, r.chats
+                    self, update.message, users, chats
                 )
 
         log.warning("No UpdateNewEphemeralMessage found in response: %s", r)
