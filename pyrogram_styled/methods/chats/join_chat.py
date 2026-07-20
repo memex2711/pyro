@@ -19,8 +19,7 @@
 from typing import Union
 
 import pyrogram_styled
-from pyrogram_styled import raw
-from pyrogram_styled import types
+from pyrogram_styled import raw, errors, types
 
 
 class JoinChat:
@@ -55,20 +54,13 @@ class JoinChat:
         match = self.INVITE_LINK_RE.match(str(chat_id))
 
         if match:
-            chat = await self.invoke(
-                raw.functions.messages.ImportChatInvite(
-                    hash=match.group(1)
-                )
-            )
-            if isinstance(chat.chats[0], raw.types.Chat):
-                return types.Chat._parse_chat_chat(self, chat.chats[0])
-            elif isinstance(chat.chats[0], raw.types.Channel):
-                return types.Chat._parse_channel_chat(self, chat.chats[0])
+            rpc = raw.functions.messages.ImportChatInvite(hash=match.group(1))
         else:
-            chat = await self.invoke(
-                raw.functions.channels.JoinChannel(
-                    channel=await self.resolve_peer(chat_id)
-                )
-            )
+            rpc = raw.functions.channels.JoinChannel(channel=await self.resolve_peer(chat_id))
 
-            return types.Chat._parse_channel_chat(self, chat.chats[0])
+        try:
+            r = await self.invoke(rpc)
+        except errors.InviteRequestSent:
+            return types.ChatJoinResultRequestSent()
+
+        return await types.ChatJoinResult._parse(self, r)

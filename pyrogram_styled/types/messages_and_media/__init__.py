@@ -118,9 +118,10 @@ from .rich_text import (
     RichTextUnderline,
     RichTextUrl,
 )
+from .ephemeral_message import EphemeralMessage
 
 __all__ = [
-    "Animation", "Audio", "AvailableEffect", "BoostsStatus", "Contact", "Document", "ForumTopic", "ForumTopicCreated",
+    "Animation", "Audio", "AvailableEffect", "BoostsStatus", "Contact", "Document", "EphemeralMessage", "ForumTopic", "ForumTopicCreated",
     "ForumTopicClosed", "ForumTopicReopened", "ForumTopicEdited", "GeneralTopicHidden",
     "GeneralTopicUnhidden", "Game", "Giveaway", "Location", "Message", "MessageEntity", "Photo", "Thumbnail",
     "StrippedThumbnail", "Story", "StoryDeleted", "StorySkipped", "StoryViews", "TextQuote", "Poll", "PollOption", "Sticker",

@@ -73,6 +73,10 @@ from .vote_poll import VotePoll
 from .send_screenshot_notification import SendScreenshotNotification
 from .add_poll_option import AddPollOption
 from .delete_poll_option import DeletePollOption
+from .send_ephemeral_message import SendEphemeralMessage
+from .delete_ephemeral_message import DeleteEphemeralMessage
+from .report_ephemeral_message import ReportEphemeralMessage
+from .get_ephemeral_callback_answer import GetEphemeralCallbackAnswer
 
 
 class Messages(
@@ -132,6 +136,10 @@ class Messages(
     GetCustomEmojiStickers,
     SendScreenshotNotification,
     DeletePollOption,
-    AddPollOption
+    AddPollOption,
+    SendEphemeralMessage,
+    DeleteEphemeralMessage,
+    ReportEphemeralMessage,
+    GetEphemeralCallbackAnswer
 ):
     pass
