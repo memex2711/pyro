@@ -1,21 +1,24 @@
 import re
-
 from typing import Any, Dict, List, Optional, Tuple, Union
-from pyrogram_styled.types import (
-    InlineKeyboardMarkup,
-    ReplyKeyboardMarkup,
-    InlineKeyboardButton,
-    KeyboardButton,
-    CopyTextButton,
-    ForceReply
-)
-from pyrogram_styled.enums import ButtonStyle
 
-ButtonTuple = Tuple[str, Any, str, ButtonStyle, str]
+from pyrogram_styled.enums import ButtonStyle
+from pyrogram_styled.types import (
+    CopyTextButton,
+    ForceReply,
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    KeyboardButton,
+    ReplyKeyboardMarkup,
+)
+
+# ── Type Definitions ──────────────────────────────────────────────────────────
+
+ButtonTuple = Tuple[Any, ...]
 ButtonInput = Union[
     str, Dict[str, Any], InlineKeyboardButton, KeyboardButton, ButtonTuple
 ]
 
+# ── Constants & Mappings ──────────────────────────────────────────────────────
 
 _STYLE_MAP: Dict[str, ButtonStyle] = {
     # Default
@@ -23,92 +26,84 @@ _STYLE_MAP: Dict[str, ButtonStyle] = {
     "d": ButtonStyle.DEFAULT,
     # Primary / Blue
     "primary": ButtonStyle.PRIMARY,
-    "b": ButtonStyle.PRIMARY,
+    "p": ButtonStyle.PRIMARY,
     "blue": ButtonStyle.PRIMARY,
+    "b": ButtonStyle.PRIMARY,
     # Success / Green
     "success": ButtonStyle.SUCCESS,
-    "g":  ButtonStyle.SUCCESS,
+    "s": ButtonStyle.SUCCESS,
     "green": ButtonStyle.SUCCESS,
+    "g": ButtonStyle.SUCCESS,
     # Danger / Red
     "danger": ButtonStyle.DANGER,
-    "r": ButtonStyle.DANGER,
     "red": ButtonStyle.DANGER,
+    "r": ButtonStyle.DANGER,
 }
+
+_KNOWN_TYPES: frozenset = frozenset({
+    "callback_data",
+    "url",
+    "copy_text",
+    "switch_inline_query",
+    "switch_inline_query_current_chat",
+    "web_app",
+    "callback_game",
+})
+
+# ── Helper Parsing Functions ──────────────────────────────────────────────────
 
 
 def parse_style(style: Union[str, ButtonStyle, None]) -> Optional[ButtonStyle]:
     """
-    Konversi string atau ButtonStyle ke objek ButtonStyle.
+    Converts a string alias or ButtonStyle to a ButtonStyle object.
 
-    Alias yang didukung:
-        "default" / "d"
-        "primary" / "blue" / "b"
-        "success" / "green" / "g"
-        "danger"  / "red"   / "r"
-
-    Contoh:
-        parse_style("red")    → ButtonStyle.DANGER
-        parse_style("g")      → ButtonStyle.SUCCESS
-        parse_style(None)     → None
+    :param style: String alias or ButtonStyle instance.
+    :return: ButtonStyle or None if input is None.
     """
     if style is None:
         return None
     if isinstance(style, ButtonStyle):
         return style
+
     key = str(style).lower().strip()
     result = _STYLE_MAP.get(key)
     if result is None:
-        valid = ", ".join(sorted(_STYLE_MAP.keys()))
+        valid = ", ".join(sorted(set(_STYLE_MAP.keys())))
         raise ValueError(f"Style '{style}' tidak dikenal. Pilihan valid: {valid}")
     return result
 
 
-# ── Helpers ────────────────────────────────────────────────────────────────────
+def _is_style_value(val: Any) -> bool:
+    """Checks if the value is a valid ButtonStyle or style alias."""
+    if isinstance(val, ButtonStyle):
+        return True
+    if isinstance(val, str):
+        return val.lower().strip() in _STYLE_MAP
+    return False
 
-def bki(keyboard):
+
+def _is_known_type(val: Any) -> bool:
+    """Checks whether the value is a recognized button type name."""
+    if isinstance(val, str):
+        return val.lower().strip() in _KNOWN_TYPES
+    return False
+
+
+def _is_custom_emoji_id(val: Any) -> bool:
     """
-    Create a list of lists of buttons from an InlineKeyboardMarkup.
-
-    :param keyboard: InlineKeyboardMarkup
-    :return: List of lists of buttons
+    Checks whether the value is a Telegram custom emoji ID.
+    Telegram emoji IDs are always numeric integers or long strings of digits.
     """
-    lines = []
-    for row in keyboard.inline_keyboard:
-        line = []
-        for button in row:
-            button = ntb(button)
-            line.append(button)
-        lines.append(line)
-    return lines
-
-
-def ntb(button):
-    """
-    Create a button list from an InlineKeyboardButton.
-
-    :param button: InlineKeyboardButton
-    :return: Button as a list to be used in btn()
-    """
-    for btn_type in [
-        "callback_data",
-        "url",
-        "switch_inline_query",
-        "switch_inline_query_current_chat",
-        "callback_game",
-    ]:
-        value = getattr(button, btn_type)
-        if value:
-            break
-    button = [button.text, value]
-    if btn_type != "callback_data":
-        button.append(btn_type)
-    return button
+    if isinstance(val, int) and val > 0:
+        return True
+    if isinstance(val, str) and val.isdigit() and len(val) >= 5:
+        return True
+    return False
 
 
 def _normalize_rows(rows: List[Any]) -> List[List[Any]]:
     """
-    Internal helper untuk mendeteksi dan mengubah list 1-Dimensi (sejajar)
-    menjadi list 2-Dimensi (multi-baris) secara otomatis.
+    Detect and convert a 1-dimensional (flat) list into a 2-dimensional list.
     """
     if not rows:
         return []
@@ -118,220 +113,137 @@ def _normalize_rows(rows: List[Any]) -> List[List[Any]]:
 
     if isinstance(first_item, (str, dict, InlineKeyboardButton, KeyboardButton)):
         is_1d = True
-    elif isinstance(first_item, tuple):
-        if len(first_item) > 0 and isinstance(first_item[0], str):
+    elif isinstance(first_item, (tuple, list)):
+        if len(first_item) > 0 and isinstance(first_item[0], (str, int)):
             is_1d = True
 
     return [rows] if is_1d else rows
 
 
-def ikb(rows: List[Any] = None) -> InlineKeyboardMarkup:
+def _parse_inline_tuple(tpl: Tuple[Any, ...]) -> InlineKeyboardButton:
     """
-    Membuat objek InlineKeyboardMarkup secara dinamis.
-    Mendukung auto-normalization (list 1D otomatis dikonversi ke list 2D).
-
-    Parameter style kini menerima string selain ButtonStyle:
-        "red"/"r", "green"/"g", "blue"/"b", "default"/"d"
-
-    Format Tuple Tombol yang didukung:
-    - 2 Elemen: (text, value)
-    - 3 Elemen:
-      * (text, value, style)   → style bisa str atau ButtonStyle
-      * (text, value, type)    → tipe khusus: url, copy_text, web_app, dll
-      * (text, value, icon)    → icon emoji ID (string numerik panjang)
-    - 4 Elemen:
-      * (text, value, style, icon)
-      * (text, value, type, style)
-      * (text, value, type, icon)
-    - 5 Elemen: (text, value, type, style, icon)
-
-    Contoh:
-        >>> ikb([
-        >>>     [("✅ Konfirmasi", "ok", "green"), ("❌ Batal", "cancel", "red")],
-        >>>     [("🔗 Link", "https://t.me/bot", "url", "blue")],
-        >>>     [("📋 Copy", "12345", "copy_text", ButtonStyle.SUCCESS, "5249053508")],
-        >>> ])
+    Improved flexibility for reading Tuples for InlineKeyboardButton.
+    The positions of parameters following index 1 (value)—specifically style, type, and icon—can now be arbitrary.
     """
-    if rows is None:
-        rows = []
+    if not tpl:
+        raise ValueError("Tuple tombol tidak boleh kosong.")
 
-    rows = _normalize_rows(rows)
+    text = str(tpl[0])
+    value = tpl[1] if len(tpl) > 1 else text
 
-    _KNOWN_TYPES = frozenset({
-        "callback_data",
-        "url",
-        "copy_text",
-        "switch_inline_query",
-        "switch_inline_query_current_chat",
-        "web_app",
-    })
+    remaining = tpl[2:]
 
-    def _is_style(val) -> bool:
-        """Cek apakah val adalah style (ButtonStyle atau string style yang dikenal)."""
-        if isinstance(val, ButtonStyle):
-            return True
-        if isinstance(val, str) and val.lower().strip() in _STYLE_MAP:
-            return True
-        return False
+    typ: Optional[str] = None
+    style: Optional[Union[str, ButtonStyle]] = None
+    icon: Optional[Union[str, int]] = None
 
-    def _is_known_type(val) -> bool:
-        return isinstance(val, str) and val in _KNOWN_TYPES
+    for arg in remaining:
+        if arg is None:
+            continue
 
-    lines = []
-    for row in rows:
-        line = []
-        for button in row:
-            if isinstance(button, InlineKeyboardButton):
-                line.append(button)
+        if style is None and _is_style_value(arg):
+            style = arg
+            continue
+
+        if typ is None and _is_known_type(arg):
+            typ = str(arg).lower().strip()
+            continue
+
+        if icon is None and _is_custom_emoji_id(arg):
+            icon = arg
+            continue
+
+        if style is None and isinstance(arg, str):
+            try:
+                style = parse_style(arg)
                 continue
+            except ValueError:
+                pass
 
-            if isinstance(button, str):
-                button = btn(button, button)
+        if icon is None and isinstance(arg, (str, int)):
+            icon = arg
 
-            elif isinstance(button, (list, tuple)):
-                button_len = len(button)
-
-                if button_len == 5:
-                    text, value, typ, style, icon = button
-                    button = btn(text, value, typ, style, icon)
-
-                elif button_len == 4:
-                    text, value, third, fourth = button
-                    if _is_known_type(third):
-                        # (text, value, type, style) atau (text, value, type, icon)
-                        if _is_style(fourth):
-                            button = btn(text, value, typ=third, style=fourth)
-                        else:
-                            button = btn(text, value, typ=third, icon=fourth)
-                    elif _is_style(third):
-                        # (text, value, style, icon)
-                        button = btn(text, value, style=third, icon=fourth)
-                    else:
-                        # (text, value, type, icon) — fallback
-                        button = btn(text, value, typ=third, icon=fourth)
-
-                elif button_len == 3:
-                    text, value, third = button
-                    if _is_known_type(third):
-                        # (text, value, type)
-                        button = btn(text, value, typ=third)
-                    elif _is_style(third):
-                        # (text, value, style)
-                        button = btn(text, value, style=third)
-                    else:
-                        # (text, value, icon)
-                        button = btn(text, value, icon=third)
-
-                elif button_len == 2:
-                    text, value = button
-                    button = btn(text, value)
-
-                else:
-                    button = btn(*button)
-
-            else:
-                button = btn(str(button), str(button))
-
-            line.append(button)
-        lines.append(line)
-
-    return InlineKeyboardMarkup(inline_keyboard=lines)
+    return btn(text=text, value=value, typ=typ, style=style, icon=icon)
 
 
-def kb(rows: List[Any] = None, **kwargs) -> ReplyKeyboardMarkup:
+def _parse_reply_tuple(tpl: Tuple[Any, ...]) -> KeyboardButton:
     """
-    Membuat objek ReplyKeyboardMarkup secara dinamis.
-    Mendukung auto-normalization (list 1D otomatis dikonversi ke list 2D).
-
-    Parameter style kini menerima string selain ButtonStyle.
-
-    Format Input Tombol yang didukung:
-    - str: Tombol teks biasa.
-    - dict: Unpacked sebagai kwargs KeyboardButton.
-    - KeyboardButton: Objek tombol manual.
-    - Tuple 2 Elemen:
-      * (text, style) → style bisa str atau ButtonStyle
-      * (text, icon)  → icon emoji ID
-    - Tuple 3 Elemen: (text, style, icon)
-
-    Contoh:
-        >>> kb([
-        >>>     [("Premium 👑", "primary"), ("Admin 👤", "52490535")],
-        >>>     ["Kembali ke Menu"]
-        >>> ], resize_keyboard=True)
+    Improved flexibility in reading Tuples for KeyboardButton (Reply Keyboard).
+    Parameters after index 0 (text) can be randomized (style, icon).
     """
-    if rows is None:
-        rows = []
+    if not tpl:
+        raise ValueError("Tuple tombol tidak boleh kosong.")
 
-    rows = _normalize_rows(rows)
+    text = str(tpl[0])
+    remaining = tpl[1:]
 
-    lines = []
-    for row in rows:
-        line = []
-        for button in row:
-            if isinstance(button, KeyboardButton):
-                line.append(button)
+    style: Optional[Union[str, ButtonStyle]] = None
+    icon: Optional[Union[str, int]] = None
+
+    for arg in remaining:
+        if arg is None:
+            continue
+
+        if style is None and _is_style_value(arg):
+            style = arg
+            continue
+
+        if icon is None and _is_custom_emoji_id(arg):
+            icon = arg
+            continue
+
+        if style is None and isinstance(arg, str):
+            try:
+                style = parse_style(arg)
                 continue
+            except ValueError:
+                pass
 
-            if isinstance(button, str):
-                button = KeyboardButton(button)
-            elif isinstance(button, dict):
-                button = KeyboardButton(**button)
-            elif isinstance(button, tuple):
-                button_len = len(button)
-                if button_len == 3:
-                    text, style, icon = button
-                    button = KeyboardButton(
-                        text,
-                        style=parse_style(style),
-                        icon_custom_emoji_id=icon
-                    )
-                elif button_len == 2:
-                    text, second = button
-                    if isinstance(second, (ButtonStyle, str)) and second in _STYLE_MAP or isinstance(second, ButtonStyle):
-                        button = KeyboardButton(text, style=parse_style(second))
-                    else:
-                        button = KeyboardButton(text, icon_custom_emoji_id=second)
-                else:
-                    button = KeyboardButton(str(button[0]))
-            else:
-                button = KeyboardButton(str(button))
+        if icon is None and isinstance(arg, (str, int)):
+            icon = arg
 
-            line.append(button)
-        lines.append(line)
+    kwargs: Dict[str, Any] = {}
+    parsed_style = parse_style(style) if style else None
 
-    return ReplyKeyboardMarkup(keyboard=lines, **kwargs)
+    if parsed_style is not None:
+        kwargs["style"] = parsed_style
+    if icon is not None:
+        kwargs["icon_custom_emoji_id"] = str(icon)
+
+    return KeyboardButton(text=text, **kwargs)
+
+
+# ── Public Builders ───────────────────────────────────────────────────────────
 
 
 def btn(
     text: str,
-    value: Any,
-    typ: str = "callback_data",
+    value: Any = None,
+    typ: Optional[str] = None,
     style: Union[str, ButtonStyle, None] = None,
-    icon: str = None,
+    icon: Union[str, int, None] = None,
 ) -> InlineKeyboardButton:
     """
-    Membuat objek tunggal InlineKeyboardButton.
+    Creates a single InlineKeyboardButton object with automatic type detection.
 
-    Parameters:
-        text  (str): Label tombol.
-        value (Any): Payload (callback string, url, teks salin, dll).
-        typ   (str): Tipe aksi. Default: "callback_data".
-                     Mendukung: "url", "copy_text", "web_app", dll.
-        style (str | ButtonStyle, opsional): Warna tombol.
-              Bisa string: "red"/"r", "green"/"g", "blue"/"b", dll.
-        icon  (str, opsional): ID custom emoji ikon tombol.
-
-    Contoh:
-        btn("Hapus", "del_123", style="red")
-        btn("Link", "https://t.me/bot", typ="url", style="blue")
-        btn("Copy", "ABC123", typ="copy_text", style="g", icon="5249053508")
+    :param text: Button label.
+    :param value: Button payload (callback data, URL, copy text, etc.).
+    :param typ: Action type ("callback_data", "url", "copy_text", etc.). Automatically detected if None.
+    :param style: Button color/style ("red", "green", "blue", "default", or ButtonStyle).
+    :param icon: Custom Emoji ID for the button icon.
     """
-    if not isinstance(typ, str):
-        raise TypeError(f"Parameter 'type' harus string, got {type(typ)}")
+    if value is None:
+        value = text
 
-    # Parse style string → ButtonStyle
-    resolved_style = parse_style(style)
+    resolved_style = parse_style(style) if style else None
+
+    if typ is None:
+        if isinstance(value, str) and value.lower().startswith(
+            ("http://", "https://", "t.me/", "tg://")
+        ):
+            typ = "url"
+        else:
+            typ = "callback_data"
 
     if typ == "callback_data" and not isinstance(value, (bytes, str)):
         value = str(value)
@@ -339,49 +251,143 @@ def btn(
     if typ == "copy_text" and isinstance(value, (str, int)):
         value = CopyTextButton(text=str(value))
 
-    kwargs = {typ: value}
+    kwargs: Dict[str, Any] = {typ: value}
+
     if resolved_style is not None:
         kwargs["style"] = resolved_style
     if icon is not None:
-        kwargs["icon_custom_emoji_id"] = icon
+        kwargs["icon_custom_emoji_id"] = str(icon)
 
-    return InlineKeyboardButton(text, **kwargs)
+    return InlineKeyboardButton(text=str(text), **kwargs)
 
 
-def clean_emoji(text: str) -> str:
+def ikb(rows: Optional[List[Any]] = None) -> InlineKeyboardMarkup:
     """
-    Menghapus tag XML custom emoji Telegram dari string teks.
+    Dynamically create an InlineKeyboardMarkup using tuples with reorderable parameters.
 
-    Contoh:
-        >>> clean_emoji("<emoji id=5301083932211550593>🔥</emoji> Bot Started")
-        "🔥 Bot Started"
+    Supported tuple formats (parameter order after `value` is flexible):
+        - (text,)
+        - (text, value)
+        - (text, value, style)
+        - (text, value, type)
+        - (text, value, icon)
+        - (text, value, style, type, icon) -> POSITIONS CAN BE SHUFFLED!
+
+    Example:
+        >>> ikb([
+        >>>     [("Google", "https://google.com")], # Auto-detects type="url"
+        >>>     [("Delete", "del_1", "red"), ("Copy", "12345", "5249053508", "copy_text", "green")], # Mixed order
+        >>> ])
     """
+    if rows is None:
+        rows = []
+
+    rows = _normalize_rows(rows)
+    lines: List[List[InlineKeyboardButton]] = []
+
+    for row in rows:
+        line: List[InlineKeyboardButton] = []
+        for button in row:
+            if isinstance(button, InlineKeyboardButton):
+                line.append(button)
+            elif isinstance(button, str):
+                line.append(btn(button, button))
+            elif isinstance(button, dict):
+                line.append(btn(**button))
+            elif isinstance(button, (tuple, list)):
+                line.append(_parse_inline_tuple(tuple(button)))
+            else:
+                line.append(btn(str(button), str(button)))
+        lines.append(line)
+
+    return InlineKeyboardMarkup(inline_keyboard=lines)
+
+
+def kb(rows: Optional[List[Any]] = None, **kwargs) -> ReplyKeyboardMarkup:
+    """
+    Dynamically generate ReplyKeyboardMarkup.
+
+    Supported tuple formats:
+    - text
+    - (text, style)
+    - (text, icon)
+    - (text, style, icon) -> The order of styles and icons can be randomized.
+    """
+    if rows is None:
+        rows = []
+
+    rows = _normalize_rows(rows)
+    lines: List[List[KeyboardButton]] = []
+
+    for row in rows:
+        line: List[KeyboardButton] = []
+        for button in row:
+            if isinstance(button, KeyboardButton):
+                line.append(button)
+            elif isinstance(button, str):
+                line.append(KeyboardButton(button))
+            elif isinstance(button, dict):
+                line.append(KeyboardButton(**button))
+            elif isinstance(button, (tuple, list)):
+                line.append(_parse_reply_tuple(tuple(button)))
+            else:
+                line.append(KeyboardButton(str(button)))
+        lines.append(line)
+
+    return ReplyKeyboardMarkup(keyboard=lines, **kwargs)
+
+
+# ── Utility Helpers ───────────────────────────────────────────────────────────
+
+
+def bki(keyboard: InlineKeyboardMarkup) -> List[List[List[Any]]]:
+    """Converting an InlineKeyboardMarkup back into a list structure of buttons."""
+    lines = []
+    for row in keyboard.inline_keyboard:
+        line = []
+        for button in row:
+            line.append(ntb(button))
+        lines.append(line)
+    return lines
+
+
+def ntb(button: InlineKeyboardButton) -> List[Any]:
+    """Convert an InlineKeyboardButton into a list representation."""
+    btn_type = "callback_data"
+    for t in [
+        "callback_data",
+        "url",
+        "switch_inline_query",
+        "switch_inline_query_current_chat",
+        "callback_game",
+    ]:
+        value = getattr(button, t, None)
+        if value is not None:
+            btn_type = t
+            break
+
+    res = [button.text, value]
+    if btn_type != "callback_data":
+        res.append(btn_type)
+    return res
+
+
+def clean_emoji(text: Optional[str]) -> Optional[str]:
+    """Removes Telegram custom emoji XML tags from text strings."""
     if not text:
-        return None
-    text = re.sub(r"<emoji id=\d+>(.*?)</emoji>", r"\1", text)
-    return text.strip()
+        return text
+    return re.sub(r"<emoji id=\d+>(.*?)</emoji>", r"\1", text).strip()
 
 
-kbtn = KeyboardButton
-"""Alias untuk KeyboardButton."""
-
-
-def force_reply(selective=True):
-    """
-    Create a ForceReply.
-
-    :param selective: Whether the reply should be selective. Defaults to True.
-    :return: ForceReply
-    """
+def force_reply(selective: bool = True) -> ForceReply:
+    """Create a ForceReply object."""
     return ForceReply(selective=selective)
 
 
-def array_chunk(input_array, size):
-    """
-    Split an array into chunks.
+def array_chunk(input_array: List[Any], size: int) -> List[List[Any]]:
+    """Split a 1D array/list into multiple rows of size `size`."""
+    return [input_array[i : i + size] for i in range(0, len(input_array), size)]
 
-    :param input_array: The array to split.
-    :param size: The size of each chunk.
-    :return: List of chunks.
-    """
-    return [input_array[i: i + size] for i in range(0, len(input_array), size)]
+
+kbtn = KeyboardButton
+"""Alias ​​for KeyboardButton."""
