@@ -1,5 +1,4 @@
 import re
-from __future__ import annotations
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from pyrogram_styled.enums import ButtonStyle
