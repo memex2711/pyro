@@ -13,8 +13,8 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with pyromod.  If not, see <https://www.gnu.org/licenses/>.
 """
-from .helpers import ikb, bki, ntb, btn, kb, kbtn, array_chunk, force_reply
+from .helpers import ikb, bki, ntb, btn, kb, kbtn, array_chunk, force_reply, richbutton
 from .keyboard import (InlineKeyboard, InlineButton, InlinePaginationKeyboard, InlineButton, ReplyKeyboard, ReplyButton, ReplyKeyboardRemove, ForceReply)
-    
 
-__all__ = ["force_reply", "ikb", "bki", "ntb", "btn", "kb", "kbtn"]
+
+__all__ = ["force_reply", "ikb", "bki", "ntb", "btn", "kb", "kbtn", "richbutton"]

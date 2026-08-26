@@ -58,7 +58,7 @@ class SwitchInlineQueryChosenChat(Object):
         self.allow_channel_chats = allow_channel_chats
 
     @staticmethod
-    def read(b: "raw.types.KeyboardButtonSwitchInline") -> "SwitchInlineQueryChosenChat":
+    def read(b: "raw.types.InlineButtonTypeSwitchInline") -> "SwitchInlineQueryChosenChat":
         allow_user_chats = None
         allow_bot_chats = None
         allow_group_chats = None
@@ -106,9 +106,7 @@ class SwitchInlineQueryChosenChat(Object):
             peer_types.append(
                 raw.types.InlineQueryPeerTypeBroadcast()
             )
-        return raw.types.KeyboardButtonSwitchInline(
-            text=text,
+        return raw.types.InlineButtonTypeSwitchInline(
             query=self.query,
             peer_types=peer_types,
-            style=style
         )

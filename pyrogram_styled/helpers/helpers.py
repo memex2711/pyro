@@ -1,4 +1,5 @@
 import re
+from __future__ import annotations
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from pyrogram_styled.enums import ButtonStyle
@@ -10,6 +11,8 @@ from pyrogram_styled.types import (
     KeyboardButton,
     ReplyKeyboardMarkup,
 )
+
+from pyrogram_styled import raw
 
 # ── Type Definitions ──────────────────────────────────────────────────────────
 
@@ -338,6 +341,72 @@ def kb(rows: Optional[List[Any]] = None, **kwargs) -> ReplyKeyboardMarkup:
 
 
 # ── Utility Helpers ───────────────────────────────────────────────────────────
+
+def richbutton(
+    text: str,
+    callback_data: str | bytes | None = None,
+    url: str | None = None,
+    copy_text: str | None = None,
+    *,
+    bg_primary: bool = False,
+    bg_danger: bool = False,
+    bg_success: bool = False,
+    link: bool = False,
+) -> raw.base.PageButton:
+    """Create a Telegram Rich Message button for layer 229.
+
+    Exactly one action must be provided: ``callback_data``, ``url``, or
+    ``copy_text``. The helper returns a ``PageButton`` ready to be placed in a
+    ``PageBlockButtonRow`` inside an ``InputRichMessage``.
+
+    Args:
+        text: The text displayed on the button.
+        callback_data: Data sent to the bot when the button is pressed. Strings
+            are encoded as UTF-8 bytes automatically.
+        url: The HTTPS or Telegram URL opened when the button is pressed.
+        copy_text: Text copied to the user's clipboard when the button is
+            pressed.
+        bg_primary: Use the primary background button style.
+        bg_danger: Use the danger background button style.
+        bg_success: Use the success background button style.
+        link: Use the link button style. URL buttons enable this automatically.
+
+    Returns:
+        A raw ``PageButton`` object for a rich message button row.
+
+    Raises:
+        ValueError: If zero or more than one button action is provided.
+
+    Examples:
+        >>> richbutton("Run", callback_data="run")
+        >>> richbutton("Open docs", url="https://core.telegram.org")
+        >>> richbutton("Copy", copy_text="text to copy")
+        >>> richbutton("Delete", callback_data=b"delete", bg_danger=True)
+    """
+    actions = [callback_data is not None, url is not None, copy_text is not None]
+    if sum(actions) != 1:
+        raise ValueError("Provide exactly one of callback_data, url, or copy_text")
+
+    style = raw.types.RichButtonStyle(
+        bg_primary=bg_primary,
+        bg_danger=bg_danger,
+        bg_success=bg_success,
+        link=link or url is not None,
+    )
+
+    if callback_data is not None:
+        data = callback_data.encode("utf-8") if isinstance(callback_data, str) else callback_data
+        button_type: raw.base.InlineButtonType = raw.types.InlineButtonTypeCallback(data=data)
+    elif url is not None:
+        button_type = raw.types.InlineButtonTypeUrl(url=url)
+    else:
+        button_type = raw.types.InlineButtonTypeCopy(copy_text=copy_text)
+
+    return raw.types.PageButton(
+        text=raw.types.TextPlain(text=text),
+        type=button_type,
+        style=style,
+    )
 
 
 def bki(keyboard: InlineKeyboardMarkup) -> List[List[List[Any]]]:

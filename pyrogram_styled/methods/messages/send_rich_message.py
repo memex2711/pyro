@@ -139,7 +139,9 @@ class SendRichMessage:
                 reply_markup=await reply_markup.write(self) if reply_markup else None,
                 message="",
                 noforwards=protect_content,
-                rich_message=rich_message.write(),
+                rich_message=rich_message.write()
+                if isinstance(rich_message, types.InputRichMessage)
+                else rich_message,
                 effect=effect_id,
             ),
         )
