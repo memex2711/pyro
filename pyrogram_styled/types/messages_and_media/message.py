@@ -3625,7 +3625,8 @@ class Message(Object, Update):
 
     async def edit_text(
         self,
-        text: str,
+        text: Optional[str] = None,
+        rich_message: Optional["types.InputRichMessage"] = None,
         parse_mode: Optional["enums.ParseMode"] = None,
         entities: List["types.MessageEntity"] = None,
         disable_web_page_preview: bool = None,
@@ -3653,6 +3654,11 @@ class Message(Object, Update):
         Parameters:
             text (``str``):
                 New text of the message.
+                Required if ``rich_message`` isn't specified.
+
+            rich_message (:obj:`~pyrogram.types.InputRichMessage`, *optional*):
+                New rich content of the message.
+                Required if ``text`` isn't specified.
 
             parse_mode (:obj:`~pyrogram_styled.enums.ParseMode`, *optional*):
                 By default, texts are parsed using both Markdown and HTML styles.
@@ -3677,6 +3683,7 @@ class Message(Object, Update):
             chat_id=self.chat.id,
             message_id=self.id,
             text=text,
+            rich_message=rich_message,
             parse_mode=parse_mode,
             entities=entities,
             disable_web_page_preview=disable_web_page_preview,
