@@ -4,8 +4,8 @@ recursive-include compiler *.py *.tl *.tsv *.txt
 recursive-include tests *.py
 
 ## Exclude
-prune pyrogram/errors/exceptions
-prune pyrogram/raw/functions
-prune pyrogram/raw/types
-prune pyrogram/raw/base
-exclude pyrogram/raw/all.py
+prune pyrogram_styled/errors/exceptions
+prune pyrogram_styled/raw/functions
+prune pyrogram_styled/raw/types
+prune pyrogram_styled/raw/base
+exclude pyrogram_styled/raw/all.py

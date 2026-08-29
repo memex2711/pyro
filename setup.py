@@ -27,7 +27,7 @@ from compiler.errors import compiler as errors_compiler
 with open("requirements.txt", encoding="utf-8") as r:
     requires = [i.strip() for i in r]
 
-with open("pyrogram/__init__.py", encoding="utf-8") as f:
+with open("pyrogram_styled/__init__.py", encoding="utf-8") as f:
     version = re.findall(r"__version__ = \"(.+)\"", f.read())[0]
 
 with open("README.md", encoding="utf-8") as f:
@@ -38,13 +38,13 @@ if len(argv) > 1 and argv[1] in ["bdist_wheel", "install", "develop"]:
     errors_compiler.start()
 
 setup(
-    name="pyrogram-navy",
+    name="pyrogram_styled",
     version=version,
     description="Elegant, modern and asynchronous Telegram MTProto API framework in Python for users and bots (Navy Fork)",
     long_description=readme,
     long_description_content_type="text/markdown",
-    url="https://github.com/navycodes/pyrogram-navy",
-    download_url="https://github.com/navycodes/pyrogram-navy/releases/latest",
+    url="https://github.com/navycodes/pyro",
+    download_url="https://github.com/navycodes/pyro/releases/latest",
     author="deylin",
     author_email="deylinarea@gmail.com",
     license="LGPLv3",
@@ -77,7 +77,7 @@ setup(
     keywords="telegram chat messenger mtproto api client library python",
     python_requires=">=3.8",
     package_data={
-        "pyrogram-navy": ["py.typed"],
+        "pyrogram_styled": ["py.typed"],
     },
     packages=find_packages(exclude=["compiler*", "tests*"]),
     zip_safe=False,
