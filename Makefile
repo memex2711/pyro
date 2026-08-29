@@ -1,7 +1,7 @@
 VENV := venv
 PYTHON := $(VENV)/bin/python
 HOST = $(shell ifconfig | grep "inet " | tail -1 | cut -d\  -f2)
-TAG = v$(shell grep -E '__version__ = ".*"' pyrogram/__init__.py | cut -d\" -f2)
+TAG = v$(shell grep -E '__version__ = ".*"' pyrogram_styled/__init__.py | cut -d\" -f2)
 
 RM := rm -rf
 
@@ -18,7 +18,7 @@ clean-build:
 	$(RM) *.egg-info build dist
 
 clean-api:
-	$(RM) pyrogram/errors/exceptions pyrogram/raw/all.py pyrogram/raw/base pyrogram/raw/functions pyrogram/raw/types
+	$(RM) pyrogram_styled/errors/exceptions pyrogram_styled/raw/all.py pyrogram_styled/raw/base pyrogram_styled/raw/functions pyrogram_styled/raw/types
 
 clean:
 	make clean-build
