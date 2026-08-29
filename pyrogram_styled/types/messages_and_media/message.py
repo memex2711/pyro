@@ -3656,7 +3656,7 @@ class Message(Object, Update):
                 New text of the message.
                 Required if ``rich_message`` isn't specified.
 
-            rich_message (:obj:`~pyrogram.types.InputRichMessage`, *optional*):
+            rich_message (:obj:`~pyrogram_styled.types.InputRichMessage`, *optional*):
                 New rich content of the message.
                 Required if ``text`` isn't specified.
 

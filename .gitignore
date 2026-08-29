@@ -7,11 +7,11 @@ unknown_errors.txt
 .DS_Store
 
 # Pyrogram generated code
-pyrogram/errors/exceptions/
-pyrogram/raw/functions/
-pyrogram/raw/types/
-pyrogram/raw/base/
-pyrogram/raw/all.py
+pyrogram_styled/errors/exceptions/
+pyrogram_styled/raw/functions/
+pyrogram_styled/raw/types/
+pyrogram_styled/raw/base/
+pyrogram_styled/raw/all.py
 docs/source/telegram
 docs/source/api/methods/
 docs/source/api/bound-methods/
